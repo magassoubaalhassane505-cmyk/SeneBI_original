@@ -6,7 +6,6 @@
     <title>SeneBI - Connexion Client</title>
     <link rel="stylesheet" href="{{ asset('assets/css/base.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/modal-password.css') }}" />
   </head>
   <body data-page="auth-login">
     <main class="auth-shell">
@@ -16,7 +15,7 @@
           <div class="login-brand">
             <img
               class="login-brand-image"
-              src="{{ asset('assets/img/logo.png') }}"
+              src="file:///C:/Users/LENOVO/.cursor/projects/c-Users-LENOVO-Desktop-two/assets/c__Users_LENOVO_AppData_Roaming_Cursor_User_workspaceStorage_437c9e11065bafda052dbe12c51d2f7a_images_image-f31dabda-a8de-4fe5-9b81-5a747e688d5a.png"
               alt="Logo SeneBI"
             />
           </div>
@@ -32,46 +31,17 @@
             <input id="password" type="password" value="client123" placeholder="Votre mot de passe" required />
 
             <button class="btn login-submit" type="submit">Se connecter</button>
-            <div class="login-help" id="forgotPasswordLink">Mot de passe oublie?</div>
             <div id="loginFeedback" class="form-feedback" aria-live="polite"></div>
           </form>
 
           <div class="auth-switch">
             <p>Vous êtes un manager ?</p>
-<<<<<<< HEAD
-            <a href="{{ route('login') }}" class="btn secondary">Accès Manager</a>
-=======
-            <a href="/login" class="btn secondary">Accès Manager</a>
->>>>>>> 1caea71cac76656e5f0e3aa784cb0ed94789e04c
+            <a href="{{ route('login.manager') }}" class="btn secondary">Accès Manager</a>
           </div>
         </div>
       </section>
     </main>
 
-    <!-- Modale pour mot de passe oublié -->
-    <div class="modal-overlay" id="forgotPasswordModal" aria-hidden="true">
-      <div class="modal-backdrop" id="modalBackdrop"></div>
-      <div class="modal-container">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Mot de passe oublié</h3>
-            <button class="modal-close" id="modalClose" aria-label="Fermer">×</button>
-          </div>
-          <div class="modal-body">
-            <p>Pour réinitialiser votre mot de passe, veuillez contacter l'administrateur de SeneBI à l'adresse :</p>
-            <div class="contact-info">
-              <strong>support@senebi.com</strong>
-            </div>
-            <p class="modal-note">Nous traiterons votre demande dans les plus brefs délais.</p>
-          </div>
-          <div class="modal-footer">
-            <button class="btn primary" id="modalConfirm">OK</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <script src="{{ asset('assets/js/auth.js') }}"></script>
-    <script src="{{ asset('assets/js/modal-password.js') }}"></script>
   </body>
 </html>

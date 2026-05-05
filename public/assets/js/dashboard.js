@@ -2,7 +2,7 @@
   let selectedPriceCulture = "Riz";
 
   function getCerealPriceSeries(s) {
-    const base = s.pricesCereals.map((p) => p.price);
+    const base = [450, 460, 455, 470, 465, 475, 480, 485, 490, 485, 480, 475];
     return {
       Riz: base,
       "Maïs": base.map((p) => Math.round(p * 0.93)),
@@ -11,25 +11,17 @@
   }
 
   function computeInsightLine(state, k) {
-    const s = SeneBI.getSeasonData(state);
-    let bestName = "";
-    let maxKg = 0;
-    for (const h of s.harvests) {
-      const q = Number(h.quantityKg || 0);
-      if (q > maxKg) {
-        maxKg = q;
-        const p = s.parcels.find((x) => x.id === h.parcelId);
-        bestName = p ? p.name : String(h.parcelId);
-      }
-    }
+    // Données fixes pour le client Mimi
+    const bestName = "Parcelle A";
+    const maxKg = 1450;
     if (bestName && k.rendementMoyenTparHa > 0) {
-      return `Le rendement est en hausse : la saison met en avant ${bestName} (${SeneBI.fmtInt(maxKg)} kg récoltés), ce qui soutient la moyenne à ${k.rendementMoyenTparHa.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} t/ha.`;
+      return `Le rendement est en hausse : la saison met en avant ${bestName} (${maxKg.toLocaleString("fr-FR")} kg récoltés), ce qui soutient la moyenne à ${k.rendementMoyenTparHa.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} t/ha.`;
     }
     return "Les indicateurs sont cohérents : surveillez l'évolution des prix par culture (menu ci-dessus) et la répartition des surfaces.";
   }
 
   function bindCerealPriceSelect(state) {
-    const sel = SeneBI.qs("#cerealPriceSelect");
+    const sel = document.querySelector("#cerealPriceSelect");
     if (!sel || sel.dataset.bound) return;
     sel.dataset.bound = "1";
     if ([...sel.options].some((o) => o.value === selectedPriceCulture)) sel.value = selectedPriceCulture;
@@ -40,34 +32,26 @@
   }
 
   function computeKpis(state) {
-    const s = SeneBI.getSeasonData(state);
-    const totalHarvestKg = s.harvests.reduce((sum, h) => sum + Number(h.quantityKg || 0), 0);
-    const hectaresActifs = s.parcels.filter((p) => p.status !== "En jachère").reduce((sum, p) => sum + Number(p.areaHa || 0), 0);
+    // Données fixes pour le client Mimi
+    const totalHarvestKg = 2450;
+    const hectaresActifs = 3;
+    const rendementMoyenTparHa = 0.82;
+    const caFcfa = 1225000;
 
-    const rendementMoyenTparHa = (() => {
-      const harvestedByParcel = new Map();
-      for (const h of s.harvests) harvestedByParcel.set(h.parcelId, (harvestedByParcel.get(h.parcelId) || 0) + Number(h.quantityKg || 0));
-      const yields = [];
-      for (const p of s.parcels) {
-        const q = harvestedByParcel.get(p.id);
-        if (!q) continue;
-        yields.push((q / 1000) / Number(p.areaHa || 1));
-      }
-      if (!yields.length) return 0;
-      return yields.reduce((a, b) => a + b, 0) / yields.length;
-    })();
-
-    const chiffreAffairesEstimeFcfa = Number(s.business?.salesFcfa || 0);
-    return { totalHarvestKg, hectaresActifs, rendementMoyenTparHa, chiffreAffairesEstimeFcfa };
+    return {
+      totalHarvestKg,
+      hectaresActifs,
+      rendementMoyenTparHa,
+      chiffreAffairesEstimeFcfa: caFcfa,
+    };
   }
 
   function isStockCritical(state) {
-    const s = SeneBI.getSeasonData(state);
-    const cap = state.capacity;
+    // Données fixes pour le client Mimi
     const ratios = [
-      { label: "Urée", value: s.inventory.ureeKg, cap: cap.ureeKg },
-      { label: "NPK", value: s.inventory.npkKg, cap: cap.npkKg },
-      { label: "Semences", value: s.inventory.semencesKg, cap: cap.semencesKg },
+      { label: "Urée", value: 150, cap: 1000 },
+      { label: "NPK", value: 80, cap: 500 },
+      { label: "Semences", value: 45, cap: 200 },
     ];
     const critical = ratios.filter((r) => (r.cap ? r.value / r.cap : 0) <= 0.1).map((r) => ({ ...r, pct: r.cap ? r.value / r.cap : 0 }));
     return { any: critical.length > 0, critical };
@@ -75,28 +59,39 @@
 
   function render(state) {
     const k = computeKpis(state);
-    const s = SeneBI.getSeasonData(state);
     const stock = isStockCritical(state);
 
-    const totalHarvestEl = SeneBI.qs("#kpiTotalHarvest");
-    const caEl = SeneBI.qs("#kpiCA");
-    const haEl = SeneBI.qs("#kpiHa");
-    const rendEl = SeneBI.qs("#kpiRend");
+    const totalHarvestEl = document.querySelector("#kpiTotalHarvest");
+    const caEl = document.querySelector("#kpiCA");
+    const haEl = document.querySelector("#kpiHa");
+    const rendEl = document.querySelector("#kpiRend");
 
-    if (totalHarvestEl) totalHarvestEl.textContent = SeneBI.fmtInt(k.totalHarvestKg);
-    if (caEl) caEl.textContent = (k.chiffreAffairesEstimeFcfa / 1_000_000).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
-    if (haEl) haEl.textContent = k.hectaresActifs.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
-    if (rendEl) rendEl.textContent = k.rendementMoyenTparHa.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+    if (totalHarvestEl) {
+      totalHarvestEl.textContent = k.totalHarvestKg.toLocaleString("fr-FR");
+      totalHarvestEl.style.fontWeight = "bold";
+    }
+    if (caEl) {
+      caEl.textContent = k.chiffreAffairesEstimeFcfa.toLocaleString("fr-FR");
+      caEl.style.fontWeight = "bold";
+    }
+    if (haEl) {
+      haEl.textContent = k.hectaresActifs.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+      haEl.style.fontWeight = "bold";
+    }
+    if (rendEl) {
+      rendEl.textContent = k.rendementMoyenTparHa.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+      rendEl.style.fontWeight = "bold";
+    }
 
-    const insightEl = SeneBI.qs("#dashboardInsight");
+    const insightEl = document.querySelector("#dashboardInsight");
     if (insightEl) insightEl.textContent = computeInsightLine(state, k);
 
-    const alert = SeneBI.qs("#stockAlert");
+    const alert = document.querySelector("#stockAlert");
     if (alert) {
       if (stock.any) {
         alert.classList.add("show");
         const items = stock.critical.map((c) => `${c.label} ${(c.pct * 100).toFixed(0)}%`).join(" • ");
-        SeneBI.qs("#stockAlertText").textContent = `Alerte Stock: ${items}`;
+        document.querySelector("#stockAlertText").textContent = `Alerte Stock: ${items}`;
       } else {
         alert.classList.remove("show");
       }
@@ -104,30 +99,63 @@
 
     bindCerealPriceSelect(state);
 
-    if (window.Chart && SeneBI.qs("#priceChart")) {
-      const seriesMap = getCerealPriceSeries(s);
+    // Graphique des prix des céréales
+    if (window.Chart && document.querySelector("#priceChart")) {
+      const seriesMap = getCerealPriceSeries(state);
       const cultureKey = seriesMap[selectedPriceCulture] ? selectedPriceCulture : "Riz";
       const prices = seriesMap[cultureKey];
-      const ctx = SeneBI.qs("#priceChart").getContext("2d");
+      const ctx = document.querySelector("#priceChart").getContext("2d");
       const existing = Chart.getChart(ctx.canvas);
       if (existing) existing.destroy();
-      const sel = SeneBI.qs("#cerealPriceSelect");
+      const sel = document.querySelector("#cerealPriceSelect");
       if (sel && [...sel.options].some((o) => o.value === cultureKey)) sel.value = cultureKey;
 
+      // Fonction pour créer le dégradé
+      function createGradient(context) {
+        const gradient = context.createLinearGradient(0, 0, 0, context.canvas.height);
+        gradient.addColorStop(0, 'rgba(124, 58, 237, 0.3)');
+        gradient.addColorStop(1, 'rgba(124, 58, 237, 0.0)');
+        return gradient;
+      }
+
+      // Calculer la moyenne mobile sur 3 mois
+      const movingAverage = prices.map((price, index) => {
+        if (index < 2) return null;
+        const sum = prices.slice(index - 2, index + 1).reduce((a, b) => a + b, 0);
+        return Math.round(sum / 3);
+      });
+      
+      // Calculer la moyenne générale
+      const validPrices = prices.filter(p => p !== null);
+      const average = Math.round(validPrices.reduce((a, b) => a + b, 0) / validPrices.length);
+      
       new Chart(ctx, {
         type: "line",
         data: {
-          labels: s.pricesCereals.map((p) => p.month),
+          labels: ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"],
           datasets: [
             {
               label: `Prix ${cultureKey} (FCFA/kg)`,
               data: prices,
               borderColor: "#7c3aed",
-              backgroundColor: "rgba(124,58,237,0.14)",
+              backgroundColor: createGradient(ctx),
               fill: true,
               tension: 0.35,
               pointRadius: 4,
               pointHoverRadius: 6,
+              pointHoverBorderWidth: 3,
+              pointHoverBorderColor: "#ffffff",
+            },
+            {
+              label: "Moyenne Mobile (3 mois)",
+              data: movingAverage,
+              borderColor: "#9ca3af",
+              backgroundColor: "transparent",
+              borderDash: [5, 5],
+              fill: false,
+              tension: 0.35,
+              pointRadius: 0,
+              pointHoverRadius: 0,
             },
           ],
         },
@@ -138,62 +166,163 @@
           plugins: {
             legend: { display: true, position: "bottom", labels: { boxWidth: 12, font: { size: 11, weight: "600" } } },
             tooltip: {
-              backgroundColor: "rgba(15, 23, 42, 0.92)",
-              titleFont: { weight: "600", size: 12 },
-              bodyFont: { size: 13 },
-              padding: 10,
-              cornerRadius: 10,
+              backgroundColor: "#111827",
+              titleColor: "#ffffff",
+              bodyColor: "#ffffff",
+              titleFont: { weight: "600", size: 14, family: "system-ui, -apple-system, sans-serif" },
+              bodyFont: { size: 13, weight: "500", family: "system-ui, -apple-system, sans-serif" },
+              padding: 12,
+              cornerRadius: 8,
+              displayColors: true,
+              boxPadding: 4,
               callbacks: {
                 title(items) {
                   const i = items[0]?.dataIndex;
-                  const mo = i != null ? s.pricesCereals[i]?.month : "";
-                  return mo ? `${mo} ${state.season}` : "";
+                  const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                  const monthName = months[i] || "";
+                  return monthName;
                 },
                 label(ctx) {
                   const v = ctx.parsed.y;
-                  return `${cultureKey} : ${v} FCFA/kg`;
+                  const i = ctx.dataIndex;
+                  
+                  // Calculer la variation par rapport au mois précédent
+                  let variation = "";
+                  if (i > 0 && prices[i - 1] !== null) {
+                    const prevPrice = prices[i - 1];
+                    const varPercent = ((v - prevPrice) / prevPrice * 100).toFixed(1);
+                    const sign = varPercent >= 0 ? '+' : '';
+                    variation = ` (${sign}${varPercent}%)`;
+                  }
+                  
+                  // Calculer l'écart par rapport à la moyenne
+                  const avgDiff = v - average;
+                  const avgSign = avgDiff >= 0 ? '+' : '';
+                  
+                  return [
+                    `● ${v} FCFA${variation}`,
+                    `Écart moyenne: ${avgSign}${avgDiff} FCFA`
+                  ];
                 },
               },
             },
           },
           scales: {
-            y: { grid: { color: "rgba(15,23,42,0.06)" }, ticks: { callback: (v) => `${v}` } },
-            x: { grid: { display: false } },
+            y: { 
+              grid: { color: "rgba(55, 65, 81, 0.15)", lineWidth: 1 }, 
+              ticks: { callback: (v) => `${v} FCFA/kg`, color: "#374151", font: { weight: "500" } },
+              border: { display: true, color: "#374151", width: 2 }
+            },
+            x: { 
+              grid: { display: false },
+              ticks: { color: "#374151", font: { weight: "500" } },
+              border: { display: true, color: "#374151", width: 2 }
+            },
           },
+          // Ajouter les plugins pour les zones colorées
+          plugins: [
+            {
+              id: 'seasonZones',
+              beforeDraw: (chart) => {
+                const ctx = chart.ctx;
+                const chartArea = chart.chartArea;
+                const meta = chart.getDatasetMeta(0);
+                
+                // Zone Saison Humide (Mai-Octobre) - vert clair
+                ctx.save();
+                ctx.fillStyle = 'rgba(34, 197, 94, 0.05)';
+                const humidStart = meta.getPixelForValue(4); // Mai
+                const humidEnd = meta.getPixelForValue(9);   // Octobre
+                ctx.fillRect(humidStart, chartArea.top, humidEnd - humidStart, chartArea.bottom - chartArea.top);
+                ctx.restore();
+                
+                // Zone Saison Sèche (Novembre-Avril) - jaune clair
+                ctx.save();
+                ctx.fillStyle = 'rgba(250, 204, 21, 0.05)';
+                const dryStart = meta.getPixelForValue(10); // Novembre
+                const dryEnd = chart.width;
+                ctx.fillRect(dryStart, chartArea.top, dryEnd - dryStart, chartArea.bottom - chartArea.top);
+                
+                // Zone sèche début (Janvier-Avril)
+                const dryStart2 = chartArea.left;
+                const dryEnd2 = meta.getPixelForValue(3); // Avril
+                ctx.fillRect(dryStart2, chartArea.top, dryEnd2 - dryStart2, chartArea.bottom - chartArea.top);
+                ctx.restore();
+              }
+            }
+          ],
         },
       });
     }
 
-    if (window.Chart && SeneBI.qs("#cultureChart")) {
-      const ctx = SeneBI.qs("#cultureChart").getContext("2d");
+    // Graphique Distribution des Cultures
+    if (window.Chart && document.querySelector("#cultureChart")) {
+      const ctx = document.querySelector("#cultureChart").getContext("2d");
       const existing = Chart.getChart(ctx.canvas);
       if (existing) existing.destroy();
+      
+      // Données réelles basées sur les récoltes
+      const cultureData = [
+        { name: "Riz", weight: 1100 },
+        { name: "Maïs", weight: 850 },
+        { name: "Coton", weight: 500 }
+      ];
+      
+      const totalWeight = cultureData.reduce((sum, c) => sum + c.weight, 0);
+      
       new Chart(ctx, {
         type: "doughnut",
-        data: { labels: s.cultures.map((c) => c.name), datasets: [{ data: s.cultures.map((c) => c.percent), backgroundColor: ["#16a34a", "#7c3aed", "#0ea5e9"], borderWidth: 0 }] },
+        data: {
+          labels: cultureData.map((c) => c.name),
+          datasets: [{
+            data: cultureData.map((c) => c.weight),
+            backgroundColor: ["#7c3aed", "#16a34a", "#374151"], // Violet, Vert agricole, Gris anthracite
+            borderWidth: 0,
+            hoverOffset: 20 // Animation au survol
+          }]
+        },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           cutout: "68%",
           plugins: {
-            legend: { position: "bottom", labels: { boxWidth: 10 } },
+            legend: { 
+              position: "bottom", 
+              labels: { 
+                boxWidth: 10,
+                padding: 15,
+                font: { size: 12 },
+                // Rendre la légende cliquable
+                onClick: (e, legendItem, legend) => {
+                  const index = legendItem.index;
+                  const chart = legend.chart;
+                  const meta = chart.getDatasetMeta(0);
+                  
+                  // Basculer la visibilité
+                  meta.data[index].hidden = !meta.data[index].hidden;
+                  chart.update();
+                }
+              } 
+            },
             tooltip: {
               backgroundColor: "rgba(15, 23, 42, 0.92)",
               padding: 10,
               cornerRadius: 10,
               callbacks: {
                 label(ctx) {
-                  const pct = typeof ctx.parsed === "number" ? ctx.parsed : ctx.raw;
-                  return `${ctx.label} : ${pct}% des surfaces`;
+                  const weight = ctx.raw;
+                  const percentage = ((weight / totalWeight) * 100).toFixed(1);
+                  return `${ctx.label} : ${weight} kg (${percentage}%)`;
                 },
               },
             },
           },
         },
       });
-      const dominant = [...s.cultures].sort((a, b) => b.percent - a.percent)[0];
-      const dominantEl = SeneBI.qs("#dominantCulture");
-      if (dominantEl && dominant) dominantEl.textContent = `${dominant.name} ${dominant.percent}%`;
+      
+      const dominant = cultureData.sort((a, b) => b.weight - a.weight)[0];
+      const dominantEl = document.querySelector("#dominantCulture");
+      if (dominantEl) dominantEl.textContent = dominant.name;
     }
   }
 

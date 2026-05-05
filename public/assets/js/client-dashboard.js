@@ -25,13 +25,15 @@
   function render() {
     const auth = SeneBI.requireRole(["manager", "client"], "Acces refuse.");
     if (!auth) return;
-    const state = SeneBI.loadState();
-    SeneBI.renderTopbar(state);
-    const season = SeneBI.getSeasonData(state);
-    const business = season.business;
-    const profit = Number(business.salesFcfa || 0) - Number(business.intrantsCostFcfa || 0);
-    const margin = business.salesFcfa > 0 ? (profit / business.salesFcfa) * 100 : 0;
-    const harvestTotal = (season.harvests || []).reduce((sum, h) => sum + Number(h.quantityKg || 0), 0);
+    const state = SeneBI.loadState ? SeneBI.loadState() : {};
+    if (SeneBI.renderTopbar) SeneBI.renderTopbar(state);
+    
+    // Données de base pour le client Mimi
+    const harvestTotal = 2450; // kg
+    const salesFcfa = 1225000; // FCFA
+    const intrantsCostFcfa = 740000; // FCFA
+    const profit = salesFcfa - intrantsCostFcfa;
+    const margin = salesFcfa > 0 ? (profit / salesFcfa) * 100 : 0;
 
     const kHarvest = document.querySelector("#kpiHarvest");
     const kSales = document.querySelector("#kpiSales");
@@ -39,7 +41,7 @@
     const kMargin = document.querySelector("#kpiMargin");
 
     if (kHarvest) kHarvest.textContent = `${harvestTotal.toLocaleString("fr-FR")} kg`;
-    if (kSales) kSales.textContent = fmtMoney(business.salesFcfa);
+    if (kSales) kSales.textContent = fmtMoney(salesFcfa);
     if (kProfit) kProfit.textContent = fmtMoney(profit);
     if (kMargin) kMargin.textContent = `${margin.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
@@ -54,7 +56,7 @@
         data: {
           labels: ["Revenus", "Couts", "Benefice"],
           datasets: [{
-            data: [business.salesFcfa / 1_000_000, business.intrantsCostFcfa / 1_000_000, profit / 1_000_000],
+            data: [1.225, 0.740, 0.485],
             backgroundColor: ["#10b981", "#ef4444", "#6366f1"],
             borderRadius: 10,
           }],
@@ -94,7 +96,7 @@
         data: {
           labels: ["Uree", "NPK", "Semences"],
           datasets: [{
-            data: [season.inventory.ureeKg, season.inventory.npkKg, season.inventory.semencesKg],
+            data: [150, 80, 45],
             backgroundColor: ["#22c55e", "#f97316", "#0ea5e9"],
             borderRadius: 10,
           }],

@@ -106,27 +106,25 @@
   }
 
   function roleHome(role) {
-    if (role === "manager") return "secure-portal";
-    return "client-dashboard";
+    if (role === "manager") return "/manager/dashboard";
+    return "/client/dashboard";
   }
 
   function fromPagesDir() {
-    return location.pathname.replace(/\\/g, "/").toLowerCase().includes("/pages/");
+    return false;
   }
 
   function goToLogin() {
-    window.location.href = fromPagesDir() ? "../login" : "./login";
+    window.location.href = "/";
   }
 
   function goToRoleHome(role) {
-    const target = roleHome(role);
-    window.location.href = fromPagesDir() ? `./${target}` : `./pages/${target}`;
+    window.location.href = roleHome(role);
   }
 
   function goToForbidden(message) {
     const encoded = encodeURIComponent(message || "Acces refuse.");
-    const path = fromPagesDir() ? `./403?message=${encoded}` : `./pages/403?message=${encoded}`;
-    window.location.href = path;
+    window.location.href = `/403?message=${encoded}`;
   }
 
   function requireRole(allowedRoles, deniedMessage) {
@@ -156,13 +154,13 @@
     if (nameEl) {
       nameEl.textContent = auth.name || auth.email || "Utilisateur";
       if (nameEl.tagName === "A") {
-        const acc = fromPagesDir() ? "./compte" : "./pages/compte";
+        const acc = auth.role === "manager" ? "/manager/compte" : "/client/mon-compte";
         nameEl.setAttribute("href", acc);
         nameEl.setAttribute("title", "Profil et paramètres du compte");
       }
     }
     if (portalBtn) {
-      portalBtn.href = fromPagesDir() ? `./${roleHome(auth.role)}` : `./pages/${roleHome(auth.role)}`;
+      portalBtn.href = "/secure-portal";
     }
     if (logoutBtn && !logoutBtn.dataset.bound) {
       logoutBtn.dataset.bound = "1";
@@ -332,33 +330,53 @@
     const auth = getAuth();
     
     // Navigation différente selon le rôle
-    let links = [
-      { href: "../index", label: "Dashboard", key: "dashboard", icon: "dashboard" },
-      { href: "../pages/parcelles", label: "Parcelles", key: "parcels", icon: "parcels" },
-      { href: "../pages/stocks", label: "Stocks", key: "stocks", icon: "stocks" },
-      { href: "../pages/rentabilite", label: "Rentabilité", key: "business", icon: "business" },
-    ];
+    let links = [];
     
-    // Ajouter "Visites" uniquement pour les managers
     if (auth && auth.role === "manager") {
-      links.splice(3, 0, { href: "../pages/visits-control", label: "Visites", key: "visits", icon: "visits" });
+      // Navigation Manager : Dashboard | Supervision | Visites
+      links = [
+        { href: "/manager/dashboard", label: "Dashboard", key: "dashboard", icon: "dashboard" },
+        { href: "/manager/supervision", label: "Supervision", key: "supervision", icon: "supervision" },
+        { href: "/manager/visites", label: "Visites", key: "visits", icon: "visits" },
+      ];
+    } else {
+      // Navigation Client : Dashboard | Parcelles | Stocks | Rentabilité
+      links = [
+        { href: "/client/dashboard", label: "Dashboard", key: "dashboard", icon: "dashboard" },
+        { href: "/client/parcelles", label: "Parcelles", key: "parcels", icon: "parcels" },
+        { href: "/manager/stocks", label: "Stocks", key: "stocks", icon: "stocks" },
+        { href: "/client/rentabilite", label: "Rentabilité", key: "business", icon: "business" },
+      ];
     }
     const navLinks = links;
-    const isIndex = location.pathname.replace(/\\/g, "/").toLowerCase().endsWith("/index") || location.pathname.endsWith("/") || location.pathname.toLowerCase().endsWith("\\index");
-    const adjusted = navLinks.map((l) => (isIndex ? { ...l, href: l.href.replace("../", "") } : l));
+    const isIndex = location.pathname.replace(/\\/g, "/").toLowerCase().endsWith("/index.html") || location.pathname.endsWith("/") || location.pathname.toLowerCase().endsWith("\\index.html") || location.pathname.replace(/\\/g, "/").toLowerCase().endsWith("/dashboard.html");
+    const isPages = location.pathname.replace(/\\/g, "/").toLowerCase().includes("/pages/");
+    const adjusted = navLinks.map((l) => {
+      if (isIndex && l.href.startsWith("../")) {
+        return { ...l, href: l.href.replace("../", "") };
+      }
+      if (isPages && l.href.startsWith("pages/")) {
+        return { ...l, href: l.href.replace("pages/", "") };
+      }
+      return l;
+    });
 
     const icon = (name) => {
       const common = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
       if (name === "dashboard") return `<svg viewBox="0 0 24 24" ${common}><path d="M3 13h8V3H3v10z"/><path d="M13 21h8V11h-8v10z"/><path d="M13 3h8v6h-8V3z"/><path d="M3 17h8v4H3v-4z"/></svg>`;
       if (name === "parcels") return `<svg viewBox="0 0 24 24" ${common}><path d="M3 6l9-3 9 3v12l-9 3-9-3V6z"/><path d="M12 3v18"/><path d="M3 6l9 3 9-3"/></svg>`;
       if (name === "stocks") return `<svg viewBox="0 0 24 24" ${common}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.73z"/><path d="M3.3 7l8.7 5 8.7-5"/><path d="M12 22V12"/></svg>`;
+      if (name === "business") return `<svg viewBox="0 0 24 24" ${common}><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>`;
+      if (name === "supervision") return `<svg viewBox="0 0 24 24" ${common}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
       if (name === "visits") return `<svg viewBox="0 0 24 24" ${common}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
       return `<svg viewBox="0 0 24 24" ${common}><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>`;
     };
 
     nav.innerHTML = adjusted
       .map((l) => {
-        const active = (current === "dashboard" && l.key === "dashboard") || current === l.key;
+        const active = (current === "dashboard" && l.key === "dashboard") || 
+                   (current === "client-dashboard" && l.key === "dashboard") || 
+                   current === l.key;
         return `<a href="${l.href}" class="${active ? "active" : ""}">${icon(l.icon)}<span>${l.label}</span></a>`;
       })
       .join("");

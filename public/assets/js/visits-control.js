@@ -2,231 +2,216 @@
 (function() {
   'use strict';
 
-  // Simuler des données de visites pour démonstration
-  const mockVisits = [
+  // Données de visites pour la page de planning
+  const visits = [
     {
       id: 1,
-      name: 'Mimi Manager',
-      email: 'mimi.manager@senebi.sn',
-      role: 'manager',
-      loginTime: new Date(Date.now() - 1000 * 60 * 15), // Il y a 15 minutes
-      action: 'Consultation du dashboard',
-      duration: 15
+      farmer: "Mamadou Diallo",
+      location: "Bamako",
+      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+      reason: "Contrôle stock Urée",
+      status: "planned"
     },
     {
       id: 2,
-      name: 'Sidi Client',
-      email: 'sidi@sidi-agri.sn',
-      role: 'client',
-      loginTime: new Date(Date.now() - 1000 * 60 * 45), // Il y a 45 minutes
-      action: 'Vérification des stocks',
-      duration: 45
+      farmer: "Aminata Touré",
+      location: "Sikasso",
+      date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
+      reason: "Alerte rendement Riz",
+      status: "planned"
     },
     {
       id: 3,
-      name: 'Agriculteur Alpha',
-      email: 'alpha@ferme-mali.com',
-      role: 'client',
-      loginTime: new Date(Date.now() - 1000 * 60 * 120), // Il y a 2 heures
-      action: 'Saisie de récolte',
-      duration: 120
-    },
-    {
-      id: 4,
-      name: 'Superviseur Beta',
-      email: 'beta@senebi.sn',
-      role: 'manager',
-      loginTime: new Date(Date.now() - 1000 * 60 * 5), // Il y a 5 minutes
-      action: 'Analyse de rentabilité',
-      duration: 5
+      farmer: "Bakary Camara",
+      location: "Kayes",
+      date: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), // 6 days from now
+      reason: "Conseil semis Coton",
+      status: "planned"
     }
   ];
 
-  // Obtenir l'initiale d'un nom
-  function getInitial(name) {
-    return (name || '?').charAt(0).toUpperCase();
-  }
+  // Charger les visites planifiées
+  function loadVisits() {
+    const visitsList = document.getElementById('visitsList');
+    if (!visitsList) return;
 
-  // Formater la durée
-  function formatDuration(minutes) {
-    if (minutes < 60) {
-      return `${minutes}m`;
-    } else {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
-  }
+    // Trier les visites par date
+    const sortedVisits = [...visits].sort((a, b) => a.date - b.date);
 
-  // Formater l'heure
-  function formatTime(date) {
-    return date.toLocaleTimeString('fr-FR', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: false 
-    });
-  }
+    visitsList.innerHTML = sortedVisits.map(visit => {
+      const date = visit.date;
+      const day = date.getDate();
+      const month = date.toLocaleDateString('fr-FR', { month: 'short' });
+      const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-  // Formater la date relative
-  function formatRelativeTime(date) {
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    
-    if (diffMins < 1) return 'À l\'instant';
-    if (diffMins < 60) return `Il y a ${diffMins} min`;
-    
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
-    
-    const diffDays = Math.floor(diffHours / 24);
-    return `Il y a ${diffDays}j`;
-  }
-
-  // Créer une ligne de visite
-  function createVisitRow(visit) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>
-        <div class="user-cell">
-          <div class="user-avatar ${visit.role}">${getInitial(visit.name)}</div>
-          <div class="user-info">
-            <div class="user-name">${visit.name}</div>
-            <div class="user-role">${visit.role === 'manager' ? 'Manager' : 'Client'}</div>
+      return `
+        <div class="visit-item">
+          <div class="visit-date">
+            <div class="day">${day}</div>
+            <div class="month">${month}</div>
+          </div>
+          <div class="visit-details">
+            <div class="visit-farmer">${visit.farmer}</div>
+            <div class="visit-location">${visit.location}</div>
+            <div class="visit-time">${time}</div>
+            <div class="visit-reason">${visit.reason}</div>
+          </div>
+          <div class="visit-status">
+            <span class="status-tag planned">Planifié</span>
           </div>
         </div>
-      </td>
-      <td>
-        <div class="time-cell">
-          <div>${formatTime(visit.loginTime)}</div>
-          <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">
-            ${formatRelativeTime(visit.loginTime)}
-          </div>
+      `;
+    }).join('');
+
+    // Si aucune visite, afficher l'état vide
+    if (visits.length === 0) {
+      visitsList.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--muted);">
+          <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+          <p>Aucune visite planifiée</p>
+          <p style="font-size: 12px;">Utilisez le formulaire pour planifier votre première visite</p>
         </div>
-      </td>
-      <td>
-        <div class="action-cell">${visit.action}</div>
-      </td>
-    `;
-    return tr;
-  }
-
-  // Mettre à jour les statistiques
-  function updateStats(visits) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const todayVisits = visits.filter(v => v.loginTime >= today);
-    const totalVisitsEl = document.getElementById('totalVisits');
-    const avgDurationEl = document.getElementById('avgDuration');
-    const activeNowEl = document.getElementById('activeNow');
-    
-    if (totalVisitsEl) {
-      totalVisitsEl.textContent = todayVisits.length;
-    }
-    
-    if (avgDurationEl) {
-      const avgDuration = visits.length > 0 
-        ? Math.round(visits.reduce((sum, v) => sum + v.duration, 0) / visits.length)
-        : 0;
-      avgDurationEl.textContent = formatDuration(avgDuration);
-    }
-    
-    if (activeNowEl) {
-      const activeCount = visits.filter(v => v.duration < 30).length; // Actifs si < 30min
-      activeNowEl.textContent = activeCount;
+      `;
     }
   }
 
-  // Rendre le tableau des visites
-  function renderVisitsTable() {
-    const tbody = document.getElementById('visitsTableBody');
-    const noVisitsMessage = document.getElementById('noVisitsMessage');
-    
-    if (!tbody) return;
-    
-    // Vider le tableau
-    tbody.innerHTML = '';
-    
-    // Trier les visites par date (plus récent en premier)
-    const sortedVisits = [...mockVisits].sort((a, b) => b.loginTime - a.loginTime);
-    
-    if (sortedVisits.length === 0) {
-      if (noVisitsMessage) {
-        noVisitsMessage.hidden = false;
+  // Charger les visites urgentes
+  function loadUrgentVisits() {
+    const urgentList = document.getElementById('urgentList');
+    if (!urgentList) return;
+
+    // Agriculteurs avec stocks critiques
+    const urgentFarmers = [
+      {
+        name: "Mamadou Diallo",
+        location: "Bamako",
+        reason: "Stock Urée critique (15%)",
+        action: "Planifier visite"
+      },
+      {
+        name: "Aminata Touré",
+        location: "Sikasso",
+        reason: "Alerte rendement Riz",
+        action: "Planifier visite"
+      },
+      {
+        name: "Bakary Camara",
+        location: "Kayes",
+        reason: "Conseil semis Coton urgent",
+        action: "Planifier visite"
       }
-    } else {
-      if (noVisitsMessage) {
-        noVisitsMessage.hidden = true;
+    ];
+
+    urgentList.innerHTML = urgentFarmers.map(farmer => `
+      <div class="urgent-item">
+        <div class="urgent-indicator"></div>
+        <div class="urgent-info">
+          <div class="urgent-name">${farmer.name}</div>
+          <div class="urgent-location">${farmer.location}</div>
+          <div class="urgent-reason">${farmer.reason}</div>
+        </div>
+        <button class="btn btn-small btn-danger" onclick="planUrgentVisit('${farmer.name}', '${farmer.location}')">
+          ${farmer.action}
+        </button>
+      </div>
+    `).join('');
+  }
+
+  // Planifier une visite urgente
+  function planUrgentVisit(farmerName, location) {
+    const farmerSelect = document.getElementById('farmerSelect');
+    const dateTime = document.getElementById('dateTime');
+    const reason = document.getElementById('reason');
+    
+    if (farmerSelect) {
+      // Sélectionner l'agriculteur
+      const options = farmerSelect.options;
+      for (let i = 0; i < options.length; i++) {
+        if (options[i].text.includes(farmerName)) {
+          farmerSelect.value = options[i].value;
+          break;
+        }
       }
-      
-      sortedVisits.forEach(visit => {
-        const row = createVisitRow(visit);
-        tbody.appendChild(row);
-      });
     }
     
-    updateStats(sortedVisits);
-  }
-
-  // Ajouter une nouvelle visite (simulation)
-  function addNewVisit() {
-    const names = ['Jean Dupont', 'Marie Konaté', 'Ibrahim Touré', 'Fatoumata Diallo'];
-    const actions = ['Consultation du dashboard', 'Vérification des stocks', 'Saisie de récolte', 'Analyse de rentabilité'];
-    const roles = ['manager', 'client'];
-    
-    const newVisit = {
-      id: mockVisits.length + 1,
-      name: names[Math.floor(Math.random() * names.length)],
-      email: `user${mockVisits.length + 1}@example.com`,
-      role: roles[Math.floor(Math.random() * roles.length)],
-      loginTime: new Date(),
-      action: actions[Math.floor(Math.random() * actions.length)],
-      duration: 0
-    };
-    
-    mockVisits.unshift(newVisit);
-    
-    // Limiter à 10 visites maximum
-    if (mockVisits.length > 10) {
-      mockVisits.pop();
+    if (dateTime) {
+      // Définir demain à 9h
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(9, 0, 0, 0);
+      dateTime.value = tomorrow.toISOString().slice(0, 16);
     }
     
-    renderVisitsTable();
-  }
-
-  // Mettre à jour les durées en temps réel
-  function updateDurations() {
-    mockVisits.forEach(visit => {
-      const now = new Date();
-      const diffMs = now - visit.loginTime;
-      visit.duration = Math.floor(diffMs / (1000 * 60));
-    });
-    
-    renderVisitsTable();
+    // Scroller vers le formulaire
+    const form = document.getElementById('visitForm');
+    if (form) {
+      form.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   // Initialiser la page
   function init() {
-    // Vérifier l'authentification
-    const auth = window.SeneBI?.getAuth?.();
-    if (!auth) {
-      window.location.href = './login';
-      return;
-    }
+    // Charger les données sans vérification d'authentification
+    loadVisits();
+    loadUrgentVisits();
     
-    // Rendre le tableau initial
-    renderVisitsTable();
+    // Configurer le formulaire
+    setupForm();
     
-    // Simuler des mises à jour en temps réel
-    setInterval(updateDurations, 30000); // Mettre à jour les durées toutes les 30s
+    // Définir la date/heure par défaut (demain 9h)
+    setDefaultDateTime();
+  }
+  
+  // Configurer le formulaire de visite
+  function setupForm() {
+    const form = document.getElementById('visitForm');
+    if (!form) return;
     
-    // Simuler l'ajout de nouvelles visites occasionnellement
-    setInterval(() => {
-      if (Math.random() > 0.7) { // 30% de chance
-        addNewVisit();
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const farmerSelect = document.getElementById('farmerSelect');
+      const dateTime = document.getElementById('dateTime');
+      const reason = document.getElementById('reason');
+      
+      if (!farmerSelect.value || !dateTime.value || !reason.value) {
+        alert('Veuillez remplir tous les champs');
+        return;
       }
-    }, 15000); // Toutes les 15 secondes
+      
+      // Ajouter la nouvelle visite
+      const newVisit = {
+        id: visits.length + 1,
+        farmer: farmerSelect.options[farmerSelect.selectedIndex].text.split(' (')[0],
+        location: farmerSelect.options[farmerSelect.selectedIndex].text.split(' (')[1].replace(')', ''),
+        date: new Date(dateTime.value),
+        reason: reason.options[reason.selectedIndex].text,
+        status: "planned"
+      };
+      
+      visits.push(newVisit);
+      
+      // Recharger la liste
+      loadVisits();
+      
+      // Réinitialiser le formulaire
+      form.reset();
+      setDefaultDateTime();
+      
+      // Afficher un message de succès
+      alert('Visite planifiée avec succès !');
+    });
+  }
+  
+  // Définir la date/heure par défaut (demain 9h)
+  function setDefaultDateTime() {
+    const dateTime = document.getElementById('dateTime');
+    if (dateTime) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(9, 0, 0, 0);
+      dateTime.value = tomorrow.toISOString().slice(0, 16);
+    }
   }
 
   // Démarrer quand le DOM est prêt

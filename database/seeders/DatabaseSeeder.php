@@ -21,5 +21,21 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        User::unguard();
+        User::create([
+            'name' => 'Mimi Manager',
+            'email' => 'mimi.manager@senebi.sn',
+            'password' => bcrypt('manager123'),
+            'role' => 'manager',
+        ]);
+
+        User::create([
+            'name' => 'Client Test',
+            'email' => 'sidi@sidi-agri.sn',
+            'password' => bcrypt('client123'),
+            'role' => 'client',
+        ]);
+        User::reguard();
     }
 }

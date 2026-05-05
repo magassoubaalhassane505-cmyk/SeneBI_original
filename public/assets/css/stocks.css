@@ -13,6 +13,203 @@
 .cards-2{ grid-template-columns: 1.25fr 1fr; margin-top: 14px; }
 .cards-1{ grid-template-columns: 1fr; margin-top: 14px; }
 
+/* ALIGNEMENT KPI CARDS EN UNE SEULE LIGNE - ÉTAPE 1.1 */
+.kpi-row {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important; /* 3 colonnes égales */
+  gap: 20px !important; /* Espacement optimal entre cartes */
+  margin-top: 14px !important;
+}
+
+/* Hauteur égale pour les 3 cartes */
+.kpi-row .kpi-card {
+  height: 100% !important; /* Force hauteur égale */
+  min-height: 120px !important; /* Hauteur minimum pour symétrie */
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+/* Adaptation mobile - 1 colonne sur téléphone */
+@media (max-width: 768px) {
+  .kpi-row {
+    grid-template-columns: 1fr !important; /* 1 seule colonne mobile */
+    gap: 12px !important; /* Espacement réduit mobile */
+  }
+  
+  .kpi-row .kpi-card {
+    min-height: 100px !important; /* Hauteur réduite mobile */
+  }
+}
+
+/* Style des alertes maintenu - fond rouge léger si > 0 */
+.kpi-row .kpi-card.critical-alert {
+  background: #fff5f5 !important; /* Rouge très léger */
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+}
+
+/* ÉTAPE 2 : HARMONISER FORMULAIRE ET TABLEAU */
+
+/* ÉTAPE 2.1 : ALIGNEMENT FINAL ET EFFET TOAST */
+
+/* RETOUR À L'ÉTAT ORIGINAL AVANT ÉTAPE 3 */
+
+/* Style des Inputs - SANS MODIFICATIONS */
+.form#consumeForm input,
+.form#consumeForm select {
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 10px 12px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  background: #ffffff !important;
+}
+
+.form#consumeForm input:focus,
+.form#consumeForm select:focus {
+  outline: none !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Notification Toast Premium */
+.toast-notification {
+  position: fixed !important;
+  bottom: 30px !important;
+  right: 30px !important;
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+  padding: 16px 24px !important;
+  border-radius: 50px !important; /* Très arrondi */
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  animation: slideInUp 0.3s ease-out !important;
+  max-width: 400px !important;
+}
+
+/* Icône de coche dans le toast */
+.toast-notification::before {
+  content: "✓" !important;
+  background: white !important;
+  color: #10b981 !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Animation du toast */
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%) !important;
+    opacity: 0 !important;
+  }
+  to {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Espace entre les boutons */
+.form#consumeForm .form-actions {
+  display: flex !important;
+  gap: 20px !important; /* Plus d'espace entre boutons */
+  align-items: center !important;
+  margin-top: 24px !important;
+}
+
+.form#consumeForm .form-actions .btn {
+  margin: 0 !important; /* Reset des marges */
+}
+
+/* ÉTAPE 3 ANNULÉE - RETOUR AU TABLEAU SIMPLE */
+
+/* Aération du Tableau - Padding augmenté */
+.table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.table th,
+.table td {
+  padding: 16px 12px !important; /* Augmenté pour aération */
+  border-bottom: 1px solid #e5e7eb !important;
+  vertical-align: middle !important;
+  transition: background-color 0.2s ease !important; /* Transition pour hover */
+}
+
+.table th {
+  background: #f8fafc !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Tableau simple - pas de hover, pas de badges personnalisés */
+
+/* Bouton Enregistrer - Call to Action avec icône */
+.form#consumeForm .btn[type="submit"] {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.form#consumeForm .btn[type="submit"]:hover {
+  background: linear-gradient(135deg, #059669, #047857) !important; /* Plus foncé */
+  transform: translateY(-2px) !important; /* S'élève de 2px */
+  box-shadow: 0 10px 20px -1px rgba(16, 185, 129, 0.4) !important; /* Ombre augmentée */
+}
+
+.form#consumeForm .btn[type="submit"]:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px -1px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Bouton Retour - Style secondaire avec icône */
+.form#consumeForm .btn.secondary {
+  background: #f8fafc !important;
+  color: #64748b !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.form#consumeForm .btn.secondary:hover {
+  background: #f1f5f9 !important; /* Gris très clair */
+  border-color: #cbd5e1 !important;
+  color: #475569 !important;
+  transform: translateY(-1px) !important; /* Léger effet hover */
+}
+
 .card{
   background: var(--card);
   border: 1px solid rgba(15,23,42,0.08);
@@ -30,6 +227,69 @@
 }
 .tag.muted{ color:#334155; background:#f1f5f9; }
 .tag.warn{ color:#7c2d12; background:#ffedd5; border-color: rgba(245,158,11,0.25); }
+
+/* ÉTAPE 3 : VISUALISATION DYNAMIQUE DES STOCKS - UNIQUEMENT SUR LE TABLEAU */
+
+/* Barres de progression discrètes dans Stock Actuel */
+.stock-progress-bar {
+  height: 5px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  margin-top: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.stock-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.stock-progress-fill.ok {
+  background: #86efac; /* Vert pastel très clair */
+}
+
+.stock-progress-fill.critical {
+  background: #fca5a5; /* Rouge pastel très clair */
+}
+
+/* Badges style pilule avec couleurs pastel */
+.table td .badge {
+  border-radius: 20px !important;
+  padding: 6px 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+.table td .badge.ok {
+  background: #dcfce7 !important; /* Vert pastel très clair */
+  color: #166534 !important; /* Vert foncé pour contraste */
+}
+
+.table td .badge.critical {
+  background: #fef2f2 !important; /* Rouge pastel très clair */
+  color: #991b1b !important; /* Rouge foncé pour contraste */
+}
+
+/* Nettoyage du Coût - FCFA en opacité réduite */
+.cost-amount {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.cost-currency {
+  opacity: 0.6;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+/* Effet hover sur les lignes du tableau */
+.table tbody tr:hover {
+  background: #fcfcfc !important; /* Gris perle très léger */
+  transition: background 0.2s ease;
+}
 .tag.danger{ color:#7f1d1d; background:#fee2e2; border-color: rgba(239,68,68,0.25); }
 .tag.good{ color:#14532d; background:#dcfce7; border-color: rgba(22,163,74,0.25); }
 
@@ -87,9 +347,52 @@
 .table-compact td{ padding: 8px 6px; font-size: 12px; }
 .top-consumers-table{ margin-top: 10px; }
 .top-consumers-fallback{ margin-top: 8px; font-style: italic; }
-.kpi-card .kpi-title{ font-size: 14px; font-weight: 700; margin:0; color: rgba(15,23,42,0.55); }
-.kpi-card .kpi-value{ font-size: 30px; font-weight: 900; margin: 6px 0 4px; letter-spacing:-0.02em; }
-.kpi-card .kpi-sub{ color: rgba(15,23,42,0.55); font-size: 12px; font-weight: 600; }
+/* MODERNISATION KPI CARDS - ÉTAPE 1 - FORCÉ */
+.kpi-card .kpi-title{ 
+  font-size: 14px !important; 
+  font-weight: 700 !important; 
+  margin:0 !important; 
+  color: rgba(15,23,42,0.85) !important; /* Plus foncé pour meilleure hiérarchie */
+}
+
+.kpi-card .kpi-value{ 
+  font-size: 30px !important; 
+  font-weight: 900 !important; 
+  margin: 12px 0 8px !important; /* Plus d'espace vertical */
+  letter-spacing:-0.02em !important; 
+}
+
+/* Valeur Totale du Stock en vert foncé - FORCÉ */
+.kpi-card .kpi-value.valeur-stock {
+  font-size: 36px !important; /* Plus grand */
+  color: #1b4332 !important; /* Vert foncé pour succès financier */
+  font-weight: 900 !important;
+}
+
+/* Alerte Critique Dynamique - fond rouge pâle si > 0 - FORCÉ */
+.kpi-card.critical-alert {
+  background: #fff5f5 !important; /* Rouge très pâle */
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+}
+
+.kpi-card.critical-alert .kpi-value {
+  color: #ef4444 !important; /* Rouge vif */
+  font-weight: 900 !important;
+}
+
+/* Ombres douces modernes - remplacement des bordures - FORCÉ */
+.kpi-card {
+  background: var(--card) !important;
+  border: none !important; /* Supprimer les bordures grises */
+  border-radius: var(--radius) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; /* Ombre très légère */
+  padding: 20px !important; /* Plus de padding pour look moderne */
+}
+
+/* SOUS-TITRES SUPPRIMÉS - Plus d'affichage - FORCÉ */
+.kpi-card .kpi-sub {
+  display: none !important; /* Supprimer complètement les sous-titres gris */
+}
 
 .section-title{ margin:0; font-size: 16px; font-weight: 900; }
 .chart-wrap{ height: 320px; margin-top: 10px; }

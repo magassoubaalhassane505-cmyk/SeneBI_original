@@ -4,7 +4,7 @@
 
   const defaultUsers = [
     { id: "U-1", name: "Mimi", company: "SeneBI", email: "mimi.manager@senebi.sn", password: "manager123", role: "manager", blocked: false },
-    { id: "U-3", name: "Sidi", company: "Sidi Agri", email: "sidi@sidi-agri.sn", password: "client123", role: "client", blocked: false },
+    { id: "U-3", name: "Mimi", company: "Sidi Agri", email: "sidi@sidi-agri.sn", password: "client123", role: "client", blocked: false },
   ];
 
   function normalizeRole(role) {
@@ -53,8 +53,8 @@
   }
 
   function roleHome(role) {
-    if (normalizeRole(role) === "manager") return "./secure-portal";
-    return "./client-dashboard";
+    if (normalizeRole(role) === "manager") return "/manager/dashboard";
+    return "/client/dashboard";
   }
 
   function getAuth() {
@@ -79,7 +79,7 @@
   function requireAuth() {
     const auth = getAuth();
     if (!auth) {
-      window.location.href = "../login";
+      window.location.href = "/";
       return null;
     }
     return auth;

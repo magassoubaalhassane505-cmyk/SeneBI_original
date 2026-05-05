@@ -6,15 +6,23 @@ use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
+    // Affiche le tableau de bord de l'agriculteur (Sidi)
     public function clientDashboard() {
         return view('client-dashboard');
     }
 
-    public function compte() {
-        return view('compte');
+    // Affiche le calculateur de rentabilité
+    public function rentabilite() {
+        return view('rentabilite');
     }
 
-    public function portail() {
-        return view('secure-portal');
+    // Affiche la gestion des parcelles
+    public function parcelles() {
+        return view('parcelles');
+    }
+
+    // Affiche le profil et les informations du compte
+    public function compte() {
+        return view('compte');
     }
 }

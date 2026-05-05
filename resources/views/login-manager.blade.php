@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SeneBI - Connexion securisee</title>
+    <title>SeneBI - Connexion Manager</title>
     <link rel="stylesheet" href="{{ asset('assets/css/base.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}" />
   </head>
@@ -20,24 +20,33 @@
             />
           </div>
 
-          <h1>SeneBI: Espace Client</h1>
-          <p class="login-subtitle">Votre plateforme de suivi agricole</p>
+          <h1>SeneBI: Business Intelligence Agricole Mali</h1>
+          <p class="login-subtitle">Votre plateforme de gestion securisee</p>
 
-          <form method="POST" action="{{ url('/login-client') }}" class="auth-form">
+          <form method="POST" action="{{ url('/login-manager') }}" class="auth-form">
             @csrf
+            
+            @if ($errors->any())
+              <div class="form-feedback error">
+                @foreach ($errors->all() as $error)
+                  <p>{{ $error }}</p>
+                @endforeach
+              </div>
+            @endif
+            
             <label for="email">Email</label>
-            <input id="email" name="email" type="email" value="sidi@sidi-agri.sn" placeholder="Ex: votre-email@entreprise.com" required />
+            <input id="email" name="email" type="email" value="mimi.manager@senebi.sn" placeholder="Ex: adiaratou@sidi-agri.com" required />
 
             <label for="password">Mot de passe</label>
-            <input id="password" name="password" type="password" value="client123" placeholder="Votre mot de passe" required />
+            <input id="password" name="password" type="password" value="manager123" placeholder="Votre mot de passe" required />
 
             <button class="btn login-submit" type="submit">Se connecter</button>
             <div id="loginFeedback" class="form-feedback" aria-live="polite"></div>
           </form>
 
           <div class="auth-switch">
-            <p>Vous êtes un manager ?</p>
-            <a href="{{ route('login.manager') }}" class="btn secondary">Accès Manager</a>
+            <p>Vous êtes un client ?</p>
+            <a href="{{ route('login.client') }}" class="btn secondary">Accès Client</a>
           </div>
         </div>
       </section>

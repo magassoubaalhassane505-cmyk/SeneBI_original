@@ -6,11 +6,13 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    // Affiche la page d'accueil principale du site (Fichier: index.blade.php)
     public function index() {
         return view('index');
     }
 
-    public function rentabilite() {
-        return view('rentabilite');
+    // Si tu veux que la page 'dashboard.blade.php' soit différente de l'index :
+    public function managerDashboard() {
+        return view('dashboard');
     }
 }

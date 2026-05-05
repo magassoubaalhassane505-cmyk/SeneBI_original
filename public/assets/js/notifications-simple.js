@@ -35,7 +35,7 @@
                         <h3>Notifications</h3>
                     </div>
                     <div class="notifications-list">
-                        <div class="notification-item warning" onclick="window.location.href='stocks'">
+                        <div class="notification-item warning" onclick="window.location.href='/manager/stocks'">
                             <div class="notification-icon">⚠️</div>
                             <div class="notification-content">
                                 <div class="notification-title">Alerte Stock</div>
@@ -43,7 +43,7 @@
                                 <div class="notification-time">Il y a 2h</div>
                             </div>
                         </div>
-                        <div class="notification-item info" onclick="window.location.href='secure-portal'">
+                        <div class="notification-item info" onclick="window.location.href='/secure-portal'">
                             <div class="notification-icon">👤</div>
                             <div class="notification-content">
                                 <div class="notification-title">Nouvelle Visite</div>

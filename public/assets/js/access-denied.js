@@ -16,7 +16,7 @@
 
     if (backBtn) {
       if (auth?.role === "manager") backBtn.href = "/secure-portal";
-      else backBtn.href = "/client-dashboard";
+      else backBtn.href = "/client/dashboard";
     }
   });
 })();
