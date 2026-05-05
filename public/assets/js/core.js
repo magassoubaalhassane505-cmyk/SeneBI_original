@@ -113,7 +113,7 @@
   function fromPagesDir() {
     return location.pathname.replace(/\\/g, "/").toLowerCase().includes("/pages/");
   }
-
+    
   function goToLogin() {
     window.location.href = fromPagesDir() ? "../login.html" : "./login.html";
   }
@@ -125,7 +125,7 @@
 
   function goToForbidden(message) {
     const encoded = encodeURIComponent(message || "Acces refuse.");
-    const path = fromPagesDir() ? `./403.html?message=${encoded}` : `./pages/403.html?message=${encoded}`;
+    const path = fromPagesDir() ? `./403?message=${encoded}` : `./pages/403?message=${encoded}`;
     window.location.href = path;
   }
 
