@@ -50,7 +50,10 @@
       <div class="topbar-actions">
         <div class="auth-pills">
           <a class="pill user-pill">Client</a>
-          <a class="pill auth-logout" href="{{ url('/logout') }}">Déconnexion</a>
+          <form action="{{ route('logout') }}" method="POST" style="display:inline-flex; margin:0;">
+            @csrf
+            <button type="submit" class="pill auth-logout">Déconnexion</button>
+          </form>
         </div>
       </div>
     </div>
