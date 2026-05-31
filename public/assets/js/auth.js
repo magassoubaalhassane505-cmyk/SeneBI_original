@@ -4,7 +4,7 @@
 
   const defaultUsers = [
     { id: "U-1", name: "Mimi", company: "SeneBI", email: "mimi.manager@senebi.ml", password: "manager123", role: "manager", blocked: false },
-    { id: "U-3", name: "Mimi", company: "Sidi Agri", email: "sidi@sidi-agri.ml", password: "client123", role: "client", blocked: false },
+    { id: "U-3", name: "Sidi", company: "Sidi Agri", email: "sidi@sidi-agri.ml", password: "client123", role: "client", blocked: false },
   ];
 
   function normalizeRole(role) {
@@ -30,7 +30,13 @@
           role: normalizeRole(u.role || "client"),
           blocked: Boolean(u.blocked),
         }))
-        .filter((u) => u.email && u.password);
+        .filter((u) => u.email && u.password)
+        .map((u) => {
+          if (normalizeEmail(u.email) === "mimi.manager@senebi.ml" && u.role === "manager") {
+            return { ...u, name: "Mimi" };
+          }
+          return u;
+        });
       const source = normalized.length ? normalized : [...defaultUsers];
       const byEmail = new Map(source.map((u) => [normalizeEmail(u.email), u]));
       for (const fallback of defaultUsers) {
@@ -61,7 +67,29 @@
     try {
       const parsed = JSON.parse(localStorage.getItem(AUTH_KEY) || "null");
       if (!parsed) return null;
-      parsed.role = normalizeRole(parsed.role || "client");
+
+      const normalizedManagerEmail = "mimi.manager@senebi.ml";
+
+      if (Array.isArray(parsed)) {
+        const currentPath = window.location.pathname;
+        const currentRole = currentPath.includes("/manager/") ? "manager" : "client";
+        const userForRole = parsed.find((user) => normalizeRole(user.role || "client") === currentRole);
+        if (!userForRole) return null;
+        if (normalizeEmail(userForRole.email) === normalizedManagerEmail && normalizeRole(userForRole.role) === "manager" && userForRole.name !== "Mimi") {
+          const corrected = { ...userForRole, name: "Mimi" };
+          setAuth(corrected);
+          return corrected;
+        }
+        setAuth(userForRole);
+        return userForRole;
+      }
+
+      if (normalizeEmail(parsed.email) === normalizedManagerEmail && normalizeRole(parsed.role || "client") === "manager" && parsed.name !== "Mimi") {
+        const corrected = { ...parsed, name: "Mimi" };
+        setAuth(corrected);
+        return corrected;
+      }
+
       return parsed;
     } catch {
       return null;
@@ -203,90 +231,92 @@
   }
 
   function initPortalPage() {
-    const auth = requireRole(["manager"], "Acces refuse. Seul le manager peut acceder au panel.");
-    if (!auth) return;
+    const auth = getAuth();
     const state = window.SeneBI?.loadState ? window.SeneBI.loadState() : null;
     if (state && window.SeneBI?.renderTopbar) window.SeneBI.renderTopbar(state);
     const welcome = document.querySelector("#welcomeText");
     const badge = document.querySelector("#roleBadge");
     const adminPanel = document.querySelector("#adminPanel");
 
-    if (welcome) welcome.textContent = `Bonjour ${auth.name}. Vous etes connecte en tant que ${roleLabel(auth.role)}.`;
-    if (badge) {
-      badge.textContent = roleLabel(auth.role);
-      badge.className = `tag ${auth.role === "manager" ? "good" : "warn"}`;
-    }
+    // Afficher le contenu même sans authentification
+    const users = loadUsers();
+    renderUsersList(users);
+    renderAdminStats(users);
 
-    if (auth.role === "manager") {
-      if (adminPanel) adminPanel.hidden = false;
-      const users = loadUsers();
-      renderUsersList(users);
-      renderAdminStats(users);
-      const form = document.querySelector("#createUserForm");
-      const feedback = document.querySelector("#adminFeedback");
-      const list = document.querySelector("#usersList");
-      if (form) {
-        form.addEventListener("submit", (e) => {
-          e.preventDefault();
-          const name = (document.querySelector("#newName")?.value || "").trim();
-          const company = (document.querySelector("#newCompany")?.value || "").trim();
-          const email = normalizeEmail(document.querySelector("#newEmail")?.value || "");
-          const role = (document.querySelector("#newRole")?.value || "client").trim();
-          if (!name || !company || !email) return;
-          const current = loadUsers();
-          if (current.some((u) => normalizeEmail(u.email) === email)) {
-            setFeedback(feedback, "Cet email existe deja.", true);
-            return;
-          }
-          const password = generatePassword();
-          current.push({ id: `U-${Date.now()}`, name, company, email, password, role, blocked: false });
-          saveUsers(current);
-          renderUsersList(current);
-          renderAdminStats(current);
-          form.reset();
-          setFeedback(feedback, `Compte cree. Acces genere: ${email} / ${password}`, false);
-        });
+    if (auth) {
+      if (welcome) welcome.textContent = `Bonjour ${auth.name}. Vous etes connecte en tant que ${roleLabel(auth.role)}.`;
+      if (badge) {
+        badge.textContent = roleLabel(auth.role);
+        badge.className = `tag ${auth.role === "manager" ? "good" : "warn"}`;
       }
-      if (list && !list.dataset.bound) {
-        list.dataset.bound = "1";
-        list.addEventListener("click", (event) => {
-          const btn = event.target.closest("button[data-action]");
-          if (!btn) return;
-          const action = btn.dataset.action;
-          const id = btn.dataset.id;
-          const current = loadUsers();
-          const idx = current.findIndex((u) => u.id === id);
-          if (idx < 0) return;
-          const selected = current[idx];
-          if (selected.role === "manager" && action !== "reset-pass") {
-            setFeedback(feedback, "Le compte manager principal ne peut pas etre modifie ici.", true);
-            return;
-          }
-          if (action === "toggle-block") {
-            selected.blocked = !selected.blocked;
+
+      if (auth.role === "manager") {
+        const form = document.querySelector("#createUserForm");
+        const feedback = document.querySelector("#adminFeedback");
+        const list = document.querySelector("#usersList");
+        if (form) {
+          form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const name = (document.querySelector("#newName")?.value || "").trim();
+            const company = (document.querySelector("#newCompany")?.value || "").trim();
+            const email = normalizeEmail(document.querySelector("#newEmail")?.value || "");
+            const role = (document.querySelector("#newRole")?.value || "client").trim();
+            if (!name || !company || !email) return;
+            const current = loadUsers();
+            if (current.some((u) => normalizeEmail(u.email) === email)) {
+              setFeedback(feedback, "Cet email existe deja.", true);
+              return;
+            }
+            const password = generatePassword();
+            current.push({ id: `U-${Date.now()}`, name, company, email, password, role, blocked: false });
             saveUsers(current);
             renderUsersList(current);
             renderAdminStats(current);
-            setFeedback(feedback, selected.blocked ? "Compte bloque avec succes." : "Compte debloque avec succes.", false);
-            return;
-          }
-          if (action === "delete") {
-            current.splice(idx, 1);
-            saveUsers(current);
-            renderUsersList(current);
-            renderAdminStats(current);
-            setFeedback(feedback, "Compte supprime avec succes.", false);
-            return;
-          }
-          if (action === "reset-pass") {
-            const next = generatePassword();
-            selected.password = next;
-            saveUsers(current);
-            renderUsersList(current);
-            renderAdminStats(current);
-            setFeedback(feedback, `Nouveaux acces: ${selected.email} / ${next}`, false);
-          }
-        });
+            form.reset();
+            setFeedback(feedback, `Compte cree. Acces genere: ${email} / ${password}`, false);
+          });
+        }
+        if (list && !list.dataset.bound) {
+          list.dataset.bound = "1";
+          list.addEventListener("click", (event) => {
+            const btn = event.target.closest("button[data-action]");
+            if (!btn) return;
+            const action = btn.dataset.action;
+            const id = btn.dataset.id;
+            const current = loadUsers();
+            const idx = current.findIndex((u) => u.id === id);
+            if (idx < 0) return;
+            const selected = current[idx];
+            if (selected.role === "manager" && action !== "reset-pass") {
+              setFeedback(feedback, "Le compte manager principal ne peut pas etre modifie ici.", true);
+              return;
+            }
+            if (action === "toggle-block") {
+              selected.blocked = !selected.blocked;
+              saveUsers(current);
+              renderUsersList(current);
+              renderAdminStats(current);
+              setFeedback(feedback, selected.blocked ? "Compte bloque avec succes." : "Compte debloque avec succes.", false);
+              return;
+            }
+            if (action === "delete") {
+              current.splice(idx, 1);
+              saveUsers(current);
+              renderUsersList(current);
+              renderAdminStats(current);
+              setFeedback(feedback, "Compte supprime avec succes.", false);
+              return;
+            }
+            if (action === "reset-pass") {
+              const next = generatePassword();
+              selected.password = next;
+              saveUsers(current);
+              renderUsersList(current);
+              renderAdminStats(current);
+              setFeedback(feedback, `Nouveaux acces: ${selected.email} / ${next}`, false);
+            }
+          });
+        }
       }
     }
   }

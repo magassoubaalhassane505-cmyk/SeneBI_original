@@ -28,7 +28,7 @@
     const state = SeneBI.loadState ? SeneBI.loadState() : {};
     if (SeneBI.renderTopbar) SeneBI.renderTopbar(state);
     
-    // Données de base pour le client Mimi
+    // Données de base pour le client Sidi
     const harvestTotal = 2450; // kg
     const salesFcfa = 1225000; // FCFA
     const intrantsCostFcfa = 740000; // FCFA

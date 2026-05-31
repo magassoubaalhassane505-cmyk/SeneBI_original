@@ -20,6 +20,7 @@ class AuthController extends Controller
 
     // Affiche le portail de sécurité
     public function portal() {
+        // Permettre l'accès public au portail sécurisé sans authentification
         return view('secure-portal');
     }
 

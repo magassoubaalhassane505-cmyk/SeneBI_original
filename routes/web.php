@@ -17,7 +17,7 @@ use App\Http\Controllers\ManagementController;
 // Page d'accueil principale : redirige vers la connexion client
 Route::get('/', [AuthController::class, 'loginClient'])->name('welcome');
 Route::get('/index', [DashboardController::class, 'index'])->name('home');
-Route::get('/secure-portal', [AuthController::class, 'portal'])->name('secure.portal');
+Route::get('/secure-portal', [AuthController::class, 'portal'])->middleware('public.portal')->name('secure.portal');
 
 // --- AUTHENTIFICATION (PAGES DE CONNEXION) ---
 Route::get('/login-manager', [AuthController::class, 'login'])->name('login.manager');

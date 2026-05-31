@@ -23,13 +23,17 @@
                 }
             ];
             
+            // Default (demo) weather; will be replaced if API key is provided
             this.weather = {
                 location: 'Bamako',
                 temperature: 35,
                 condition: 'Temps sec',
                 icon: '☀️'
             };
-            
+
+            // Read API key from global var or meta tag (optional)
+            this.weatherApiKey = window.SENEBI_WEATHER_API_KEY || (document.querySelector('meta[name="senebi-weather-key"]') || {}).content || null;
+
             this.init();
         }
 
@@ -87,7 +91,7 @@
         }
 
         createWeatherWidget() {
-            // Créer le widget météo
+            // Créer le widget météo (initial avec données connues)
             const weatherWidget = document.createElement('div');
             weatherWidget.className = 'weather-widget';
             weatherWidget.innerHTML = `
@@ -109,8 +113,64 @@
                 const kpisGrid = document.querySelector('.grid.kpis');
                 if (kpisGrid) {
                     kpisGrid.insertAdjacentElement('afterend', weatherWidget);
+                    // tenter de récupérer la météo réelle (si clé présente)
+                    this.fetchWeatherAndUpdate(weatherWidget).catch(() => {});
                 }
             }, 200);
+        }
+
+        // Récupère la météo via OpenWeatherMap (si clé fournie)
+        async fetchWeather(city = 'Bamako') {
+            const key = this.weatherApiKey;
+            if (!key) return null;
+            try {
+                const resp = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)},ml&units=metric&appid=${key}`);
+                if (!resp.ok) throw new Error('API error');
+                const j = await resp.json();
+                const w = {
+                    location: j.name || city,
+                    temperature: Math.round((j.main && j.main.temp) || this.weather.temperature),
+                    condition: (j.weather && j.weather[0] && j.weather[0].description) || this.weather.condition,
+                    icon: this.mapOpenWeatherIconToEmoji(j.weather && j.weather[0] && j.weather[0].icon)
+                };
+                return w;
+            } catch (e) {
+                console.warn('fetchWeather failed', e);
+                return null;
+            }
+        }
+
+        // Met à jour le DOM du widget météo avec des données réelles si disponibles
+        async fetchWeatherAndUpdate(container) {
+            const city = 'Bamako';
+            const data = await this.fetchWeather(city);
+            if (!data) return;
+            // mettre à jour la source locale
+            this.weather = data;
+            try {
+                const iconEl = container.querySelector('.weather-icon');
+                const locEl = container.querySelector('.weather-location');
+                const tempEl = container.querySelector('.weather-temp');
+                const condEl = container.querySelector('.weather-condition');
+                if (iconEl) iconEl.textContent = data.icon;
+                if (locEl) locEl.textContent = data.location;
+                if (tempEl) tempEl.textContent = `${data.temperature}°C`;
+                if (condEl) condEl.textContent = data.condition;
+            } catch (e) {
+                console.warn('update DOM failed', e);
+            }
+        }
+
+        // Map OpenWeather icon code to a simple emoji fallback
+        mapOpenWeatherIconToEmoji(code) {
+            if (!code) return '☀️';
+            if (code.startsWith('01')) return '☀️';
+            if (code.startsWith('02') || code.startsWith('03') || code.startsWith('04')) return '⛅';
+            if (code.startsWith('09') || code.startsWith('10')) return '🌧️';
+            if (code.startsWith('11')) return '⛈️';
+            if (code.startsWith('13')) return '❄️';
+            if (code.startsWith('50')) return '🌫️';
+            return '☀️';
         }
 
         generateNotificationsHTML() {

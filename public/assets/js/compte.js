@@ -30,7 +30,7 @@
 
   const defaultUsers = [
     { id: "U-1", name: "Mimi", company: "SeneBI", email: "mimi.manager@senebi.ml", password: "manager123", role: "manager", blocked: false },
-    { id: "U-3", name: "Mimi", company: "Sidi Agri", email: "sidi@sidi-agri.ml", password: "client123", role: "client", blocked: false },
+    { id: "U-3", name: "Sidi", company: "Sidi Agri", email: "sidi@sidi-agri.ml", password: "client123", role: "client", blocked: false },
   ];
 
   function loadUsers() {
@@ -45,7 +45,16 @@
         saveUsers(defaultUsers);
         return [...defaultUsers];
       }
-      return parsed;
+      const corrected = parsed.map((u) => {
+        if (normalizeEmail(u.email) === "mimi.manager@senebi.ml" && u.role === "manager") {
+          return { ...u, name: "Mimi" };
+        }
+        return u;
+      });
+      if (JSON.stringify(corrected) !== JSON.stringify(parsed)) {
+        saveUsers(corrected);
+      }
+      return corrected;
     } catch {
       saveUsers(defaultUsers);
       return [...defaultUsers];
@@ -133,11 +142,19 @@
     if (av) av.textContent = initial(auth.name);
 
     const prefs = loadPrefs(auth.email);
-    SeneBI.qs("#prefEmail").checked = !!prefs.emailAlerts;
-    SeneBI.qs("#prefStock").checked = !!prefs.stockAlerts;
-    SeneBI.qs("#prefParcel").checked = !!prefs.parcelReminders;
-    SeneBI.qs("#prefDigest").checked = !!prefs.weeklyDigest;
-    SeneBI.qs("#prefSms").checked = !!prefs.smsAlerts;
+    
+    // Vérifier que les éléments existent avant de les modifier
+    const prefEmail = SeneBI.qs("#prefEmail");
+    const prefStock = SeneBI.qs("#prefStock");
+    const prefParcel = SeneBI.qs("#prefParcel");
+    const prefDigest = SeneBI.qs("#prefDigest");
+    const prefSms = SeneBI.qs("#prefSms");
+    
+    if (prefEmail) prefEmail.checked = !!prefs.emailAlerts;
+    if (prefStock) prefStock.checked = !!prefs.stockAlerts;
+    if (prefParcel) prefParcel.checked = !!prefs.parcelReminders;
+    if (prefDigest) prefDigest.checked = !!prefs.weeklyDigest;
+    if (prefSms) prefSms.checked = !!prefs.smsAlerts;
 
     const pwdForm = SeneBI.qs("#passwordForm");
     if (pwdForm && !pwdForm.dataset.bound) {

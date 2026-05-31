@@ -7,102 +7,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/base.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}" />
     
-    <!-- Styles pour la cloche de notification -->
+    <!-- Styles pour la navigation active -->
     <style>
-      .notification-bell {
-        position: relative;
-        cursor: pointer;
-        margin-right: 16px;
-        padding: 8px;
-        border: 2px solid #10b981;
-        border-radius: 50%;
-        transition: all 0.2s ease;
-      }
-      
-      .notification-bell:hover {
-        border-color: #059669;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-      }
-      
-      .bell-icon {
-        color: #10b981;
-        transition: color 0.2s ease;
-      }
-      
-      .notification-bell:hover .bell-icon {
-        color: #059669;
-      }
-      
-      .notification-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background: #ef4444;
-        color: white;
-        border-radius: 50%;
-        width: 16px;
-        height: 16px;
-        font-size: 10px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      .notification-dropdown {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 8px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        min-width: 320px;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.3s ease;
-      }
-      
-      .notification-dropdown.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-      }
-      
-      .notification-content {
-        padding: 16px;
-      }
-      
-      .notification-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 12px 0;
-      }
-      
-      .notification-icon {
-        font-size: 16px;
-        flex-shrink: 0;
-      }
-      
-      .notification-text strong {
-        color: #1e293b;
-        font-size: 14px;
-        display: block;
-        margin-bottom: 4px;
-      }
-      
-      .notification-text p {
-        color: #64748b;
-        font-size: 13px;
-        margin: 0;
-        line-height: 1.4;
-      }
-      
-      /* Styles pour la navigation active */
       .manager-nav a.active {
         background: #dcfce7;
         color: #14532d;
@@ -116,67 +22,17 @@
         background: #bbf7d0;
         border-left-color: #059669;
       }
-      
-      /* Risk status badges */
-      .risk-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 500;
-        white-space: nowrap;
-      }
-      
-      .risk-badge.risk-high {
-        background: rgba(239, 68, 68, 0.1);
-        color: #dc2626;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-      }
-      
-      .risk-badge.risk-medium {
-        background: rgba(245, 158, 11, 0.1);
-        color: #d97706;
-        border: 1px solid rgba(245, 158, 11, 0.2);
-      }
-      
-      .risk-badge.risk-low {
-        background: rgba(34, 197, 94, 0.1);
-        color: #16a34a;
-        border: 1px solid rgba(34, 197, 94, 0.2);
-      }
-      
-      .risk-badge::before {
-        content: '';
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-      
-      .risk-badge.risk-high::before {
-        background: #dc2626;
-      }
-      
-      .risk-badge.risk-medium::before {
-        background: #d97706;
-      }
-      
-      .risk-badge.risk-low::before {
-        background: #16a34a;
-      }
     </style>
   </head>
   <body data-page="supervision">
     <div class="app">
       @include('header-manager')
-      
+
       <main class="container">
         <div class="page-title">
           <div>
             <h1>Supervision</h1>
-            <p>Vue d'ensemble des activités et contrôle opérationnel</p>
+            <p>Surveillance des parcelles et alertes en temps réel</p>
           </div>
         </div>
 
@@ -352,30 +208,6 @@
             link.classList.add('active');
           }
         });
-        
-        // Gestion de la cloche de notification
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationDropdown = document.getElementById('notificationDropdown');
-
-        if (notificationBell && notificationDropdown) {
-          // Au clic sur la cloche
-          notificationBell.addEventListener('click', function(e) {
-            e.stopPropagation();
-            notificationDropdown.classList.toggle('show');
-          });
-
-          // Fermeture au clic ailleurs
-          document.addEventListener('click', function(e) {
-            if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
-              notificationDropdown.classList.remove('show');
-            }
-          });
-
-          // Fermeture au clic sur le dropdown lui-même
-          notificationDropdown.addEventListener('click', function(e) {
-            e.stopPropagation();
-          });
-        }
       });
     </script>
   </body>

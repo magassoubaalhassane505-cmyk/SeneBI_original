@@ -1,3 +1,29 @@
+<!-- SVG sprite icons (hidden) -->
+<svg aria-hidden="true" style="display:none">
+  <symbol id="icon-seed" viewBox="0 0 24 24">
+    <path d="M12 2c3 0 7 3 7 7 0 5-7 13-7 13s-7-8-7-13c0-4 4-7 7-7z" fill="currentColor"/>
+  </symbol>
+  <symbol id="icon-seedling" viewBox="0 0 24 24">
+    <path d="M6 20s4-4 6-4 4 4 4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M12 12c2-2 4-6 2-8-2 2-6 0-8 2s0 6 2 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="icon-bag" viewBox="0 0 24 24">
+    <path d="M7 7c0-2 1-4 5-4s5 2 5 4v2H7V7z" fill="currentColor"/>
+    <path d="M5 9h14v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9z" fill="currentColor" opacity="0.9"/>
+  </symbol>
+  <symbol id="icon-spray" viewBox="0 0 24 24">
+    <path d="M3 21l6-6 6 6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M14 7l3-3 4 4-3 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="icon-fertilizer" viewBox="0 0 24 24">
+    <path d="M12 2c2 2 3 4 3 6 0 4-3 8-3 8s-3-4-3-8c0-2 1-4 3-6z" fill="currentColor"/>
+  </symbol>
+  <symbol id="icon-chemical" viewBox="0 0 24 24">
+    <path d="M7 7h10l-1 7a4 4 0 0 1-4 4 4 4 0 0 1-4-4L7 7z" fill="currentColor"/>
+    <path d="M12 3v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
 <header class="topbar">
   <div class="topbar-inner">
     <!-- Partie Gauche : Logo SeneBI -->
@@ -49,7 +75,7 @@
       <!-- Partie Droite : Actions -->
       <div class="topbar-actions">
         <!-- Bouton "Retour au portail" -->
-        <a class="btn secondary" href="{{ route('secure.portal') }}">🔧Admin panel </a>
+        <a class="btn secondary" href="/secure-portal">🔧Admin panel </a>
         
         <div class="auth-pills">
           <a class="pill user-pill" href="/manager/compte">Mimi</a>

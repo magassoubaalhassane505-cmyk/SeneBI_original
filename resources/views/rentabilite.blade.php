@@ -1849,18 +1849,23 @@
           const profit = parseFloat(profitKpi.querySelector('.number')?.textContent.replace(/[^\d.-]/g, '') || '0');
           
           let advice = '';
-          
+          let iconHtml = '';
+
           if (profit > 0 && sales > 0) {
             const margin = (profit / sales) * 100;
             if (margin > 20) {
-              advice = '🎯 Excellente performance! Votre marge de ' + margin.toFixed(1) + '% est très rentable. Continuez cette stratégie!';
+              advice = 'Excellente performance! Votre marge de ' + margin.toFixed(1) + "% est très rentable. Continuez cette stratégie!";
+              iconHtml = '<svg class="ai-icon-svg" width="18" height="18" role="img" aria-label="bonnes performances" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 14.5l-4.5-4.5 1.4-1.4L11 13.7l6.1-6.1 1.4 1.4L11 16.5z"/></svg>';
             } else if (margin > 10) {
-              advice = '📈 Bonne rentabilité avec ' + margin.toFixed(1) + '% de marge. Optimisez les coûts pour améliorer encore.';
+              advice = 'Bonne rentabilité avec ' + margin.toFixed(1) + "% de marge. Optimisez les coûts pour améliorer encore.";
+              iconHtml = '<svg class="ai-icon-svg" width="18" height="18" role="img" aria-label="rentabilité" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 16v-6l4 4 4-8 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             } else {
-              advice = '⚠️ Marge faible à ' + margin.toFixed(1) + '%. Analysez vos coûts d\'intrants pour améliorer la rentabilité.';
+              advice = 'Marge faible à ' + margin.toFixed(1) + "% . Analysez vos coûts d\'intrants pour améliorer la rentabilité.";
+              iconHtml = '<svg class="ai-icon-svg" width="18" height="18" role="img" aria-label="marge faible" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 12l4-4 4 4 6-6" stroke-linecap="round" stroke-linejoin="round"/><path fill="currentColor" d="M19 14.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zm-4.5-2.5v3m0 2v.01"/></svg>';
             }
           } else {
-            advice = '🚨 Attention! Votre exploitation est en perte. Il faut revoir votre stratégie de prix ou réduire les coûts.';
+            advice = 'Attention — votre exploitation est en perte. Il faut revoir votre stratégie de prix ou réduire les coûts.';
+            iconHtml = '<svg class="ai-icon-svg" width="18" height="18" role="img" aria-label="alerte perte" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/><path fill="currentColor" d="M19 11v6h-6"/></svg>';
           }
           
           // Créer et afficher le conseil
@@ -1871,24 +1876,29 @@
             adviceCard.className = 'card';
             adviceCard.style.cssText = `
               grid-column: 1 / -1;
-              background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-              border: 1px solid #10b981;
+              background: #f8fafc;
+              border: 1px solid #dbeafe;
               border-radius: 12px;
-              padding: 16px;
+              padding: 14px 16px;
               margin-top: 16px;
             `;
+
             adviceCard.innerHTML = `
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 24px;">🤖</span>
+              <div style="display:flex; align-items:flex-start; gap:12px;">
+                <div style="width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:#eef2ff; color:#2563eb; flex-shrink:0;">
+                  ${iconHtml}
+                </div>
                 <div>
-                  <h3 style="margin: 0; color: #10b981; font-size: 16px;">Conseil IA SeneBI</h3>
-                  <p style="margin: 4px 0 0 0; color: #374151; font-size: 14px;">${advice}</p>
+                  <h3 style="margin: 0 0 6px 0; color: #0f172a; font-size: 15px; letter-spacing: 0.01em;">Conseil IA SeneBI</h3>
+                  <p class="ai-advice-text" style="margin: 0; color: #334155; font-size: 13.5px; line-height: 1.6;">${advice}</p>
                 </div>
               </div>
             `;
             adviceSection.parentNode.insertBefore(adviceCard, adviceSection.nextSibling);
           } else if (document.getElementById('aiAdvice')) {
-            const adviceText = document.querySelector('#aiAdvice p');
+            const adviceText = document.querySelector('#aiAdvice .ai-advice-text');
+            const iconWrapper = document.querySelector('#aiAdvice > div > div');
+            if (iconWrapper) iconWrapper.innerHTML = iconHtml;
             if (adviceText) adviceText.textContent = advice;
           }
         }

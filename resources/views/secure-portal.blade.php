@@ -12,7 +12,7 @@
      @include('header-manager')
       <main class="portal-shell container">
         
-        <section class="card section-shell" id="adminPanel" hidden>
+        <section class="card section-shell" id="adminPanel">
           <div class="section-head">
             <h2>Gestion des comptes</h2>
             <p>Ajoutez des clients, attribuez des droits manager et bloquez des comptes si necessaire.</p>

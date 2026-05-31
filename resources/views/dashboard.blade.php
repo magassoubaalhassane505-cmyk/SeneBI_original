@@ -335,7 +335,6 @@
                 <h3 style="margin:0; font-size:16px;">Cartographie des Récoltes</h3>
                 <div class="small muted">Vue stratégique des zones agricoles</div>
               </div>
-              <span class="tag good">Live</span>
             </div>
             <div class="map-container">
               <div class="mali-map">
@@ -437,7 +436,6 @@
           </article>
         </section>
 
-        <div class="footer-note">Astuce: si tu saisis des consommations d'intrants dans "Stocks", l'alerte rouge apparaît ici automatiquement.</div>
       </main>
 
         <!-- Section Tableaux de Bord Supplémentaires -->
@@ -445,10 +443,19 @@
           <article class="card">
             <div class="card-header">
               <div>
-                <h3 style="margin:0; font-size:16px;">📊 Statistiques Nationales</h3>
+                <h3 style="margin:0; font-size:16px; display:flex; align-items:center; gap:8px;">
+                  <span style="display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <rect x="4" y="10" width="3" height="10" rx="1" fill="#10b981"/>
+                      <rect x="10.5" y="6" width="3" height="14" rx="1" fill="#0ea5e9"/>
+                      <rect x="17" y="3" width="3" height="17" rx="1" fill="#f97316"/>
+                    </svg>
+                  </span>
+                  Statistiques Nationales
+                </h3>
                 <div class="small muted">Vue d'ensemble nationale</div>
               </div>
-              <span class="tag muted">2024</span>
+              <span class="tag muted">2026</span>
             </div>
             <div class="stats-grid">
               <div class="stat-item">
@@ -473,14 +480,22 @@
           <article class="card">
             <div class="card-header">
               <div>
-                <h3 style="margin:0; font-size:16px;">🚨 Alertes Critiques</h3>
+                <h3 style="margin:0; font-size:16px; display:flex; align-items:center; gap:8px;">
+                  <span style="display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M12 2L3 7v5c0 5 3.5 9.4 9 10 5.5-.6 9-5 9-10V7l-9-5z" fill="#ef4444"/>
+                      <path d="M12 8v5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M12 16h.01" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                  Alertes Critiques
+                </h3>
                 <div class="small muted">Surveillance en temps réel</div>
               </div>
-              <span class="tag danger">Live</span>
             </div>
             <div class="alerts-list">
               <div class="alert-item critical">
-                <div class="alert-icon">!</div>
+                <div class="alert-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2L3 7v5c0 5 3.5 9.4 9 10 5.5-.6 9-5 9-10V7l-9-5z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
                 <div class="alert-content">
                   <div class="alert-title">Stock critique - NPK</div>
                   <div class="alert-desc">Région de Sikasso - Seuil atteint</div>
@@ -488,7 +503,7 @@
                 </div>
               </div>
               <div class="alert-item warning">
-                <div class="alert-icon">⚠</div>
+                <div class="alert-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
                 <div class="alert-content">
                   <div class="alert-title">Rendement faible</div>
                   <div class="alert-desc">Parcelle Nord - Maïs</div>
@@ -496,7 +511,7 @@
                 </div>
               </div>
               <div class="alert-item info">
-                <div class="alert-icon">ℹ</div>
+                <div class="alert-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 7h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 11v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
                 <div class="alert-content">
                   <div class="alert-title">Météo favorable</div>
                   <div class="alert-desc">Conditions optimales prévues</div>
@@ -507,82 +522,6 @@
           </article>
         </section>
 
-        <!-- Section Tendances et Projections -->
-        <section class="trends-section">
-          <article class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="margin:0; font-size:16px;">📈 Tendances et Projections</h3>
-                <div class="small muted">Analyse prédictive et tendances mensuelles</div>
-              </div>
-              <span class="tag good">Analytics</span>
-            </div>
-            <div class="trends-grid">
-              <div class="trend-card">
-                <div class="trend-header">
-                  <h4>Croissance Production</h4>
-                  <span class="trend-value positive">+15.3%</span>
-                </div>
-                <div class="trend-chart">
-                  <div class="trend-bar" style="height: 60%;"></div>
-                  <div class="trend-bar" style="height: 75%;"></div>
-                  <div class="trend-bar" style="height: 85%;"></div>
-                  <div class="trend-bar" style="height: 90%;"></div>
-                  <div class="trend-bar" style="height: 95%;"></div>
-                </div>
-                <div class="trend-labels">
-                  <span>Jan</span>
-                  <span>Fév</span>
-                  <span>Mar</span>
-                  <span>Avr</span>
-                  <span>Mai</span>
-                </div>
-              </div>
-              
-              <div class="trend-card">
-                <div class="trend-header">
-                  <h4>Efficacité Intrants</h4>
-                  <span class="trend-value positive">+8.7%</span>
-                </div>
-                <div class="trend-chart">
-                  <div class="trend-bar" style="height: 70%;"></div>
-                  <div class="trend-bar" style="height: 72%;"></div>
-                  <div class="trend-bar" style="height: 78%;"></div>
-                  <div class="trend-bar" style="height: 82%;"></div>
-                  <div class="trend-bar" style="height: 88%;"></div>
-                </div>
-                <div class="trend-labels">
-                  <span>Jan</span>
-                  <span>Fév</span>
-                  <span>Mar</span>
-                  <span>Avr</span>
-                  <span>Mai</span>
-                </div>
-              </div>
-              
-              <div class="trend-card">
-                <div class="trend-header">
-                  <h4>Rentabilité Globale</h4>
-                  <span class="trend-value positive">+12.1%</span>
-                </div>
-                <div class="trend-chart">
-                  <div class="trend-bar" style="height: 65%;"></div>
-                  <div class="trend-bar" style="height: 68%;"></div>
-                  <div class="trend-bar" style="height: 74%;"></div>
-                  <div class="trend-bar" style="height: 79%;"></div>
-                  <div class="trend-bar" style="height: 87%;"></div>
-                </div>
-                <div class="trend-labels">
-                  <span>Jan</span>
-                  <span>Fév</span>
-                  <span>Mar</span>
-                  <span>Avr</span>
-                  <span>Mai</span>
-                </div>
-              </div>
-            </div>
-          </article>
-        </section>
       </main>
       <div data-layout="footer"></div>
     </div>

@@ -49,15 +49,6 @@
       <!-- Partie Droite : Actions -->
       <div class="topbar-actions">
         <div class="auth-pills">
-          <!-- Cloche de notification corrigée -->
-          <a href="#" class="notification-bell">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
-            <span class="badge">3</span>
-          </a>
-          
           <a class="pill user-pill" href="{{ url('/client/mon-compte') }}">Sidi</a>
           <form action="{{ route('logout') }}" method="POST" style="display:inline-flex; margin:0;">
             @csrf
@@ -68,44 +59,7 @@
     </div>
   </div>
 
-  <!-- Styles corrigés pour la cloche -->
   <style>
-    .notification-bell {
-      position: relative;
-      color: #64748b;
-      padding: 8px;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .notification-bell:hover {
-      color: #10b981;
-      background: #f0fdf4;
-    }
-    
-    .notification-bell .badge {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      background: #ef4444;
-      color: white;
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 4px;
-      border-radius: 10px;
-      min-width: 16px;
-      text-align: center;
-    }
-    
-    .notification-bell svg {
-      width: 20px;
-      height: 20px;
-      color: inherit;
-    }
-    
     .client-nav a.active {
       background: #dcfce7;
       color: #14532d;

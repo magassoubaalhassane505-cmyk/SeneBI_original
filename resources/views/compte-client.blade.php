@@ -9,7 +9,7 @@
   </head>
   <body data-page="compte-client">
     <div class="app">
-      <div data-layout="header"></div>
+      @include('header-client') 
 
       <main class="container compte-page">
         <header class="compte-hero">
@@ -17,7 +17,6 @@
             <h1>Mon compte Client</h1>
             <p>Profil, sécurité et préférences de notification.</p>
           </div>
-          <a class="compte-back-btn" href="{{ route('client.dashboard') }}" id="compteBackLink">Retour</a>
         </header>
 
         <div class="compte-grid">
@@ -118,7 +117,6 @@
           </section>
         </div>
       </main>
-      <div data-layout="footer"></div>
     </div>
 
     <script src="{{ asset('assets/js/layout.js') }}"></script>

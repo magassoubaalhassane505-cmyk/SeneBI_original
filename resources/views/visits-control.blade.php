@@ -8,102 +8,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}" />
     <script src="{{ asset('assets/js/visits-control.js') }}"></script>
     
-    <!-- Styles pour la cloche de notification -->
+    <!-- Styles pour la navigation active -->
     <style>
-      .notification-bell {
-        position: relative;
-        cursor: pointer;
-        margin-right: 16px;
-        padding: 8px;
-        border: 2px solid #10b981;
-        border-radius: 50%;
-        transition: all 0.2s ease;
-      }
-      
-      .notification-bell:hover {
-        border-color: #059669;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-      }
-      
-      .bell-icon {
-        color: #10b981;
-        transition: color 0.2s ease;
-      }
-      
-      .notification-bell:hover .bell-icon {
-        color: #059669;
-      }
-      
-      .notification-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background: #ef4444;
-        color: white;
-        border-radius: 50%;
-        width: 16px;
-        height: 16px;
-        font-size: 10px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      .notification-dropdown {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 8px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        min-width: 320px;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.3s ease;
-      }
-      
-      .notification-dropdown.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-      }
-      
-      .notification-content {
-        padding: 16px;
-      }
-      
-      .notification-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 12px 0;
-      }
-      
-      .notification-icon {
-        font-size: 16px;
-        flex-shrink: 0;
-      }
-      
-      .notification-text strong {
-        color: #1e293b;
-        font-size: 14px;
-        display: block;
-        margin-bottom: 4px;
-      }
-      
-      .notification-text p {
-        color: #64748b;
-        font-size: 13px;
-        margin: 0;
-        line-height: 1.4;
-      }
-      
-      /* Styles pour la navigation active */
       .manager-nav a.active {
         background: #dcfce7;
         color: #14532d;
@@ -116,6 +22,104 @@
       .manager-nav a.active:hover {
         background: #bbf7d0;
         border-left-color: #059669;
+      }
+
+      .visits-list {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: #ffffff;
+      }
+
+      .visit-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        padding: 18px 20px;
+      }
+
+      .visit-item:not(:last-child) {
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      }
+
+      .visit-date {
+        text-align: center;
+        min-width: 70px;
+      }
+
+      .visit-day {
+        display: block;
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--primary);
+        line-height: 1;
+      }
+
+      .visit-month {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        margin-top: 2px;
+      }
+
+      .visit-time {
+        display: block;
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .visit-details {
+        display: grid;
+        gap: 4px;
+      }
+
+      .visit-person {
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .visit-location {
+        font-size: 14px;
+        color: #475569;
+      }
+
+      .visit-purpose {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 6px;
+      }
+
+      .visit-status {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .status-badge.planifie {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .status-badge.en-retard {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .status-badge.urgent {
+        background: #fef3c7;
+        color: #92400e;
       }
     </style>
   </head>
@@ -146,51 +150,51 @@
               
               <div class="visits-list" id="visitsList">
                 <!-- Données initiales des visites prévues -->
-                <div class="visit-item" style="display: flex; padding: 16px; border-bottom: 1px solid var(--border); align-items: center;">
-                  <div style="min-width: 60px; text-align: center; margin-right: 16px;">
-                    <div style="font-size: 24px; font-weight: bold; color: var(--primary);">4</div>
-                    <div style="font-size: 12px; color: var(--muted);">Mai</div>
+                <div class="visit-item">
+                  <div class="visit-date">
+                    <span class="visit-day">2</span>
+                    <span class="visit-month">Juin</span>
+                    <span class="visit-time">17:01</span>
                   </div>
-                  <div style="flex: 1;">
-                    <div style="font-weight: 600; margin-bottom: 4px;">Mamadou Diallo</div>
-                    <div style="font-size: 14px; color: var(--muted); margin-bottom: 2px;">Bamako</div>
-                    <div style="font-size: 13px; color: var(--muted);">00:52</div>
-                    <div style="font-size: 13px; margin-top: 4px;">Contrôle stock Urée</div>
+                  <div class="visit-details">
+                    <div class="visit-person">Mamadou Diallo</div>
+                    <div class="visit-location">Bamako</div>
+                    <div class="visit-purpose">Contrôle stock Urée</div>
                   </div>
-                  <div>
-                    <span style="background: var(--success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Planifié</span>
-                  </div>
-                </div>
-                
-                <div class="visit-item" style="display: flex; padding: 16px; border-bottom: 1px solid var(--border); align-items: center;">
-                  <div style="min-width: 60px; text-align: center; margin-right: 16px;">
-                    <div style="font-size: 24px; font-weight: bold; color: var(--primary);">6</div>
-                    <div style="font-size: 12px; color: var(--muted);">Mai</div>
-                  </div>
-                  <div style="flex: 1;">
-                    <div style="font-weight: 600; margin-bottom: 4px;">Aminata Touré</div>
-                    <div style="font-size: 14px; color: var(--muted); margin-bottom: 2px;">Sikasso</div>
-                    <div style="font-size: 13px; color: var(--muted);">00:52</div>
-                    <div style="font-size: 13px; margin-top: 4px;">Alerte rendement Riz</div>
-                  </div>
-                  <div>
-                    <span style="background: var(--success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Planifié</span>
+                  <div class="visit-status">
+                    <span class="status-badge planifie">Planifié</span>
                   </div>
                 </div>
                 
-                <div class="visit-item" style="display: flex; padding: 16px; border-bottom: 1px solid var(--border); align-items: center;">
-                  <div style="min-width: 60px; text-align: center; margin-right: 16px;">
-                    <div style="font-size: 24px; font-weight: bold; color: var(--primary);">8</div>
-                    <div style="font-size: 12px; color: var(--muted);">Mai</div>
+                <div class="visit-item">
+                  <div class="visit-date">
+                    <span class="visit-day">4</span>
+                    <span class="visit-month">Juin</span>
+                    <span class="visit-time">17:01</span>
                   </div>
-                  <div style="flex: 1;">
-                    <div style="font-weight: 600; margin-bottom: 4px;">Bakary Camara</div>
-                    <div style="font-size: 14px; color: var(--muted); margin-bottom: 2px;">Kayes</div>
-                    <div style="font-size: 13px; color: var(--muted);">00:52</div>
-                    <div style="font-size: 13px; margin-top: 4px;">Conseil semis Coton</div>
+                  <div class="visit-details">
+                    <div class="visit-person">Aminata Touré</div>
+                    <div class="visit-location">Sikasso</div>
+                    <div class="visit-purpose">Alerte rendement Riz</div>
                   </div>
-                  <div>
-                    <span style="background: var(--success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Planifié</span>
+                  <div class="visit-status">
+                    <span class="status-badge planifie">Planifié</span>
+                  </div>
+                </div>
+                
+                <div class="visit-item">
+                  <div class="visit-date">
+                    <span class="visit-day">6</span>
+                    <span class="visit-month">Juin</span>
+                    <span class="visit-time">17:01</span>
+                  </div>
+                  <div class="visit-details">
+                    <div class="visit-person">Bakary Camara</div>
+                    <div class="visit-location">Kayes</div>
+                    <div class="visit-purpose">Conseil semis Coton</div>
+                  </div>
+                  <div class="visit-status">
+                    <span class="status-badge planifie">Planifié</span>
                   </div>
                 </div>
               </div>

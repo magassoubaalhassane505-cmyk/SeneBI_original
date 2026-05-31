@@ -17,111 +17,6 @@
         font-weight: 600 !important;
       }
       
-      /* Styles pour la fenêtre modale de commande */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(5px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-      
-      .modal-overlay.show {
-        opacity: 1;
-      }
-      
-      .modal-content {
-        background: white;
-        border-radius: 15px;
-        padding: 24px;
-        max-width: 400px;
-        width: 90%;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        transform: translateY(-20px);
-        transition: transform 0.3s ease;
-      }
-      
-      .modal-overlay.show .modal-content {
-        transform: translateY(0);
-      }
-      
-      .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-      
-      .modal-header h2 {
-        margin: 0;
-        font-size: 20px;
-        color: #1a1d23;
-      }
-      
-      .modal-close {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: #64748b;
-        padding: 0;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        transition: background-color 0.2s;
-      }
-      
-      .modal-close:hover {
-        background: #f1f5f9;
-      }
-      
-      .modal-body {
-        margin-bottom: 24px;
-      }
-      
-      .form-group {
-        margin-bottom: 16px;
-      }
-      
-      .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #374151;
-      }
-      
-      .form-control {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 14px;
-        transition: border-color 0.2s;
-      }
-      
-      .form-control:focus {
-        outline: none;
-        border-color: #7c3aed;
-        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-      }
-      
-      .modal-footer {
-        display: flex;
-        gap: 12px;
-        justify-content: flex-end;
-      }
-      
       /* Styles pour l'impression */
       @media print {
         .head-actions {
@@ -167,14 +62,6 @@
             <p>Suivi de vos performances agricoles et indicateurs clés.</p>
           </div>
           <div class="head-actions" style="display: flex; gap: 10px; align-items: center;">
-            <button class="btn" id="orderBtn" type="button" style="background: #2d5016; color: white; border: none; border-radius: 15px; padding: 12px 20px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 2l6 6-6 6"/>
-                <path d="M3 12h12"/>
-                <circle cx="12" cy="12" r="10"/>
-              </svg>
-              Passer une commande
-            </button>
             <button class="btn" id="clientExportBtn" type="button" style="background: #111827; color: white; border: none; border-radius: 15px; padding: 12px 20px; font-weight: 600; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#1a1a1a'" onmouseout="this.style.backgroundColor='#111827'">Exporter le Rapport PDF</button>
           </div>
         </div>
@@ -293,7 +180,6 @@
                 <h3 style="margin:0; font-size:16px;">Distribution des Cultures</h3>
                 <div class="small muted">Riz / Maïs / Coton</div>
               </div>
-              <span class="tag good" id="dominantCulture">Riz</span>
             </div>
             <div style="height: 260px;">
               <canvas id="cultureChart"></canvas>
@@ -307,68 +193,12 @@
       <div data-layout="footer"></div>
     </div>
 
-    <!-- Fenêtre Modale de Commande -->
-    <div id="orderModal" class="modal-overlay" style="display: none;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Nouvelle Commande SeneBI</h2>
-          <button class="modal-close" id="closeModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="cultureSelect">Culture</label>
-            <select id="cultureSelect" class="form-control">
-              <option value="Riz">Riz</option>
-              <option value="Maïs">Maïs</option>
-              <option value="Coton">Coton</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="quantityInput">Quantité (kg)</label>
-            <input type="number" id="quantityInput" class="form-control" placeholder="Entrez la quantité" min="1">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn" id="confirmOrder" style="background: #2d5016; color: white; border: none; border-radius: 15px;">Confirmer l'achat</button>
-          <button class="btn secondary" id="cancelOrder">Annuler</button>
-        </div>
-      </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="{{ asset('assets/js/layout.js') }}"></script>
     <script src="{{ asset('assets/js/core.js') }}"></script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
     
-    <!-- DÉTECTION DES PARAMÈTRES URL POUR OUVERTURE AUTO MODAL -->
-    <script>
-      // Vérifier si on doit ouvrir le modal de commande (depuis stocks)
-      window.addEventListener('load', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const openModal = urlParams.get('openModal');
-        const reason = urlParams.get('reason');
-        
-        if (openModal === 'true' && reason === 'stock_critical') {
-          console.log("🔗 Ouverture auto du modal de commande (stock critique)");
-          
-          // Attendre un peu que la page soit complètement chargée
-          setTimeout(function() {
-            const modal = document.querySelector('#orderModal');
-            if (modal) {
-              // Utiliser la même méthode que le bouton "Passer commande"
-              modal.style.display = 'flex';
-              modal.setAttribute('aria-hidden', 'false');
-              setTimeout(() => {
-                modal.classList.add('show');
-              }, 10);
-              console.log("✅ Modal de commande ouvert et centré automatiquement pour stock critique");
-            } else {
-              console.log("❌ Modal #orderModal non trouvé sur client-dashboard");
-            }
-          }, 1000);
-        }
-      });
-    </script>
     
     <!-- Script pour forcer les styles avec MutationObserver -->
     <script>
@@ -434,102 +264,10 @@
         applyKPIStyles();
       }, 200);
       
-      // Logique pour la fenêtre modale de commande
-      const orderModal = document.getElementById('orderModal');
-      const clientExportBtn = document.getElementById('clientExportBtn');
-      const caEl = document.querySelector("#kpiCA");
-      const haEl = document.querySelector("#kpiHa");
-      const rendEl = document.querySelector("#kpiRend");
-      
       // Fonction d'export PDF avec window.print()
+      const clientExportBtn = document.getElementById('clientExportBtn');
       clientExportBtn.addEventListener('click', function() {
         window.print();
-      });
-      const orderBtn = document.getElementById('orderBtn');
-      const closeModal = document.getElementById('closeModal');
-      const cancelOrder = document.getElementById('cancelOrder');
-      const confirmOrder = document.getElementById('confirmOrder');
-      const cultureSelect = document.getElementById('cultureSelect');
-      const quantityInput = document.getElementById('quantityInput');
-      
-      // Ouvrir la modale
-      orderBtn.addEventListener('click', function() {
-        orderModal.style.display = 'flex';
-        setTimeout(() => {
-          orderModal.classList.add('show');
-        }, 10);
-      });
-      
-      // Fermer la modale
-      function closeModalFunc() {
-        orderModal.classList.remove('show');
-        setTimeout(() => {
-          orderModal.style.display = 'none';
-        }, 300);
-      }
-      
-      closeModal.addEventListener('click', closeModalFunc);
-      cancelOrder.addEventListener('click', closeModalFunc);
-      
-      // Confirmer la commande
-      confirmOrder.addEventListener('click', function() {
-        const culture = cultureSelect.value;
-        const quantity = quantityInput.value;
-        
-        if (!culture || !quantity || quantity < 1) {
-          alert('Veuillez remplir tous les champs correctement.');
-          return;
-        }
-        
-        // Afficher le message de succès
-        const successMessage = document.createElement('div');
-        successMessage.textContent = `Commande envoyée avec succès à Sidi !`;
-        successMessage.style.cssText = `
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background: #10b981;
-          color: white;
-          padding: 12px 20px;
-          border-radius: 12px;
-          font-size: 14px;
-          font-weight: 500;
-          z-index: 1001;
-          opacity: 0;
-          transform: translateY(20px);
-          transition: all 0.3s ease;
-        `;
-        
-        document.body.appendChild(successMessage);
-        
-        // Animation d'apparition
-        setTimeout(() => {
-          successMessage.style.opacity = '1';
-          successMessage.style.transform = 'translateY(0)';
-        }, 100);
-        
-        // Fermer la modale
-        closeModalFunc();
-        
-        // Masquer le message après 3 secondes
-        setTimeout(() => {
-          successMessage.style.opacity = '0';
-          successMessage.style.transform = 'translateY(20px)';
-          setTimeout(() => {
-            document.body.removeChild(successMessage);
-          }, 300);
-        }, 3000);
-        
-        // Réinitialiser le formulaire
-        cultureSelect.value = 'Riz';
-        quantityInput.value = '';
-      });
-      
-      // Fermer en cliquant sur le fond
-      orderModal.addEventListener('click', function(e) {
-        if (e.target === orderModal) {
-          closeModalFunc();
-        }
       });
     </script>
   </body>

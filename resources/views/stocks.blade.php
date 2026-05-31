@@ -33,6 +33,70 @@
 
         <section class="grid cards-2 kpi-row" id="inventoryCards"></section>
 
+        <section class="grid cards-1" id="stocksConsumeSection">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="section-title">Declarer une consommation</h3>
+                <div class="small muted">Deduit automatiquement du stock</div>
+              </div>
+              <span class="tag warn">Logistique</span>
+            </div>
+
+            <form class="form" id="consumeForm">
+              <div class="form-row form-row--3">
+                <div class="field">
+                  <label class="field-label" for="consumeRegion">Région</label>
+                  <select id="consumeRegion" required>
+                    <option value="">Sélectionner une région</option>
+                    <option value="Kayes">Kayes</option>
+                    <option value="Bamako">Bamako</option>
+                    <option value="Koulikoro">Koulikoro</option>
+                    <option value="Sikasso">Sikasso</option>
+                    <option value="Ségou">Ségou</option>
+                    <option value="Mopti">Mopti</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="consumeParcel">Parcelle</label>
+                  <select id="consumeParcel" required>
+                    <option value="">Choisir une parcelle</option>
+                    <option value="Parcelle Nord">Parcelle Nord</option>
+                    <option value="Parcelle Sud">Parcelle Sud</option>
+                    <option value="Parcelle Est">Parcelle Est</option>
+                    <option value="Parcelle Ouest">Parcelle Ouest</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="consumeDate">Date</label>
+                  <input id="consumeDate" type="date" required />
+                </div>
+              </div>
+              <div class="form-row form-row--2">
+                <div class="field">
+                  <label class="field-label" for="consumeItem">Intrant</label>
+                  <select id="consumeItem" required>
+                    <option>Urée</option>
+                    <option>NPK</option>
+                    <option>Semence Maïs</option>
+                    <option>Semence Coton</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="consumeQty">Quantité (kg)</label>
+                  <input id="consumeQty" type="number" min="1" step="1" placeholder="ex: 50" required />
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn" type="submit">Enregistrer</button>
+                <a class="btn secondary" href="{{ route('client.dashboard') }}">Retour Dashboard</a>
+              </div>
+              <div class="footer-note">Si un stock passe sous le seuil critique, une alerte rouge apparait.</div>
+              <div class="form-feedback" id="consumeFeedback" aria-live="polite"></div>
+            </form>
+          </article>
+        </section>
+
         <section class="grid cards-2 stocks-extra-row">
           <article class="card stock-gauge-card">
             <h3 class="section-title">Remplissage global (capacite)</h3>
@@ -86,69 +150,6 @@
           </div>
         </section>
 
-        <section class="grid cards-1" id="stocksConsumeSection">
-          <article class="card">
-            <div class="card-header">
-              <div>
-                <h3 class="section-title">Declarer une consommation</h3>
-                <div class="small muted">Deduit automatiquement du stock</div>
-              </div>
-              <span class="tag warn">Logistique</span>
-            </div>
-
-            <form class="form" id="consumeForm">
-              <div class="form-row">
-                <div>
-                  <label class="small muted" for="consumeRegion">Région</label>
-                  <select id="consumeRegion" required>
-                    <option value="">Sélectionner une région</option>
-                    <option value="Kayes">Kayes</option>
-                    <option value="Bamako">Bamako</option>
-                    <option value="Koulikoro">Koulikoro</option>
-                    <option value="Sikasso">Sikasso</option>
-                    <option value="Ségou">Ségou</option>
-                    <option value="Mopti">Mopti</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="small muted" for="consumeParcel">Parcelle</label>
-                  <select id="consumeParcel" required>
-                    <option value="">Choisir une parcelle</option>
-                    <option value="Parcelle Nord">Parcelle Nord</option>
-                    <option value="Parcelle Sud">Parcelle Sud</option>
-                    <option value="Parcelle Est">Parcelle Est</option>
-                    <option value="Parcelle Ouest">Parcelle Ouest</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="small muted" for="consumeDate">Date</label>
-                  <input id="consumeDate" type="date" required />
-                </div>
-              </div>
-              <div class="form-row">
-                <div>
-                  <label class="small muted" for="consumeItem">Intrant</label>
-                  <select id="consumeItem" required>
-                    <option>Urée</option>
-                    <option>NPK</option>
-                    <option>Semence Maïs</option>
-                    <option>Semence Coton</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="small muted" for="consumeQty">Quantité (kg)</label>
-                  <input id="consumeQty" type="number" min="1" step="1" placeholder="ex: 50" required />
-                </div>
-              </div>
-              <div class="form-actions">
-                <button class="btn" type="submit">Enregistrer</button>
-                <a class="btn secondary" href="{{ route('client.dashboard') }}">Retour Dashboard</a>
-              </div>
-              <div class="footer-note">Si un stock passe sous le seuil critique, une alerte rouge apparait.</div>
-              <div class="form-feedback" id="consumeFeedback" aria-live="polite"></div>
-            </form>
-          </article>
-        </section>
       </main>
       <div data-layout="footer"></div>
     </div>
@@ -245,7 +246,7 @@
           inventoryCards.innerHTML = `
             <article class="card kpi-card">
               <p class="kpi-title">Total Intrants</p>
-              <div class="kpi-value" style="color: #00a65a;">4 200 kg</div>
+              <div class="kpi-value" style="color: #00a65a;">191 250 kg</div>
               <div class="kpi-sub">Stock actuel total</div>
             </article>
             <article class="card kpi-card">
@@ -255,7 +256,7 @@
             </article>
             <article class="card kpi-card">
               <p class="kpi-title">Alertes Critiques</p>
-              <div class="kpi-value" style="color: #ef4444;">2</div>
+              <div class="kpi-value" style="color: #ef4444;">3</div>
               <div class="kpi-sub">Stock sous le seuil critique</div>
             </article>
           `;
@@ -266,21 +267,21 @@
         const tableBody = document.getElementById("stockTableBody");
         if (tableBody && !tableBody.innerHTML.trim()) {
           const stockData = [
-            { name: "Urée", type: "Engrais", stock: "1800 sac", threshold: "1000 sac", cost: "15 000 FCFA", critical: false },
-            { name: "NPK", type: "Engrais", stock: "800 sac", threshold: "1000 sac", cost: "18 000 FCFA", critical: true },
-            { name: "Semence Maïs", type: "Semence", stock: "1200 sac", threshold: "800 sac", cost: "25 000 FCFA", critical: true },
-            { name: "Semence Coton", type: "Semence", stock: "25 sac", threshold: "100 sac", cost: "45 000 FCFA", critical: true }
+            { name: "Urée", type: "Engrais", stock: "90 000 kg", threshold: "50 000 kg", cost: "15 000 FCFA", critical: false },
+            { name: "NPK", type: "Engrais", stock: "40 000 kg", threshold: "50 000 kg", cost: "18 000 FCFA", critical: true },
+            { name: "Semence Maïs", type: "Semence", stock: "60 000 kg", threshold: "40 000 kg", cost: "25 000 FCFA", critical: true },
+            { name: "Semence Coton", type: "Semence", stock: "1 250 kg", threshold: "5 000 kg", cost: "45 000 FCFA", critical: true }
           ];
           
           stockData.forEach(item => {
             const row = document.createElement("tr");
-            const stockValue = parseInt(item.stock);
-            const thresholdValue = parseInt(item.threshold);
+            const stockValue = parseInt(item.stock.replace(/\s/g, '').replace('kg', ''));
+            const thresholdValue = parseInt(item.threshold.replace(/\s/g, '').replace('kg', ''));
             const isCritical = stockValue <= thresholdValue;
             const statusClass = isCritical ? "critical" : "ok";
             const statusText = isCritical ? "CRITIQUE" : "OK";
             
-            const progressPercent = Math.min((stockValue / 2000) * 100, 100);
+            const progressPercent = Math.min((stockValue / 100000) * 100, 100);
             
             row.innerHTML = `
               <td>${item.name}</td>
@@ -361,12 +362,14 @@
               labels: ['Urée', 'NPK', 'Semence Maïs', 'Semence Coton'],
               datasets: [{
                 label: 'Stock Actuel',
-                data: [1800, 800, 1200, 25],
-                backgroundColor: '#00a65a'
+                data: [90000, 40000, 60000, 1250],
+                backgroundColor: '#10b981',
+                borderRadius: 10
               }, {
                 label: 'Seuil Critique',
-                data: [1000, 1000, 800, 100],
-                backgroundColor: '#ef4444'
+                data: [50000, 50000, 40000, 5000],
+                backgroundColor: '#ef4444',
+                borderRadius: 10
               }]
             },
             options: {
@@ -388,8 +391,8 @@
         const alertText = document.getElementById('stocksLocalAlertText');
         const criticalChip = document.getElementById('criticalChip');
         if (alertText && criticalChip) {
-          alertText.textContent = '2 intrants en dessous du seuil critique';
-          criticalChip.textContent = '2';
+          alertText.textContent = '3 intrants en dessous du seuil critique';
+          criticalChip.textContent = '3';
           criticalChip.style.background = '#ef4444';
           criticalChip.style.color = 'white';
         }

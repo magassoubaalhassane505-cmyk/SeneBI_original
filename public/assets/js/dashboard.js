@@ -11,7 +11,7 @@
   }
 
   function computeInsightLine(state, k) {
-    // Données fixes pour le client Mimi
+    // Données fixes pour le client Sidi
     const bestName = "Parcelle A";
     const maxKg = 1450;
     if (bestName && k.rendementMoyenTparHa > 0) {
@@ -32,7 +32,7 @@
   }
 
   function computeKpis(state) {
-    // Données fixes pour le client Mimi
+    // Données fixes pour le client Sidi
     const totalHarvestKg = 2450;
     const hectaresActifs = 3;
     const rendementMoyenTparHa = 0.82;
@@ -47,7 +47,7 @@
   }
 
   function isStockCritical(state) {
-    // Données fixes pour le client Mimi
+    // Données fixes pour le client Sidi
     const ratios = [
       { label: "Urée", value: 150, cap: 1000 },
       { label: "NPK", value: 80, cap: 500 },

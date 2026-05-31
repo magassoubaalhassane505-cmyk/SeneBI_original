@@ -28,6 +28,6 @@ class ClientController extends Controller
 
     // Affiche le profil et les informations du compte
     public function compte() {
-        return view('compte');
+        return view('compte-client');
     }
 }

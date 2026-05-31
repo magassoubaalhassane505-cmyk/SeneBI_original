@@ -52,9 +52,9 @@
 
     // Actions : TOUTES les pages manager ont le bouton "Retour au portail"
     const actionsHtml = `
-                <a class="btn secondary" href="${base}/pages/secure-portal.html">🔧 Retour au portail</a>
+                <a class="btn secondary" href="/secure-portal">🔧 Retour au portail</a>
                 <div class="auth-pills" id="authPills" hidden>
-                  <a class="pill user-pill user-pill--link" id="authUserName" href="${base}/pages/compte.html">Mimi</a>
+                  <a class="pill user-pill user-pill--link" id="authUserName" href="${base}/pages/compte.html">Sidi</a>
                   <a class="pill auth-logout" id="globalLogoutBtn" href="${base}/index.html">Déconnexion</a>
                 </div>
     `;
@@ -139,5 +139,12 @@
       }
     `;
     document.head.appendChild(style);
+  });
+
+  // Gérer la cloche de notification
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#notificationBell')) {
+      alert('Notifications : Vous avez 3 nouvelles alertes (Stocks, Visites, Récoltes)');
+    }
   });
 })();

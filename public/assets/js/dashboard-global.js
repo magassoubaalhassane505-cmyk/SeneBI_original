@@ -3,7 +3,9 @@
   document.addEventListener("DOMContentLoaded", function() {
     // Check if user is authenticated
     const auth = SeneBI.getAuth();
-    if (!auth) {
+    
+    // Ne pas rediriger vers login sur la page /secure-portal
+    if (!auth && window.location.pathname !== '/secure-portal') {
       window.location.href = "/";
       return;
     }
