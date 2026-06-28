@@ -66,7 +66,7 @@
           </div>
 
           <div class="auth-switch" style="margin-top: 16px;">
-            <a href="{{ route('register') }}" class="text-muted" style="color: #4b5563; font-weight: 500;">Vous n'avez pas de compte ? S'inscrire</a>
+            <a href="{{ route('public.register') }}" class="text-muted" style="color: #4b5563; font-weight: 500;">Vous n'avez pas de compte ? S'inscrire</a>
           </div>
         </div>
       </section>

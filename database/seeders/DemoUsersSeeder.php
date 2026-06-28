@@ -16,8 +16,8 @@ class DemoUsersSeeder extends Seeder
             ['email' => 'mimi.manager@senebi.ml'],
             [
                 'name' => 'Mimi Manager',
-                'password' => 'manager123',
-                'role' => 'admin',
+                'password' => bcrypt('manager123'),
+                'role' => 'manager',
                 'saison' => '2026',
                 'is_active' => true,
                 'status' => 'approved',

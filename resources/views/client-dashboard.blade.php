@@ -219,9 +219,9 @@
                 <div class="small muted">Riz / Maïs / Coton</div>
               </div>
             </div>
-            <div style="height: 260px;">
-              <canvas id="cultureChart"></canvas>
-            </div>
+<div style="height: 260px;">
+               <canvas id="cultureChart"></canvas>
+             </div>
           </article>
 
         </section>

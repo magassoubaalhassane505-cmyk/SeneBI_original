@@ -7,6 +7,7 @@ use App\Models\Stock;
 use App\Models\StockMouvement;
 use App\Models\IntrantConsomme;
 use App\Models\Intrant;
+use App\Models\Recolte;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

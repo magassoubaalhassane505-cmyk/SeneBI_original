@@ -46,6 +46,7 @@ class RegisterController extends Controller
             'role' => 'client',
             'status' => 'pending',
             'is_active' => false,
+            'rejection_reason' => null,
         ];
 
         if (Schema::hasColumn('users', 'approved_at')) {

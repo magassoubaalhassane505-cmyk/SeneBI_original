@@ -193,27 +193,12 @@
         .trends-grid {
           grid-template-columns: 1fr;
         }
-      }
-      
-      /* Styles pour la navigation active */
-      .manager-nav a.active {
-        background: #dcfce7;
-        color: #14532d;
-        font-weight: 600;
-        border-left: 3px solid #10b981;
-        border-radius: 0 8px 8px 0;
-        transition: all 0.2s ease;
-      }
-      
-      .manager-nav a.active:hover {
-        background: #bbf7d0;
-        border-left-color: #059669;
-      }
+}
     </style>
   </head>
   <body data-page="dashboard">
     <div class="app">
-      
+       
     @include('header-manager')
 
       <main class="container">
@@ -512,88 +497,91 @@
                 @else
                   <div style="text-align: center; color: #9ca3af; padding: 24px; font-size: 14px;">
                     <i class="fas fa-check-circle" style="font-size: 32px; color: #10b981; margin-bottom: 8px; display: block;"></i>
-                    Tous les indicateurs sont bons.
-                  </div>
-                @endif
-              </div>
-            </article>
-          </div>
+Tous les indicateurs sont bons.
+                   </div>
+                 @endif
+               </div>
+             </article>
+           </div>
+         </section>
 
-          <!-- Deuxième ligne : Agriculteurs à Risque -->
-          <section class="grid cards-3">
-            <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #ef4444; transition: all 0.3s ease;"
-                     onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';"
-                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
-              <div class="card-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #fef2f2; border: 1px solid #fecaca;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 14px; color: #991b1b;"></i>
-                  </div>
-                  <div>
-                    <h3 style="margin:0; font-size:16px; font-weight: 700; color: #111827;">Agriculteurs a Risque</h3>
-                    <div class="small muted">Necessitent une attention particuliere</div>
-                  </div>
-                </div>
-                <span class="badge" style="background: #fef2f2; color: #991b1b; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;">{{ $atRiskFarmers->count() }}</span>
-              </div>
-              <div style="flex: 1; padding: 16px;">
-                @if($atRiskFarmers->count() > 0)
-                  <div class="risk-farmers-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
-                    @foreach($atRiskFarmers as $farmer)
-                      <div class="risk-card" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; transition: all 0.3s ease; animation: fadeUpSoft 0.4s ease both;"
-                           onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 16px 32px rgba(0,0,0,0.08)'; this.style.borderColor='#d1d5db';"
-                           onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.borderColor='#e5e7eb';">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                          <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; flex-shrink: 0;">
-                            {{ substr($farmer['name'], 0, 2) }}
-                          </div>
-                          <div style="min-width: 0;">
-                            <div style="font-size: 14px; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $farmer['name'] }}</div>
-                            <div style="font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                              <i class="fas fa-map-marker-alt" style="font-size: 10px; color: #ef4444;"></i> {{ $farmer['location'] }}
-                            </div>
-                          </div>
-                        </div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                          @foreach($farmer['risks'] as $risk)
-                            @php
-                              $riskLabels = [
-                                'stock_critique' => 'Stock critique',
-                                'faible_rentabilite' => 'Faible rentabilite',
-                                'faible_activite' => 'Faible activite',
-                              ];
-                              $riskColors = [
-                                'stock_critique' => 'critical',
-                                'faible_rentabilite' => 'warning',
-                                'faible_activite' => 'muted',
-                              ];
-                            @endphp
-                            <span class="badge {{ $riskColors[$risk] ?? 'muted' }}">{{ $riskLabels[$risk] ?? $risk }}</span>
-                          @endforeach
-                        </div>
-                        <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px;">
-                          <i class="fas fa-clock" style="font-size: 10px;"></i> Derniere visite : {{ $farmer['last_visit'] }}
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px solid #f3f4f6;">
-                          <a href="#" class="btn btn-sm" style="font-size: 12px; padding: 6px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-eye"></i> Details</a>
-                          <a href="{{ url('/manager/visites') }}" class="btn" style="font-size: 12px; padding: 6px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: #10b981; color: #fff; border: none;"><i class="fas fa-calendar-check"></i> Planifier visite</a>
-                        </div>
-                      </div>
-                    @endforeach
-                  </div>
-                @else
-                  <div style="text-align: center; color: #9ca3af; padding: 24px; font-size: 14px;">Aucun agriculteur a risque detecte.</div>
-                @endif
-              </div>
-            </article>
-          </section>
-        </section>
+         <!-- Section Agriculteurs à Risque - pleine largeur -->
+         <section style="margin-top: 24px;">
+           <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #ef4444;">
+             <div class="card-header">
+               <div style="display: flex; align-items: center; gap: 12px;">
+                 <div style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #fef2f2; border: 1px solid #fecaca;">
+                   <i class="fas fa-exclamation-triangle" style="font-size: 14px; color: #991b1b;"></i>
+                 </div>
+                 <div>
+                   <h3 style="margin:0; font-size:16px; font-weight: 700; color: #111827;">Agriculteurs à Risque</h3>
+                   <div class="small muted">Nécessitent une attention particulière</div>
+                 </div>
+               </div>
+               <span class="badge" style="background: #fef2f2; color: #991b1b; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;">{{ $atRiskFarmers->count() }}</span>
+             </div>
+             <div style="flex: 1; padding: 16px;">
+               @if($atRiskFarmers->count() > 0)
+                 <div class="risk-farmers-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                   @foreach($atRiskFarmers as $farmer)
+                     <div class="risk-card" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; transition: all 0.3s ease; animation: fadeUpSoft 0.4s ease both;"
+                          onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 16px 32px rgba(0,0,0,0.08)'; this.style.borderColor='#d1d5db';"
+                          onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.borderColor='#e5e7eb';">
+                       <div style="display: flex; align-items: center; gap: 12px;">
+                         <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; flex-shrink: 0;">
+                           {{ substr($farmer['name'], 0, 2) }}
+                         </div>
+                         <div style="min-width: 0;">
+                           <div style="font-size: 14px; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $farmer['name'] }}</div>
+                           <div style="font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                             <i class="fas fa-map-marker-alt" style="font-size: 10px; color: #ef4444;"></i> {{ $farmer['location'] }}
+                           </div>
+                         </div>
+                       </div>
+                       <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                         @foreach($farmer['risks'] as $risk)
+                           @php
+                             $riskLabels = [
+                               'stock_critique' => 'Stock critique',
+                               'faible_rentabilite' => 'Faible rentabilité',
+                               'faible_activite' => 'Faible activité',
+                             ];
+                             $riskColors = [
+                               'stock_critique' => 'critical',
+                               'faible_rentabilite' => 'warning',
+                               'faible_activite' => 'muted',
+                             ];
+                           @endphp
+                           <span class="badge {{ $riskColors[$risk] ?? 'muted' }}">{{ $riskLabels[$risk] ?? $risk }}</span>
+                         @endforeach
+                       </div>
+                       <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px;">
+                         <i class="fas fa-clock" style="font-size: 10px;"></i> Dernière visite : {{ $farmer['last_visit'] }}
+                       </div>
+                       <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px solid #f3f4f6;">
+                         <a href="#" class="btn btn-sm" style="font-size: 12px; padding: 6px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-eye"></i> Détails</a>
+                         <a href="{{ url('/manager/visites') }}" class="btn" style="font-size: 12px; padding: 6px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: #10b981; color: #fff; border: none;"><i class="fas fa-calendar-check"></i> Planifier visite</a>
+                       </div>
+                     </div>
+                   @endforeach
+                 </div>
+               @else
+                 <div style="text-align: center; color: #9ca3af; padding: 24px; font-size: 14px;">Aucun agriculteur à risque détecté.</div>
+               @endif
+             </div>
+           </article>
+         </section>
 
-        <style>
-          @media (max-width: 1024px) {
-            .dashboard-row-2 { grid-template-columns: 1fr !important; }
-            .risk-farmers-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          }
+         <style>
+           @media (max-width: 1024px) {
+             .risk-farmers-grid { grid-template-columns: repeat(2, 1fr) !important; }
+           }
+           @media (max-width: 768px) {
+             .risk-farmers-grid { grid-template-columns: 1fr !important; }
+           }
+           @media (max-width: 768px) {
+             .risk-farmers-grid { grid-template-columns: 1fr !important; }
+           }
           @media (max-width: 768px) {
             .dashboard-row-2 { grid-template-columns: 1fr !important; }
             .risk-farmers-grid { grid-template-columns: 1fr !important; }
@@ -605,11 +593,12 @@
           .timeline-list::-webkit-scrollbar { width: 6px; }
           .timeline-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
           .btn-sm { font-size: 12px; padding: 6px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; }
-          .btn-sm:hover { background: #e2e8f0 !important; border-color: #cbd5e1 !important; }
-        </style>
-
-      </main>
-      @include('partials.footer-manager')
+.btn-sm:hover { background: #e2e8f0 !important; border-color: #cbd5e1 !important; }
+         </style>
+ 
+         <div class="footer-note">Source : Données MySQL — Dernière mise à jour : {{ now()->format('d/m/Y H:i') }}</div>
+       </main>
+       @include('partials.footer-manager')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -822,19 +811,8 @@
           }, 100 * (index + 1));
         });
         
-        console.log("✅ Dashboard manager entièrement initialisé");
-        
-        // Détecter la page active dans la navigation
-        const navLinks = document.querySelectorAll('.manager-nav a');
-        const currentPath = window.location.pathname;
-
-        navLinks.forEach(link => {
-          const linkPath = new URL(link.href, window.location.origin).pathname;
-          if (currentPath === linkPath) {
-            link.classList.add('active');
-          }
-        });
+console.log("✅ Dashboard manager entièrement initialisé");
       });
     </script>
   </body>
- </html>
+</html>

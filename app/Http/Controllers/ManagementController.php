@@ -257,7 +257,13 @@ class ManagementController extends Controller
     public function supervision() {
         $pendingClients = collect();
 
-        if (Schema::hasColumn('users', 'is_active')) {
+        if (Schema::hasColumn('users', 'is_active') && Schema::hasColumn('users', 'status')) {
+            $pendingClients = User::where('role', 'client')
+                ->where('status', 'pending')
+                ->where('is_active', false)
+                ->orderBy('created_at', 'asc')
+                ->get();
+        } elseif (Schema::hasColumn('users', 'is_active')) {
             $pendingClients = User::where('role', 'client')
                 ->where('is_active', false)
                 ->orderBy('created_at', 'asc')
@@ -547,7 +553,12 @@ class ManagementController extends Controller
         $criticalStocks = Stock::whereColumn('quantite_actuelle', '<=', 'seuil_critique')->count();
 
         $pendingClients = 0;
-        if (Schema::hasColumn('users', 'is_active')) {
+        if (Schema::hasColumn('users', 'is_active') && Schema::hasColumn('users', 'status')) {
+            $pendingClients = User::where('role', 'client')
+                ->where('status', 'pending')
+                ->where('is_active', false)
+                ->count();
+        } elseif (Schema::hasColumn('users', 'is_active')) {
             $pendingClients = User::where('role', 'client')
                 ->where('is_active', false)
                 ->count();

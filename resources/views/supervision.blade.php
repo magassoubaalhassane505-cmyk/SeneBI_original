@@ -6,23 +6,6 @@
     <title>Supervision - SeneBI</title>
     <link rel="stylesheet" href="{{ asset('assets/css/base.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}" />
-    
-    <!-- Styles pour la navigation active -->
-    <style>
-      .manager-nav a.active {
-        background: #dcfce7;
-        color: #14532d;
-        font-weight: 600;
-        border-left: 3px solid #10b981;
-        border-radius: 0 8px 8px 0;
-        transition: all 0.2s ease;
-      }
-      
-      .manager-nav a.active:hover {
-        background: #bbf7d0;
-        border-left-color: #059669;
-      }
-    </style>
   </head>
   <body data-page="supervision">
     <div class="app">
@@ -244,6 +227,8 @@
             </div>
           </article>
         </section>
+
+        <div class="footer-note">Source : Données MySQL — Dernière mise à jour : {{ now()->format('d/m/Y H:i') }}</div>
       </main>
       @include('partials.footer-manager')
     </div>
@@ -422,5 +407,71 @@
     </script>
     <script src="{{ asset('assets/js/supervision.js') }}"></script>
 
+    <!-- Modal de rejet de demande d'inscription -->
+    <div id="rejectModal" class="modal-overlay" hidden style="display: none;">
+      <div class="modal-content" style="background: #fff; border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+        <div class="modal-header-modern" style="padding: 0 0 16px 0; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #111827;">Rejeter la demande d'inscription</h3>
+          <button onclick="closeRejectModal()" style="background: #f8fafc; border: 1px solid #e5e7eb; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><line x1="18" y1="6" x2="6" y="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <form id="rejectForm" method="POST" style="margin-top: 20px;">
+          @csrf
+          <input type="hidden" name="user_id" id="rejectUserId">
+          <div class="form-group">
+            <label for="rejectReason" style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Raison du rejet (optionnel)</label>
+            <textarea id="rejectReason" name="reason" rows="4" placeholder="Indiquez la raison du rejet..." style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+          </div>
+          <div class="form-footer" style="display: flex; gap: 12px; margin-top: 20px; padding: 0; border: none; justify-content: flex-end;">
+            <button type="button" onclick="closeRejectModal()" class="btn secondary" style="background: #f8fafc; color: #374151; border: 1px solid #e5e7eb;">Annuler</button>
+            <button type="submit" class="btn" style="background: #ef4444; color: #fff;">Rejeter la demande</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      window.openRejectModal = function(userId, userName) {
+        const modal = document.getElementById('rejectModal');
+        document.getElementById('rejectUserId').value = userId;
+        document.getElementById('rejectForm').action = '/manager/clients/reject/' + userId;
+        modal.hidden = false;
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        document.body.style.overflow = 'hidden';
+      };
+
+      window.closeRejectModal = function() {
+        const modal = document.getElementById('rejectModal');
+        if (modal) {
+          modal.hidden = true;
+          modal.style.display = 'none';
+        }
+        document.body.style.overflow = '';
+        document.getElementById('rejectReason').value = '';
+      };
+
+      document.addEventListener('click', function(e) {
+        const modal = document.getElementById('rejectModal');
+        if (e.target === modal) {
+          closeRejectModal();
+        }
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          const modal = document.getElementById('rejectModal');
+          if (modal && modal.style.display === 'flex') {
+            closeRejectModal();
+          }
+        }
+      });
+    </script>
+    
+    <style>
+      #rejectModal { z-index: 1100; }
+    </style>
   </body>
 </html>

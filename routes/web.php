@@ -21,6 +21,7 @@ Route::get('/contact', [PublicController::class, 'contact'])->name('public.conta
 Route::get('/faq', [PublicController::class, 'faq'])->name('public.faq');
 Route::get('/connexion', [PublicController::class, 'login'])->name('public.login');
 Route::get('/inscription', [PublicController::class, 'register'])->name('public.register');
+Route::post('/inscription', [RegisterController::class, 'store'])->name('public.register.post');
 
 // --- ACCUEIL & PORTAIL (STRUCTURE ORIGINALE) ---
 Route::get('/index', [DashboardController::class, 'index'])->name('home.old');

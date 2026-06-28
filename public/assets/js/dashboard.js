@@ -170,6 +170,21 @@
     const existing = Chart.getChart(ctx.canvas);
     if (existing) existing.destroy();
 
+    const hasData = values.length > 0 && values.some(v => v > 0);
+
+    if (!hasData) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6b7280; font-size: 14px; max-width: 90%;';
+      emptyDiv.innerHTML = '<i class="fas fa-question-circle" style="font-size: 36px; color: #94a3b8; margin-bottom: 8px; display: block;"></i>Commencez par saisir vos récoltes pour voir la distribution de vos cultures';
+      const chartContainer = document.querySelector("#cultureChart").parentElement;
+      chartContainer.style.position = 'relative';
+      const existingMsg = chartContainer.querySelector('.culture-empty-msg');
+      if (existingMsg) existingMsg.remove();
+      emptyDiv.className = 'culture-empty-msg';
+      chartContainer.appendChild(emptyDiv);
+      return;
+    }
+
     const colors = labels.map((_, i) => ["#7c3aed", "#16a34a", "#374151", "#f59e0b", "#3b82f6"][i % 5]);
 
     new Chart(ctx, {

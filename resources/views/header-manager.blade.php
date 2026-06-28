@@ -48,7 +48,7 @@
     <div class="topbar-right">
       <!-- Partie Centrale : Navigation -->
       <nav class="nav manager-nav">
-        <a href="/manager/dashboard" class="{{ request()->path() == '/manager/dashboard' ? 'active' : '' }}">
+        <a href="/manager/dashboard" class="{{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 13h8V3H3v10z"/>
             <path d="M13 21h8V11h-8v10z"/>
@@ -57,22 +57,22 @@
           </svg>
           <span>Dashboard</span>
         </a>
-        <a href="/manager/supervision" class="{{ request()->path() == '/manager/supervision' ? 'active' : '' }}">
+        <a href="/manager/supervision" class="{{ request()->routeIs('manager.supervision') ? 'active' : '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
           </svg>
           <span>Supervision</span>
         </a>
-        <a href="/manager/visites" class="{{ request()->path() == '/manager/visites' ? 'active' : '' }}">
+        <a href="/manager/visites" class="{{ request()->routeIs('manager.visites') ? 'active' : '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
             <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            <path d="M16 3.13a4 2 0 0 1 0 7.75"/>
           </svg>
           <span>Visites</span>
         </a>
-         <a href="/manager/analyses-bi" class="{{ request()->path() == '/manager/analyses-bi' ? 'active' : '' }}">
+         <a href="/manager/analyses-bi" class="{{ request()->routeIs('manager.analyses') ? 'active' : '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
             <path d="M12 22V8"/>
@@ -401,51 +401,56 @@
 }
 
 .notif-badge-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
+   animation: pulseOnce 0.6s ease-out;
+ }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
+ @keyframes pulseOnce {
+   0% { transform: scale(1); }
+   50% { transform: scale(1.3); }
+   100% { transform: scale(1); }
+ }
 </style>
 
 <script>
-  (function() {
-    function getEls() {
-      return {
-        btn: document.getElementById('managerNotifBtn'),
-        dropdown: document.getElementById('managerNotifDropdown'),
-        badge: document.getElementById('managerNotifBadge'),
-        list: document.getElementById('managerNotifList'),
-      };
-    }
+   (function() {
+     let previousUnreadCount = 0;
+     
+     function getEls() {
+       return {
+         btn: document.getElementById('managerNotifBtn'),
+         dropdown: document.getElementById('managerNotifDropdown'),
+         badge: document.getElementById('managerNotifBadge'),
+         list: document.getElementById('managerNotifList'),
+       };
+     }
 
-    async function fetchNotifications() {
-      try {
-        const res = await fetch('/manager/api/notifications?limit=50');
-        if (!res.ok) return [];
-        const json = await res.json();
-        return json.data || [];
-      } catch (e) {
-        console.warn('Manager notifications load error:', e);
-        return [];
-      }
-    }
+     async function fetchNotifications() {
+       try {
+         const res = await fetch('/manager/api/notifications?limit=50');
+         if (!res.ok) return [];
+         const json = await res.json();
+         return json.data || [];
+       } catch (e) {
+         console.warn('Manager notifications load error:', e);
+         return [];
+       }
+     }
 
-    function renderBadge(items) {
-      const { badge } = getEls();
-      if (!badge) return;
-      const unread = items.filter(n => !n.read_at).length;
-      if (unread > 0) {
-        badge.style.display = 'inline-block';
-        badge.textContent = unread > 99 ? '99+' : unread;
-        badge.classList.add('notif-badge-pulse');
-      } else {
-        badge.style.display = 'none';
-        badge.classList.remove('notif-badge-pulse');
-      }
-    }
+     function renderBadge(unread) {
+       const { badge } = getEls();
+       if (!badge) return;
+       
+       badge.style.display = unread > 0 ? 'inline-block' : 'none';
+       badge.textContent = unread > 99 ? '99+' : unread;
+       
+       if (unread > previousUnreadCount && unread > 0) {
+         badge.classList.remove('notif-badge-pulse');
+         void badge.offsetWidth;
+         badge.classList.add('notif-badge-pulse');
+       }
+       
+       previousUnreadCount = unread;
+     }
 
     function groupNotifications(items) {
       const groups = [];
@@ -529,26 +534,28 @@
       list.innerHTML = html || '<div class="notif-empty"><i class="fas fa-check-circle" style="font-size:24px;display:block;margin-bottom:8px;color:#10b981"></i>Toutes les notifications sont lues</div>';
     }
 
-    async function markAllAsRead() {
-      try {
-        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        await fetch('/manager/api/notifications/read-all', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-        });
-        const items = await fetchNotifications();
-        renderBadge(items);
-        renderList(items);
-      } catch (e) {
-        console.warn('Mark all read error:', e);
-      }
-    }
+async function markAllAsRead() {
+       try {
+         const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+         await fetch('/manager/api/notifications/read-all', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+         });
+         const items = await fetchNotifications();
+         const unread = items.filter(n => !n.read_at).length;
+         renderBadge(unread);
+         renderList(items);
+       } catch (e) {
+         console.warn('Mark all read error:', e);
+       }
+     }
 
-    async function refreshBadge() {
-      const items = await fetchNotifications();
-      renderBadge(items);
-      return items;
-    }
+async function refreshBadge() {
+       const items = await fetchNotifications();
+       const unread = items.filter(n => !n.read_at).length;
+       renderBadge(unread);
+       return items;
+     }
 
     async function openDropdown() {
       const { dropdown, list } = getEls();

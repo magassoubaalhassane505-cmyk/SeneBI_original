@@ -89,17 +89,6 @@ class ClientController extends Controller
             $prixCultures['coton'] = 0;
         }
 
-        if (empty($culturesLabels)) {
-            $culturesLabels = [];
-            $culturesData = [];
-        }
-        if (!$prixCultures->has('maïs') && !$prixCultures->has('mais')) {
-            $prixCultures['maïs'] = 0;
-        }
-        if (!$prixCultures->has('coton')) {
-            $prixCultures['coton'] = 0;
-        }
-
         $culturesLabels = [];
         $culturesData = [];
         $userRecoltes = Recolte::where('user_id', $user->id)
@@ -111,8 +100,8 @@ class ClientController extends Controller
             $culturesData[] = $rc->total_qte;
         }
         if (empty($culturesLabels)) {
-            $culturesLabels = [];
-            $culturesData = [];
+            $culturesLabels = ['Riz', 'Maïs', 'Coton'];
+            $culturesData = [0, 0, 0];
         }
 
         $stockCritical = \App\Models\Stock::where('user_id', $user->id)

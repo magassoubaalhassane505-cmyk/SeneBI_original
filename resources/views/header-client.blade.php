@@ -347,19 +347,22 @@
       font-size: 13px;
     }
 
-    .notif-badge-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.notif-badge-pulse {
+      animation: pulseOnce 0.6s ease-out;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+    @keyframes pulseOnce {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
     }
   </style>
 </header>
 
 <script>
   (function() {
+    let previousUnreadCount = 0;
+    
     function getEls() {
       return {
         btn: document.getElementById('clientNotifBtn'),
@@ -381,18 +384,20 @@
       }
     }
 
-    function renderBadge(items) {
+    function renderBadge(unread) {
       const { badge } = getEls();
       if (!badge) return;
-      const unread = items.filter(n => !n.read_at).length;
-      if (unread > 0) {
-        badge.style.display = 'inline-block';
-        badge.textContent = unread > 99 ? '99+' : unread;
-        badge.classList.add('notif-badge-pulse');
-      } else {
-        badge.style.display = 'none';
+      
+      badge.style.display = unread > 0 ? 'inline-block' : 'none';
+      badge.textContent = unread > 99 ? '99+' : unread;
+      
+      if (unread > previousUnreadCount && unread > 0) {
         badge.classList.remove('notif-badge-pulse');
+        void badge.offsetWidth;
+        badge.classList.add('notif-badge-pulse');
       }
+      
+      previousUnreadCount = unread;
     }
 
     function groupNotifications(items) {
@@ -486,7 +491,8 @@
           headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
         });
         const items = await fetchNotifications();
-        renderBadge(items);
+        const unread = items.filter(n => !n.read_at).length;
+        renderBadge(unread);
         renderList(items);
       } catch (e) {
         console.warn('Mark all read error:', e);
@@ -495,7 +501,8 @@
 
     async function refreshBadge() {
       const items = await fetchNotifications();
-      renderBadge(items);
+      const unread = items.filter(n => !n.read_at).length;
+      renderBadge(unread);
       return items;
     }
 

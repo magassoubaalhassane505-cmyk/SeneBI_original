@@ -68,10 +68,11 @@
                 <span>Importer un fichier de sauvegarde</span>
               </label>
             </div>
-            <p class="form-feedback" id="backupFeedback" aria-live="polite"></p>
-          </section>
+<p class="form-feedback" id="backupFeedback" aria-live="polite"></p>
         </div>
       </main>
+
+      <div class="footer-note">Source : Données MySQL — Dernière mise à jour : {{ now()->format('d/m/Y H:i') }}</div>
       @include('partials.footer-manager')
     </div>
 

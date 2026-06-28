@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   </head>
-  <body data-page="public-register">
+  <body data-page="public-register" data-server-side="1">
     <div class="app">
       @include('public.header')
       
@@ -53,7 +53,7 @@
                 </div>
                 <span class="tag muted">Inscription</span>
               </div>
-              <form method="POST" action="/register" class="register-form">
+              <form method="POST" action="{{ route('public.register.post') }}" class="register-form">
                 @csrf
                 <div class="form-row">
                   <div class="form-group">
@@ -68,24 +68,24 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label for="password">Mot de passe</label>
-                    <input type="password" id="password" name="password" required placeholder="••••••••" minlength="6" />
+                    <input type="password" id="password" name="password" required placeholder="••••••••" minlength="8" />
                   </div>
                   <div class="form-group">
                     <label for="password_confirmation">Confirmer le mot de passe</label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" required placeholder="••••••••" minlength="6" />
+                    <input type="password" id="password_confirmation" name="password_confirmation" required placeholder="••••••••" minlength="8" />
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="company">Entreprise / Ferme (optionnel)</label>
-                  <input type="text" id="company" name="company" placeholder="Nom de votre entreprise" />
+                  <label for="company">Entreprise / Exploitation</label>
+                  <input type="text" id="company" name="company" placeholder="Nom de votre entreprise" required />
                 </div>
                 <div class="form-group">
-                  <label for="location">Localisation (optionnel)</label>
-                  <input type="text" id="location" name="location" placeholder="Votre ville ou région" />
+                  <label for="location">Localisation</label>
+                  <input type="text" id="location" name="location" placeholder="Votre ville ou région" required />
                 </div>
                 <div class="form-group">
-                  <label for="phone">Téléphone (optionnel)</label>
-                  <input type="tel" id="phone" name="phone" placeholder="+223 XX XX XX XX" />
+                  <label for="phone">Téléphone</label>
+                  <input type="tel" id="phone" name="phone" placeholder="+223 XX XX XX XX" required />
                 </div>
                 <label class="checkbox-label">
                   <input type="checkbox" name="terms" required>
@@ -102,13 +102,13 @@
         </section>
 
         <!-- Success Message Section (Hidden by default) -->
-        @if(session('success'))
+        @if(session('status'))
         <section class="success-section">
           <article class="card success-card">
             <div class="success-content">
               <i class="fas fa-check-circle success-icon"></i>
               <h3>Compte créé avec succès !</h3>
-              <p>{{ session('success') }}</p>
+              <p>{{ session('status') }}</p>
               <a href="/connexion" class="btn btn-primary">Se connecter</a>
             </div>
           </article>

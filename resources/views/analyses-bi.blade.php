@@ -266,10 +266,8 @@
     function destroy(n){if(window[n]){window[n].destroy();window[n]=null}}
 
     document.addEventListener('DOMContentLoaded',function(){
-        initProductionChart();initRevenueCostChart();initPerformanceChart();initRegionChart();initYieldChart();initPdfExport();initExcelExport();initActiveNav();
+        initProductionChart();initRevenueCostChart();initPerformanceChart();initRegionChart();initYieldChart();initPdfExport();initExcelExport();
     });
-
-    function initActiveNav(){document.querySelectorAll('.manager-nav a').forEach(function(l){try{if(location.pathname===new URL(l.href,location.origin).pathname)l.classList.add('active')}catch(e){}})}
 
     function initProductionChart(){
         const c=document.getElementById('productionChart');if(!c)return;const ctx=c.getContext('2d');destroy('_p');
