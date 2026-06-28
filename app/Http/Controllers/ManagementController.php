@@ -59,7 +59,22 @@ class ManagementController extends Controller
             ->take(5)
             ->values();
 
-        return view('visits-control', compact('visites', 'totalVisites', 'visitesCeMois', 'clients', 'urgentClients'));
+        if ($urgentClients->count() > 0) {
+            \App\Models\Notification::notifyManager(
+                'visite',
+                'Visites urgentes à planifier',
+                $urgentClients->count() . ' agriculteur(s) ont des stocks critiques nécessitant une visite urgente.',
+                'danger',
+                url('/manager/visites')
+            );
+        }
+
+        $allVisites = Visite::with(['user'])
+            ->orderByDesc('date_visite')
+            ->limit(50)
+            ->get();
+
+        return view('visits-control', compact('visites', 'totalVisites', 'visitesCeMois', 'clients', 'urgentClients', 'allVisites'));
     }
 
     // Créer une nouvelle visite
@@ -110,91 +125,132 @@ class ManagementController extends Controller
         return view('stocks', compact('stocks', 'criticalStocks', 'totalValue'));
     }
 
-    // NOUVEAU : Affiche le catalogue des prix (Fichier: catalogue.blade.php)
-    public function catalogue() {
-        // Récupérer les intrants depuis la base de données
-        $intrants = Intrant::orderBy('nom')->get();
-        
-        // Si la table est vide, créer les intrants par défaut
-        if ($intrants->isEmpty()) {
-            $defaults = [
-                [
-                    'nom' => 'Urée',
-                    'description' => 'Engrais azoté 46%',
-                    'unite' => 'Sac de 50kg',
-                    'prix' => 25000,
-                    'statut' => 'Disponible',
-                    'type' => 'fertilizer',
-                    'derniere_maj' => now()
-                ],
-                [
-                    'nom' => 'NPK 15-15-15',
-                    'description' => 'Engrais complet',
-                    'unite' => 'Sac de 50kg',
-                    'prix' => 35000,
-                    'statut' => 'Disponible',
-                    'type' => 'fertilizer',
-                    'derniere_maj' => now()
-                ],
-                [
-                    'nom' => 'Semences Maïs',
-                    'description' => 'Variété améliorée',
-                    'unite' => 'kg',
-                    'prix' => 1200,
-                    'statut' => 'Stock limité',
-                    'type' => 'seed',
-                    'derniere_maj' => now()
-                ],
-                [
-                    'nom' => 'Semences Riz',
-                    'description' => 'Variété IR841',
-                    'unite' => 'kg',
-                    'prix' => 1500,
-                    'statut' => 'Disponible',
-                    'type' => 'seed',
-                    'derniere_maj' => now()
-                ],
-                [
-                    'nom' => 'Herbicide',
-                    'description' => 'Désherbage sélectif',
-                    'unite' => 'Litre',
-                    'prix' => 8500,
-                    'statut' => 'Disponible',
-                    'type' => 'chemical',
-                    'derniere_maj' => now()
-                ],
-            ];
-            
-            foreach ($defaults as $default) {
-                Intrant::create($default);
-            }
-            
-            $intrants = Intrant::orderBy('nom')->get();
+    // NOUVEAU : Affiche les analyses BI (Fichier: analyses-bi.blade.php)
+    public function analysesBi()
+    {
+        $stats = [
+            'production_totale' => \App\Models\Recolte::sum('quantite') ?? 0,
+            'revenus_totaux' => \App\Models\Recolte::sum('revenu_total') ?? 0,
+            'rendement_moyen' => 0,
+            'agriculteurs_actifs' => \App\Models\User::where('role', 'client')->where('is_active', true)->count(),
+            'parcelles_actives' => \App\Models\Parcelle::count(),
+            'alertes_critiques' => \App\Models\Stock::whereColumn('quantite_actuelle', '<=', 'seuil_critique')->count(),
+        ];
+
+        $stats['rendement_moyen'] = $stats['parcelles_actives'] > 0 ? ($stats['production_totale'] / $stats['parcelles_actives']) : 0;
+
+        $topFarmers = \App\Models\User::where('role', 'client')
+            ->where('is_active', true)
+            ->with(['recoltes', 'parcelles', 'stocks'])
+            ->get()
+            ->map(function ($client) {
+                $totalRecolte = $client->recoltes->sum('quantite');
+                $surface = $client->parcelles->sum('surface');
+                $rendement = $surface > 0 ? ($totalRecolte / $surface) : 0;
+                $benefice = $client->recoltes->sum('benefice_net');
+                $criticalStocks = $client->stocks->where('quantite_actuelle', '<=', 'seuil_critique')->count();
+                $score = 0;
+                if ($rendement >= 1.0) $score += 40;
+                elseif ($rendement >= 0.5) $score += 25;
+                else $score += 10;
+                if ($benefice >= 500000) $score += 30;
+                elseif ($benefice >= 0) $score += 15;
+                else $score += 0;
+                $score += max(0, (1 - ($criticalStocks / max(1, $client->stocks->count())))) * 30;
+                return [
+                    'id' => $client->id,
+                    'name' => $client->name,
+                    'location' => $client->location ?? 'Non spécifié',
+                    'rendement' => round($rendement, 2),
+                    'benefice' => round($benefice, 0),
+                    'surface' => $surface,
+                    'score' => $score,
+                    'critical_stocks' => $criticalStocks,
+                ];
+            })
+            ->sortByDesc('score')
+            ->take(5)
+            ->values();
+
+        $atRiskFarmers = \App\Models\User::where('role', 'client')
+            ->where('is_active', true)
+            ->with(['stocks', 'recoltes', 'visites'])
+            ->get()
+            ->filter(function ($client) {
+                $criticalStocks = $client->stocks->where('quantite_actuelle', '<=', 'seuil_critique')->count();
+                $totalBenefice = $client->recoltes->sum('benefice_net');
+                $isLowProfitability = $totalBenefice < 0;
+                $lastVisit = $client->visites->sortByDesc('date_visite')->first();
+                $isInactive = $lastVisit ? $lastVisit->date_visite->lt(now()->subMonths(2)) : true;
+                return $criticalStocks > 0 || $isLowProfitability || $isInactive;
+            })
+            ->map(function ($client) {
+                $risks = [];
+                $criticalStocks = $client->stocks->where('quantite_actuelle', '<=', 'seuil_critique')->count();
+                if ($criticalStocks > 0) $risks[] = 'stock_critique';
+                $totalBenefice = $client->recoltes->sum('benefice_net');
+                if ($totalBenefice < 0) $risks[] = 'faible_rentabilite';
+                $lastVisit = $client->visites->sortByDesc('date_visite')->first();
+                if (!$lastVisit || $lastVisit->date_visite->lt(now()->subMonths(2))) $risks[] = 'faible_activite';
+                return [
+                    'id' => $client->id,
+                    'name' => $client->name,
+                    'location' => $client->location ?? 'Non spécifié',
+                    'risks' => $risks,
+                    'last_visit' => $lastVisit ? $lastVisit->date_visite->format('d/m/Y') : 'Jamais',
+                ];
+            })
+            ->values();
+
+        $recommendations = [];
+        if ($stats['alertes_critiques'] > 0) {
+            $recommendations[] = ['type' => 'danger', 'message' => "{$stats['alertes_critiques']} stock(s) critique(s) détecté(s) chez les agriculteurs"];
         }
-        
-        return view('catalogue', compact('intrants'));
-    }
-
-    // NOUVEAU : Met à jour les prix du catalogue
-    public function updateCatalogue(Request $request) {
-        $request->validate([
-            'prix' => 'required|array',
-            'prix.*' => 'required|numeric|min:0',
-            'statut' => 'required|array',
-            'statut.*' => 'required|string',
-        ]);
-
-        foreach ($request->prix as $id => $prix) {
-            $intrant = Intrant::find($id);
-            if ($intrant) {
-                $intrant->prix = $prix;
-                $intrant->statut = $request->statut[$id] ?? 'Disponible';
-                $intrant->derniere_maj = now();
-                $intrant->save();
-            }
+        if ($atRiskFarmers->count() > 0) {
+            $recommendations[] = ['type' => 'danger', 'message' => "{$atRiskFarmers->count()} agriculteur(s) nécessitent une attention particulière"];
+        }
+        $maizePerformance = \App\Models\Recolte::where('culture', 'Maïs')->avg('quantite') ?? 0;
+        $rizPerformance = \App\Models\Recolte::where('culture', 'Riz')->avg('quantite') ?? 0;
+        if ($maizePerformance < $rizPerformance) {
+            $recommendations[] = ['type' => 'warning', 'message' => "Les rendements du maïs sont en baisse comparés au riz"];
         }
 
-        return redirect()->route('manager.catalogue')->with('status', 'Les tarifs ont été mis à jour avec succès.');
+        $productionByMonth = \App\Models\Recolte::selectRaw('MONTH(date_recolte) as mois, SUM(quantite) as total')
+            ->groupBy('mois')
+            ->orderBy('mois')
+            ->get();
+
+        $revenusByMonth = \App\Models\Recolte::selectRaw('MONTH(date_recolte) as mois, SUM(revenu_total) as total')
+            ->groupBy('mois')
+            ->orderBy('mois')
+            ->get();
+
+        $performanceByCulture = \App\Models\Recolte::selectRaw('culture, SUM(quantite) as total_qte, AVG(benefice_net) as avg_benefice')
+            ->groupBy('culture')
+            ->get();
+
+        $farmersByRegion = \App\Models\User::where('role', 'client')
+            ->where('is_active', true)
+            ->selectRaw('location, COUNT(*) as total')
+            ->groupBy('location')
+            ->get();
+
+        $rendementByMonth = \App\Models\Recolte::selectRaw('MONTH(date_recolte) as mois, AVG(benefice_net) as avg_rendement')
+            ->groupBy('mois')
+            ->orderBy('mois')
+            ->get();
+
+        return view('analyses-bi', compact(
+            'stats',
+            'topFarmers',
+            'atRiskFarmers',
+            'recommendations',
+            'productionByMonth',
+            'revenusByMonth',
+            'performanceByCulture',
+            'farmersByRegion',
+            'rendementByMonth'
+        ));
     }
 
     // NOUVEAU : Affiche la supervision des agriculteurs (Fichier: supervision.blade.php)
@@ -258,6 +314,15 @@ class ManagementController extends Controller
             'Compte approuvé par ' . (auth()->user()->name ?? 'manager')
         );
 
+        \App\Models\Notification::notifyUser(
+            $user->id,
+            'inscription',
+            'Compte approuvé',
+            'Votre compte SeneBI a été approuvé. Vous pouvez maintenant vous connecter.',
+            'success',
+            url('/client/dashboard')
+        );
+
         return redirect()->route('manager.supervision')->with(
             'status',
             'Le compte de ' . $user->name . ' a bien été approuvé. Il peut se connecter avec son email '
@@ -299,6 +364,15 @@ class ManagementController extends Controller
             'client.rejected',
             $user->id,
             $reason
+        );
+
+        \App\Models\Notification::notifyUser(
+            $user->id,
+            'inscription',
+            'Compte non approuvé',
+            'Votre demande d\'inscription n\'a pas été approuvée. Raison : ' . $reason,
+            'danger',
+            url('/contact')
         );
 
         return redirect()->route('manager.supervision')->with('status', 'Le compte de ' . $user->name . ' a bien été rejeté.');
@@ -355,5 +429,140 @@ class ManagementController extends Controller
         ]);
     }
 
-    // Dans app/Http/Controllers/ManagementController.php
+    // Notification Manager
+    public function notifications()
+    {
+        return view('manager.notifications');
+    }
+
+    public function notificationsIndexApi()
+    {
+        $notifications = \App\Models\Notification::where('user_id', Auth::id())
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
+        return response()->json(['data' => $notifications]);
+    }
+
+    public function notificationsReadAllApi()
+    {
+        \App\Models\Notification::where('user_id', Auth::id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function notificationsDestroyApi(\App\Models\Notification $notification)
+    {
+        if ($notification->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $notification->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function farmerDetailApi(User $user)
+    {
+        if ($user->role !== 'client') {
+            abort(404);
+        }
+
+        $user->load(['parcelles', 'stocks', 'recoltes', 'visites', 'intrantConsommes']);
+
+        $surfaceTotal = $user->parcelles->sum('surface');
+        $totalRecolte = $user->recoltes->sum('quantite');
+        $rendementMoyen = $surfaceTotal > 0 ? ($totalRecolte / $surfaceTotal) : 0;
+        $totalCA = $user->recoltes->sum('revenu_total');
+        $totalCouts = $user->intrantConsommes->sum(fn($ic) => $ic->quantite_consommee * ($ic->stock->cout_unitaire ?? 0));
+        $beneficeNet = $totalCA - $totalCouts;
+        $rentabiliteMoyenne = $user->recoltes->avg('benefice_net') ?? 0;
+
+        $stocksData = $user->stocks->map(fn($s) => [
+            'nom' => $s->nom,
+            'quantite' => $s->quantite_actuelle,
+            'seuil' => $s->seuil_critique,
+            'est_critique' => $s->quantite_actuelle <= $s->seuil_critique,
+        ]);
+
+        $visitesData = $user->visites->sortByDesc('date_visite')->take(10)->map(fn($v) => [
+            'date' => $v->date_visite->format('d/m/Y H:i'),
+            'action' => $v->action_effectuee,
+            'recommandation' => $v->recommandation,
+            'statut' => $v->date_visite->lt(now()) ? 'Effectuée' : 'Planifiée',
+        ]);
+
+        $culturesData = $user->recoltes->groupBy('culture')->map(fn($group) => [
+            'culture' => $group->first()->culture,
+            'quantite' => $group->sum('quantite'),
+            'surface' => $group->sum(fn($r) => $r->parcelle->surface ?? 0),
+        ])->values();
+
+        $alertes = [];
+        foreach ($user->stocks as $stock) {
+            if ($stock->quantite_actuelle <= $stock->seuil_critique) {
+                $alertes[] = "Stock critique: {$stock->nom} ({$stock->quantite_actuelle} kg restant)";
+            }
+        }
+        if ($beneficeNet < 0) {
+            $alertes[] = "Rentabilité négative: " . number_format($beneficeNet, 0, ',', ' ') . " FCFA";
+        }
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'location' => $user->location ?? 'Non spécifié',
+            'date_inscription' => $user->created_at->format('d/m/Y'),
+            'parcelles_count' => $user->parcelles->count(),
+            'surface_totale' => $surfaceTotal,
+            'rendement_moyen' => round($rendementMoyen, 2),
+            'rentabilite_moyenne' => round($rentabiliteMoyenne, 2),
+            'production_totale' => $totalRecolte,
+            'chiffre_affaires' => $totalCA,
+            'benefice_net' => $beneficeNet,
+            'stocks' => $stocksData,
+            'visites' => $visitesData,
+            'cultures' => $culturesData,
+            'alertes' => $alertes,
+            'last_activity' => $user->visites->sortByDesc('date_visite')->first()?->date_visite->format('d/m/Y H:i') ?? 'Aucune',
+        ]);
+    }
+
+    public function supervisionStatsApi()
+    {
+        $activeClients = User::where('role', 'client')
+            ->where('is_active', true)
+            ->where('status', 'approved')
+            ->count();
+
+        $todayActivities = 0;
+        if (Schema::hasTable('activity_logs')) {
+            $todayActivities = ActivityLog::whereDate('created_at', today())->count();
+        }
+
+        $criticalStocks = Stock::whereColumn('quantite_actuelle', '<=', 'seuil_critique')->count();
+
+        $pendingClients = 0;
+        if (Schema::hasColumn('users', 'is_active')) {
+            $pendingClients = User::where('role', 'client')
+                ->where('is_active', false)
+                ->count();
+        }
+        $systemAlerts = $criticalStocks + $pendingClients;
+
+        $performanceScore = $activeClients > 0
+            ? min(100, round(($activeClients / max(1, $activeClients + $pendingClients)) * 100))
+            : 100;
+
+        return response()->json([
+            'activeUsers' => $activeClients,
+            'dailyActivities' => $todayActivities,
+            'systemAlerts' => $systemAlerts,
+            'performanceScore' => $performanceScore,
+        ]);
+    }
 }

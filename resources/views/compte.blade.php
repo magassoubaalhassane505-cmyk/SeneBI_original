@@ -72,7 +72,7 @@
           </section>
         </div>
       </main>
-      <div data-layout="footer"></div>
+      @include('partials.footer-manager')
     </div>
 
     <script src="{{ asset('assets/js/layout.js') }}"></script>

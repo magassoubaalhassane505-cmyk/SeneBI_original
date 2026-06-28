@@ -6,6 +6,7 @@ use App\Models\Parcelle;
 use App\Models\Stock;
 use App\Models\StockMouvement;
 use App\Models\IntrantConsomme;
+use App\Models\Intrant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,23 @@ class ClientApiController extends Controller
             'surface' => $data['surface'],
             'culture' => $data['culture'],
         ]);
+
+        \App\Models\Notification::notifyUser(
+            Auth::id(),
+            'parcelle',
+            'Nouvelle parcelle ajoutée',
+            "La parcelle {$data['nom']} ({$data['culture']}) a été ajoutée à vos parcelles.",
+            'success',
+            url('/client/parcelles')
+        );
+
+        \App\Models\Notification::notifyManager(
+            'parcelle',
+            'Nouvelle parcelle créée',
+            "L'agriculteur " . Auth::user()->name . " a ajouté la parcelle {$data['nom']} ({$data['culture']}) - {$data['region']}.",
+            'info',
+            url('/manager/supervision')
+        );
 
         return response()->json(['data' => $parcelle], 201);
     }
@@ -217,6 +235,42 @@ class ClientApiController extends Controller
             // Vérifier si le stock est critique
             $estCritique = $stock->quantite_actuelle <= $stock->seuil_critique;
 
+            if ($estCritique) {
+                \App\Models\Notification::notifyUser(
+                    $user->id,
+                    'stock',
+                    'Stock critique : ' . $stock->nom,
+                    "Votre stock de {$stock->nom} est descendu à {$stock->quantite_actuelle} kg (seuil : {$stock->seuil_critique} kg).",
+                    'danger',
+                    url('/client/stocks')
+                );
+
+                \App\Models\Notification::notifyManager(
+                    'stock',
+                    'Stock critique détecté',
+                    "L'agriculteur " . $user->name . " a un stock critique de {$stock->nom} ({$stock->quantite_actuelle} kg restant).",
+                    'danger',
+                    url('/manager/stocks')
+                );
+            } elseif ($data['quantite'] >= 500) {
+                \App\Models\Notification::notifyUser(
+                    $user->id,
+                    'consommation',
+                    'Consommation importante enregistree',
+                    "Vous avez utilise {$data['quantite']} kg de {$stock->nom} pour la parcelle {$data['parcelle']}.",
+                    'info',
+                    url('/client/stocks')
+                );
+
+                \App\Models\Notification::notifyManager(
+                    'consommation',
+                    'Consommation importante',
+                    "L'agriculteur " . $user->name . " a consommé {$data['quantite']} kg de {$stock->nom}.",
+                    'info',
+                    url('/manager/stocks')
+                );
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Consommation enregistrée avec succès',
@@ -248,7 +302,6 @@ class ClientApiController extends Controller
             $stock->quantite_actuelle += $data['quantite'];
             $stock->save();
 
-            // Enregistrer le mouvement d'entrée
             StockMouvement::create([
                 'user_id' => Auth::id(),
                 'stock_id' => $stock->id,
@@ -266,5 +319,152 @@ class ClientApiController extends Controller
                 'stock' => $stock->fresh(),
             ]);
         });
+    }
+
+    public function storeHarvest(Request $request)
+    {
+        $data = $request->validate([
+            'parcelle_id' => 'required|exists:parcelles,id',
+            'date' => 'required|date',
+            'quantite' => 'required|numeric|min:0.01',
+            'culture' => 'nullable|string|max:255',
+            'prix_unitaire' => 'nullable|numeric|min:0',
+            'couts_totaux' => 'nullable|numeric|min:0',
+        ]);
+
+        $user = Auth::user();
+        $parcelle = Parcelle::where('user_id', $user->id)->findOrFail($data['parcelle_id']);
+        $culture = $data['culture'] ?: $parcelle->culture;
+        $prixUnitaire = $data['prix_unitaire'] ?? $this->priceForCulture($culture);
+        $coutsTotaux = $data['couts_totaux'] ?? 0;
+        $revenuTotal = $data['quantite'] * $prixUnitaire;
+        $beneficeNet = $revenuTotal - $coutsTotaux;
+
+        $recolte = Recolte::create([
+            'user_id' => $user->id,
+            'parcelle_id' => $parcelle->id,
+            'date_recolte' => $data['date'],
+            'quantite' => $data['quantite'],
+            'culture' => $culture,
+            'prix_unitaire' => $prixUnitaire,
+            'couts_totaux' => $coutsTotaux,
+            'revenu_total' => $revenuTotal,
+            'benefice_net' => $beneficeNet,
+            'saison' => now()->year,
+        ]);
+
+        if ($beneficeNet < 0) {
+            \App\Models\Notification::notifyManager(
+                'rentabilite',
+                'Faible rentabilité détectée',
+                "L'agriculteur " . $user->name . " a une rentabilité négative sur la culture {$culture} : " . number_format($beneficeNet, 0, ',', ' ') . " FCFA.",
+                'warning',
+                url('/manager/supervision')
+            );
+        }
+
+        return response()->json(['data' => $recolte->fresh(['parcelle'])], 201);
+    }
+
+    public function storeRentabilite(Request $request)
+    {
+        $data = $request->validate([
+            'parcelle_id' => 'nullable|exists:parcelles,id',
+            'parcelle_nom' => 'nullable|string|max:255',
+            'culture' => 'required|string|max:255',
+            'surface' => 'nullable|numeric|min:0',
+            'quantite' => 'required|numeric|min:0',
+            'prix_unitaire' => 'required|numeric|min:0',
+            'couts_totaux' => 'nullable|numeric|min:0',
+        ]);
+
+        $user = Auth::user();
+        $parcelle = null;
+
+        if (! empty($data['parcelle_id'])) {
+            $parcelle = Parcelle::where('user_id', $user->id)->findOrFail($data['parcelle_id']);
+        } elseif (! empty($data['parcelle_nom'])) {
+            $parcelle = Parcelle::where('user_id', $user->id)
+                ->whereRaw('LOWER(nom) = ?', [mb_strtolower($data['parcelle_nom'])])
+                ->first();
+        }
+
+        if (! $parcelle) {
+            $parcelle = Parcelle::create([
+                'user_id' => $user->id,
+                'nom' => $data['parcelle_nom'] ?: $data['culture'],
+                'region' => $user->location ?? 'Non spécifié',
+                'surface' => $data['surface'] ?? 0,
+                'culture' => $data['culture'],
+                'statut' => 'En culture',
+            ]);
+        }
+
+        $coutsTotaux = $data['couts_totaux'] ?? 0;
+        $revenuTotal = $data['quantite'] * $data['prix_unitaire'];
+        $beneficeNet = $revenuTotal - $coutsTotaux;
+
+        $recolte = Recolte::create([
+            'user_id' => $user->id,
+            'parcelle_id' => $parcelle->id,
+            'date_recolte' => now()->toDateString(),
+            'quantite' => $data['quantite'],
+            'culture' => $data['culture'],
+            'prix_unitaire' => $data['prix_unitaire'],
+            'couts_totaux' => $coutsTotaux,
+            'revenu_total' => $revenuTotal,
+            'benefice_net' => $beneficeNet,
+            'saison' => now()->year,
+        ]);
+
+        return response()->json(['data' => $recolte->fresh(['parcelle'])], 201);
+    }
+
+    public function notificationsIndex()
+    {
+        $notifications = \App\Models\Notification::where('user_id', Auth::id())
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
+        return response()->json(['data' => $notifications]);
+    }
+
+    public function notificationsReadAll()
+    {
+        \App\Models\Notification::where('user_id', Auth::id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function notificationsDestroy(\App\Models\Notification $notification)
+    {
+        if ($notification->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $notification->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
+    protected function priceForCulture(string $culture): float
+    {
+        $key = mb_strtolower($culture);
+        $defaults = [
+            'riz' => 1500,
+            'mais' => 1200,
+            'maïs' => 1200,
+            'coton' => 2000,
+        ];
+
+        $intrant = Intrant::whereRaw('LOWER(nom) LIKE ?', ['%' . $key . '%'])->orderBy('prix')->first();
+        if ($intrant) {
+            return (float) $intrant->prix;
+        }
+
+        return $defaults[$key] ?? 1500;
     }
 }

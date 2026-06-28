@@ -1,0 +1,1150 @@
+/* SeneBI - Unified Design System */
+/* Based on dashboard.css design tokens */
+
+/* ===========================================
+   VARIABLES & TOKENS - Dashboard Reference
+   =========================================== */
+:root {
+  /* Colors - matching dashboard */
+  --senebi-bg: #f4f7f9;
+  --senebi-card: #ffffff;
+  --senebi-text: #0f172a;
+  --senebi-muted: #64748b;
+  --senebi-border: rgba(15, 23, 42, 0.08);
+  --senebi-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+  --senebi-shadow-lg: 0 20px 50px -15px rgba(15, 23, 42, 0.12);
+  --senebi-radius: 18px;
+  --senebi-accent: #059669;
+  --senebi-accent-soft: #d1fae5;
+  --senebi-good: #16a34a;
+  --senebi-warn: #f59e0b;
+  --senebi-warn-soft: #fef3c7;
+  --senebi-danger: #ef4444;
+  
+  /* Font sizes */
+  --senebi-fs-title: 26px;
+  --senebi-fs-subtitle: 14px;
+  --senebi-fs-section: 16px;
+  --senebi-fs-body: 13px;
+  --senebi-fs-small: 12px;
+  
+  /* Font weights */
+  --senebi-fw-regular: 500;
+  --senebi-fw-semibold: 700;
+  --senebi-fw-bold: 800;
+  --senebi-fw-black: 900;
+  
+  /* Animation timing */
+  --senebi-anim-fast: 160ms;
+  --senebi-anim-med: 260ms;
+  --senebi-anim-slow: 1000ms;
+}
+
+/* ===========================================
+   ANIMATIONS - Modern & Professional
+   =========================================== */
+
+/* Fade in up animation for cards */
+@keyframes senebiFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered animation delays */
+.senebi-animate-1 { animation-delay: 0ms; }
+.senebi-animate-2 { animation-delay: 100ms; }
+.senebi-animate-3 { animation-delay: 200ms; }
+.senebi-animate-4 { animation-delay: 300ms; }
+
+/* Card appearance animation */
+.senebi-card-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: senebiFadeInUp var(--senebi-anim-med) ease forwards;
+}
+
+/* Counter animation */
+@keyframes senebiCountUp {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.senebi-counter-animate {
+  display: inline-block;
+}
+
+.senebi-counter-animate.animate {
+  animation: senebiCountUp var(--senebi-anim-fast) ease;
+}
+
+/* Chart loading animation */
+@keyframes senebiChartLoading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
+}
+
+.senebi-chart-loading {
+  background: linear-gradient(90deg, 
+    rgba(15, 23, 42, 0.03) 0%, 
+    rgba(15, 23, 42, 0.06) 50%, 
+    rgba(15, 23, 42, 0.03) 100%);
+  background-size: 200px 100%;
+  animation: senebiChartLoading 1.5s ease infinite;
+  border-radius: 8px;
+}
+
+/* Notification badge pulse */
+@keyframes senebiPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    transform: scale(1.05);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    transform: scale(1);
+  }
+}
+
+.senebi-notification-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: var(--senebi-danger);
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: senebiPulse 2s infinite;
+}
+
+/* Notification slide in */
+@keyframes senebiSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.senebi-notification-slide-in {
+  animation: senebiSlideInRight var(--senebi-anim-fast) ease;
+}
+
+/* Smooth transitions for all elements */
+.senebi-transition {
+  transition: all var(--senebi-anim-fast) ease;
+}
+
+.senebi-transition-med {
+  transition: all var(--senebi-anim-med) ease;
+}
+
+/* ===========================================
+   KPI CARDS - Unified Design
+   =========================================== */
+.senebi-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+/* Initial hidden state for animation */
+.senebi-kpi-card {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@media (max-width: 1100px) {
+  .senebi-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .senebi-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.senebi-kpi-card {
+  background: var(--senebi-card);
+  border: 1px solid var(--senebi-border);
+  border-radius: var(--senebi-radius);
+  box-shadow: var(--senebi-shadow);
+  padding: 16px;
+  transition: transform var(--senebi-anim-fast) ease, box-shadow var(--senebi-anim-fast) ease;
+}
+
+.senebi-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--senebi-shadow-lg);
+}
+
+.senebi-kpi-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.senebi-kpi-title {
+  margin: 0;
+  font-size: var(--senebi-fs-subtitle);
+  color: rgba(15, 23, 42, 0.55);
+  font-weight: 700;
+}
+
+.senebi-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f3f7;
+  border: 1px solid var(--senebi-border);
+}
+
+.senebi-kpi-icon svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.85;
+}
+
+.senebi-kpi-value {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin: 6px 0 8px;
+}
+
+.senebi-kpi-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--senebi-good);
+  font-weight: 700;
+  font-size: var(--senebi-fs-small);
+}
+
+.senebi-kpi-sub .senebi-muted {
+  color: rgba(15, 23, 42, 0.55);
+  font-weight: 600;
+}
+
+/* ===========================================
+   TAGS - Unified Badges
+   =========================================== */
+.senebi-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  border: 1px solid var(--senebi-border);
+  background: #fff;
+}
+
+.senebi-tag.good {
+  color: #14532d;
+  background: #dcfce7;
+  border-color: rgba(22, 163, 74, 0.25);
+}
+
+.senebi-tag.danger {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.senebi-tag.muted {
+  color: #334155;
+  background: #f1f5f9;
+}
+
+.senebi-tag.warn {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+/* ===========================================
+   BUTTONS - Unified Styles
+   =========================================== */
+.senebi-btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 800;
+  background: #0b1220;
+  color: #fff;
+  font-size: 14px;
+  transition: transform var(--senebi-anim-fast) ease, box-shadow var(--senebi-anim-fast) ease;
+}
+
+.senebi-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+.senebi-btn:active {
+  transform: translateY(0);
+}
+
+.senebi-btn.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.senebi-btn-secondary {
+  background: #f8fafc;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+}
+
+.senebi-btn.secondary {
+  background: #f8fafc;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+}
+
+.senebi-btn.secondary:hover {
+  background: #e2e8f0;
+}
+
+.senebi-btn-primary {
+  background: var(--senebi-accent);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--senebi-anim-fast) ease;
+}
+
+.senebi-btn-primary:hover {
+  background: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.senebi-btn-primary:active {
+  transform: translateY(0);
+}
+
+.senebi-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--senebi-border);
+  color: var(--senebi-text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--senebi-anim-fast) ease;
+}
+
+.senebi-btn-ghost:hover {
+  background: rgba(248, 250, 252, 0.8);
+  border-color: var(--senebi-accent);
+}
+
+/* ===========================================
+   TABLES - Unified Styles
+   =========================================== */
+.senebi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--senebi-fs-body);
+}
+
+.senebi-table th {
+  background: rgba(248, 250, 252, 0.8);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--senebi-text);
+  border-bottom: 2px solid rgba(226, 232, 240, 0.8);
+  font-size: var(--senebi-fs-small);
+  white-space: nowrap;
+}
+
+.senebi-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  vertical-align: middle;
+}
+
+.senebi-table tr:hover {
+  background: rgba(248, 250, 252, 0.5);
+}
+
+.senebi-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status badges in tables */
+.senebi-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.senebi-status-badge.critical {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.senebi-status-badge.ok {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.senebi-status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.senebi-status-badge.critical::before {
+  background: #dc2626;
+}
+
+.senebi-status-badge.ok::before {
+  background: #16a34a;
+}
+
+/* ===========================================
+   ALERTS - Unified Styles
+   =========================================== */
+.senebi-alert-banner {
+  display: none;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.08);
+  color: #7f1d1d;
+  font-weight: 800;
+}
+
+.senebi-alert-banner.show {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.senebi-alert-banner.senebi-alert-success {
+  background: rgba(22, 163, 74, 0.08);
+  border-color: rgba(22, 163, 74, 0.25);
+  color: #14532d;
+}
+
+.senebi-alert-banner.senebi-alert-success.show {
+  display: flex;
+}
+
+/* ===========================================
+   FORM ELEMENTS - Unified Styles
+   =========================================== */
+.senebi-form-control {
+  padding: 10px 12px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+  transition: border-color var(--senebi-anim-fast) ease, box-shadow var(--senebi-anim-fast) ease;
+}
+
+.senebi-form-control:focus {
+  outline: none;
+  border-color: var(--senebi-accent);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.senebi-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .senebi-form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.senebi-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.senebi-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+/* ===========================================
+   PAGE TITLE - Unified
+   =========================================== */
+.senebi-page-title {
+  margin-top: 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.senebi-page-title h1 {
+  margin: 0;
+  font-size: var(--senebi-fs-title);
+  letter-spacing: -0.02em;
+}
+
+.senebi-page-title p {
+  margin: 6px 0 0;
+  color: rgba(15, 23, 42, 0.6);
+  max-width: 720px;
+  font-size: var(--senebi-fs-subtitle);
+}
+
+.senebi-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.senebi-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ===========================================
+   REGION SELECTOR - Unified
+   =========================================== */
+.senebi-region-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.senebi-region-label {
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.senebi-region-dropdown {
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+  transition: all var(--senebi-anim-fast) ease;
+}
+
+.senebi-region-dropdown:focus {
+  border-color: var(--senebi-accent);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  outline: none;
+}
+
+/* ===========================================
+   WEATHER WIDGET - Unified
+   =========================================== */
+.senebi-weather-widget {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #bbf7d0;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
+}
+
+.senebi-weather-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.senebi-weather-icon {
+  font-size: 48px;
+}
+
+.senebi-weather-info {
+  flex: 1;
+}
+
+.senebi-weather-location {
+  font-size: 14px;
+  font-weight: 600;
+  color: #065f46;
+  margin-bottom: 4px;
+}
+
+.senebi-weather-temp {
+  font-size: 28px;
+  font-weight: 700;
+  color: #059669;
+  margin-bottom: 4px;
+}
+
+.senebi-weather-condition {
+  font-size: 13px;
+  color: #047857;
+}
+
+@media (max-width: 768px) {
+  .senebi-weather-widget {
+    margin: 16px 0;
+    padding: 16px;
+  }
+  
+  .senebi-weather-icon {
+    font-size: 36px;
+  }
+  
+  .senebi-weather-temp {
+    font-size: 24px;
+  }
+}
+
+/* ===========================================
+   GRID LAYOUTS - Unified
+   =========================================== */
+.senebi-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.senebi-grid-2 {
+  grid-template-columns: 1.25fr 1fr;
+}
+
+@media (max-width: 1100px) {
+  .senebi-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================================
+   CHART CONTAINERS - Unified
+   =========================================== */
+.senebi-chart-wrap {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.senebi-chart-wrap canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* Chart colors - matching dashboard charts */
+.senebi-chart-green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.senebi-chart-blue {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+}
+
+.senebi-chart-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+/* ===========================================
+   FOOTER NOTE - Unified
+   =========================================== */
+.senebi-footer-note {
+  margin-top: 14px;
+  color: rgba(15, 23, 42, 0.55);
+  font-size: 12px;
+}
+
+/* ===========================================
+    CATATALOGUE - Product styling
+    =========================================== */
+.product-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.product-icon .icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  color: inherit;
+}
+
+.product-icon.fertilizer {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.product-icon.seed {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.product-icon.chemical {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.product-info {
+  display: flex;
+  align-items: center;
+}
+
+.product-details {
+  flex: 1;
+}
+
+.product-name {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.product-description {
+  font-size: 12px;
+  color: var(--senebi-muted);
+}
+
+/* Small muted text utility */
+.senebi-muted {
+  color: var(--senebi-muted);
+}
+
+/* Price input wrapper */
+.price-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.price-input {
+  width: 140px;
+  padding: 8px 45px 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: #f9fafb;
+  color: var(--senebi-text);
+  transition: all var(--senebi-anim-fast) ease;
+}
+
+.price-input:focus {
+  outline: none;
+  border-color: var(--senebi-accent);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  background: white;
+}
+
+.price-unit {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--senebi-muted);
+  font-weight: 500;
+  pointer-events: none;
+}
+
+/* Catalogue table specific styling */
+.catalogue-table th {
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.catalogue-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.save-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Status badge colors for selects */
+.senebi-status-badge.available {
+  background: rgba(34, 197, 94, 0.1);
+  color: #15803d;
+}
+
+.senebi-status-badge.limited {
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+}
+
+.senebi-status-badge.out-of-stock {
+  background: rgba(239, 68, 68, 0.1);
+  color: #991b1b;
+}
+
+/* ===========================================
+   NOTIFICATIONS - Unified Styles
+   =========================================== */
+.senebi-btn-sm {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.senebi-btn-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.senebi-btn-danger:hover {
+  background: #fecaca;
+}
+
+.notification-section-header {
+  margin: 32px 0 16px;
+}
+
+.notification-section-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--senebi-text);
+  margin: 0;
+}
+
+.notifications-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.notification-card {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--senebi-border);
+  border-radius: var(--senebi-radius);
+  box-shadow: var(--senebi-shadow);
+  transition: all var(--senebi-anim-fast) ease;
+}
+
+.notification-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--senebi-shadow-lg);
+}
+
+.notification-card--unread {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  border-left: 4px solid var(--senebi-accent);
+}
+
+.notification-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #f2f3f7;
+  border: 1px solid var(--senebi-border);
+}
+
+.notification-card-icon i {
+  font-size: 20px;
+}
+
+.notification-card--info .notification-card-icon {
+  background: #dbeafe;
+  color: #3b82f6;
+}
+
+.notification-card--warn .notification-card-icon {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.notification-card--danger .notification-card-icon {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.notification-card--system .notification-card-icon {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.notification-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.notification-card-header strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--senebi-text);
+  line-height: 1.4;
+}
+
+.notification-card-time {
+  font-size: 12px;
+  color: var(--senebi-muted);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.notification-card-message {
+  font-size: 14px;
+  color: var(--senebi-muted);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.notification-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 64px;
+  color: var(--senebi-muted);
+  margin-bottom: 24px;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--senebi-text);
+  margin: 0 0 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--senebi-muted);
+  margin: 0;
+}
+
+/* Filter button styles */
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--senebi-border);
+  border-radius: 20px;
+  background: #fff;
+  color: var(--senebi-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--senebi-anim-fast) ease;
+}
+
+.filter-btn:hover {
+  background: var(--senebi-accent-soft);
+  border-color: var(--senebi-accent);
+}
+
+.filter-btn.active {
+  background: var(--senebi-accent);
+  color: #fff;
+  border-color: var(--senebi-accent);
+}
+
+/* Weather advice */
+.weather-advice {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--senebi-accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.advice-icon {
+  color: var(--senebi-accent);
+  font-size: 14px;
+}
+
+/* Growth bar */
+.parcel-growth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.growth-bar {
+  flex: 1;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.growth-fill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 3px;
+  transition: width var(--senebi-anim-fast) ease;
+}
+
+.growth-text {
+  font-size: 12px;
+  color: var(--senebi-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Performance indicator */
+.performance-indicator {
+  margin-left: 6px;
+  cursor: help;
+  transition: transform var(--senebi-anim-fast) ease;
+}
+
+.performance-indicator:hover {
+  transform: scale(1.1);
+}
+
+/* Planting date */
+.planting-date {
+  font-size: 11px;
+  color: var(--senebi-muted);
+  font-weight: 400;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* Apply intrant button */
+.apply-intrant-btn {
+  background: transparent;
+  border: 1.5px solid var(--senebi-accent);
+  color: var(--senebi-accent);
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 15px;
+  cursor: pointer;
+  transition: all var(--senebi-anim-med) ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.apply-intrant-btn:hover {
+  background: var(--senebi-accent);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 166, 90, 0.3);
+}
+
+.apply-intrant-btn:active {
+  transform: translateY(0);
+}
+
+.parcel-actions {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.parcel-card {
+  position: relative !important;
+}
+
+/* ===========================================
+    REDUCED MOTION SUPPORT
+    =========================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .senebi-notification-badge {
+    animation: none;
+  }
+}

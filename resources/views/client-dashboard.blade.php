@@ -81,11 +81,19 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-value"><span id="kpiTotalHarvest" style="font-weight: bold !important;">2,450</span> <span class="muted" style="font-size:14px;font-weight:700;">kg</span></div>
-            <div class="kpi-sub">
-              <span style="color: #10b981 !important; font-weight: 600 !important;">+12.5% vs. période précédente</span>
-              <span class="muted">Données certifiées SeneBI</span>
+            <div class="kpi-value">
+              <span id="kpiTotalHarvest" style="font-weight: bold !important;">{{ number_format($totalRecolteQte, 0, ',', ' ') }}</span>
+              <span class="muted" style="font-size:14px;font-weight:700;">kg</span>
+              @php $indicatorClass = $rendementEvolution >= 0 ? 'up' : 'down'; @endphp
+              <span class="kpi-indicator {{ $indicatorClass }}">
+                <i class="fas fa-arrow-{{ $rendementEvolution >= 0 ? 'up' : 'down' }}"></i>
+                {{ number_format(abs($rendementEvolution), 1) }}%
+              </span>
             </div>
+             <div class="kpi-sub">
+               <span style="color: #10b981 !important; font-weight: 600 !important;">Quantité totale récoltée</span>
+               <span class="muted">Toutes parcelles confondues</span>
+             </div>
           </article>
 
           <article class="card">
@@ -97,10 +105,18 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-value"><span id="kpiCA" style="font-weight: bold !important;">1,225,000</span> <span class="muted" style="font-size:14px;font-weight:700;">FCFA</span></div>
+            <div class="kpi-value">
+              <span id="kpiCA" style="font-weight: bold !important;">{{ number_format($totalCA, 0, ',', ' ') }}</span>
+              <span class="muted" style="font-size:14px;font-weight:700;">FCFA</span>
+              @php $caIndicatorClass = $caEvolution >= 0 ? 'up' : 'down'; @endphp
+              <span class="kpi-indicator {{ $caIndicatorClass }}">
+                <i class="fas fa-arrow-{{ $caEvolution >= 0 ? 'up' : 'down' }}"></i>
+                {{ number_format(abs($caEvolution), 1) }}%
+              </span>
+            </div>
             <div class="kpi-sub">
-              <span style="color: #10b981 !important; font-weight: 600 !important;">+8.3% vs. période précédente</span>
-              <span class="muted">Prix moyen × quantité récoltée</span>
+              <span style="color: #10b981 !important; font-weight: 600 !important;">vs mois précédent</span>
+              <span class="muted">Prix.unit × quantité récoltée</span>
             </div>
           </article>
 
@@ -113,10 +129,18 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-value"><span id="kpiHa" style="font-weight: bold !important;">3</span> <span class="muted" style="font-size:14px;font-weight:700;">ha</span></div>
+            <div class="kpi-value">
+              <span id="kpiHa" style="font-weight: bold !important;">{{ number_format($hectaresActifs, 2, ',', ' ') }}</span>
+              <span class="muted" style="font-size:14px;font-weight:700;">ha</span>
+              @php $haIndicatorClass = $haEvolution >= 0 ? 'up' : 'down'; @endphp
+              <span class="kpi-indicator {{ $haIndicatorClass }}">
+                <i class="fas fa-arrow-{{ $haEvolution >= 0 ? 'up' : 'down' }}"></i>
+                {{ number_format(abs($haEvolution), 1) }}%
+              </span>
+            </div>
             <div class="kpi-sub">
-              <span>+5.2% vs. période précédente</span>
-              <span class="muted">Parcelles hors jachère</span>
+              <span style="color: #10b981 !important; font-weight: 600 !important;">Surface totale cultivée</span>
+              <span class="muted">Parcelles enregistrées</span>
             </div>
           </article>
 
@@ -130,21 +154,29 @@
                 </svg>
               </div>
             </div>
-            <div class="kpi-value"><span id="kpiRend" style="font-weight: bold !important;">0.82</span> <span class="muted" style="font-size:14px;font-weight:700;">t/ha</span></div>
+            <div class="kpi-value">
+              <span id="kpiRend" style="font-weight: bold !important;">{{ number_format($rendementMoyen, 2, ',', ' ') }}</span>
+              <span class="muted" style="font-size:14px;font-weight:700;">t/ha</span>
+              @php $rendIndicatorClass = $rendementEvolution >= 0 ? 'up' : 'down'; @endphp
+              <span class="kpi-indicator {{ $rendIndicatorClass }}">
+                <i class="fas fa-arrow-{{ $rendementEvolution >= 0 ? 'up' : 'down' }}"></i>
+                {{ number_format(abs($rendementEvolution), 1) }}%
+              </span>
+            </div>
             <div class="kpi-sub">
-              <span>+3.1% vs. période précédente</span>
-              <span class="muted">Moyenne sur parcelles récoltées</span>
+              <span style="color: #10b981 !important; font-weight: 600 !important;">Moyenne toutes cultures</span>
+              <span class="muted">Quantité / surface récoltée</span>
             </div>
           </article>
         </section>
 
         <div class="weather-widget">
             <div class="weather-content">
-                <div class="weather-icon">☀️</div>
+                <div class="weather-icon">🌾</div>
                 <div class="weather-info">
-                    <div class="weather-location">Sikasso</div>
-                    <div class="weather-temp">32°C</div>
-                    <div class="weather-condition">Temps sec</div>
+                    <div class="weather-location">{{ auth()->user()->location ?? 'Sénégal' }}</div>
+                    <div class="weather-temp">{{ $widgets['hectaresActifs'] ?? 0 }} ha actifs</div>
+                    <div class="weather-condition">Exploitation en {{ $widgets['activeParcelles'] ?? 0 }} parcelle(s) active(s)</div>
                     <div style="font-weight: 600; margin-top: 4px; color: #10b981;">
                         @if($derniereVisite && $derniereVisite->recommandation)
                             {{ $derniereVisite->recommandation }}
@@ -194,15 +226,89 @@
 
         </section>
 
-        <div class="footer-note">Astuce : Les prix affichés sont basés sur les cours actuels des marchés de Bamako et Sikasso.</div>
+        <section class="grid cards-2">
+          <article class="card" style="min-height: 320px;">
+            <div class="card-header">
+              <div>
+                <h3 style="margin:0; font-size:16px;">Conseils SeneBI</h3>
+                <div class="small muted">Recommandations personnalisees</div>
+              </div>
+              <span class="tag muted">IA</span>
+            </div>
+            <div style="padding: 16px;">
+              @if(!empty($recommendations) && count($recommendations) > 0)
+                @foreach($recommendations as $rec)
+                  <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; padding: 10px; background: #f9fafb; border-radius: 8px; border-left: 3px solid #10b981;">
+                    <i class="fas fa-lightbulb" style="color: #10b981; margin-top: 2px;"></i>
+                    <span style="font-size: 14px; color: #374151; line-height: 1.5;">{{ $rec }}</span>
+                  </div>
+                @endforeach
+              @else
+                <div style="text-align: center; color: #9ca3af; padding: 20px; font-size: 14px;">
+                  <i class="fas fa-check-circle" style="font-size: 32px; color: #10b981; margin-bottom: 8px; display: block;"></i>
+                  Aucun conseil particulier. Votre exploitation est en bon etat.
+                </div>
+              @endif
+            </div>
+          </article>
+
+          <article class="card" style="min-height: 320px;">
+            <div class="card-header">
+              <div>
+                <h3 style="margin:0; font-size:16px;">Activites Recentes</h3>
+                <div class="small muted">Dernieres actions enregistrees</div>
+              </div>
+              <span class="tag muted">Historique</span>
+            </div>
+            <div style="padding: 16px;">
+              @php
+                $recentActivities = \App\Models\Notification::where('user_id', auth()->id())
+                  ->orderByDesc('created_at')
+                  ->limit(8)
+                  ->get();
+              @endphp
+              @if($recentActivities->count() > 0)
+                @foreach($recentActivities as $activity)
+                  <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: {{ $activity->level === 'danger' ? '#ef4444' : ($activity->level === 'warning' ? '#f59e0b' : '#10b981') }}; margin-top: 8px; flex-shrink: 0;"></div>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 2px;">{{ $activity->title }}</div>
+                      <div style="font-size: 12px; color: #6b7280; line-height: 1.4;">{{ $activity->message }}</div>
+                      <div style="font-size: 11px; color: #9ca3af; margin-top: 2px;">{{ $activity->created_at->format('d/m/Y H:i') }}</div>
+                    </div>
+                  </div>
+                @endforeach
+              @else
+                <div style="text-align: center; color: #9ca3af; padding: 20px; font-size: 14px;">
+                  Aucune activite recente enregistree.
+                </div>
+              @endif
+            </div>
+          </article>
+        </section>
       </main>
-      <div data-layout="footer"></div>
+    @include('partials.footer-client')
     </div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="{{ asset('assets/js/layout.js') }}"></script>
     <script src="{{ asset('assets/js/core.js') }}"></script>
+    <script>
+      window.SeneBI_DASHBOARD = {
+        totalHarvestKg: {{ $totalRecolteQte }},
+        totalCA: {{ $totalCA }},
+        hectaresActifs: {{ $hectaresActifs }},
+        rendementMoyen: {{ number_format($rendementMoyen, 4, '.', '') }},
+        caEvolution: {{ number_format($caEvolution, 2, '.', '') }},
+        haEvolution: {{ number_format($haEvolution, 2, '.', '') }},
+        rendementEvolution: {{ number_format($rendementEvolution, 2, '.', '') }},
+        prixCultures: @json($prixCultures),
+        culturesLabels: @json($culturesLabels),
+        culturesData: @json($culturesData),
+        stockCritical: @json($stockCritical),
+      };
+    </script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
     
     

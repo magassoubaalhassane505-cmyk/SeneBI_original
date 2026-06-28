@@ -1,11 +1,14 @@
 (function () {
-  const harvests = [
-    { date: "15/11/2025", parcel: "Parcelle Nord (Riz)", qtyKg: 22000, unitPrice: 250 },
-    { date: "20/02/2026", parcel: "Parcelle Sud (Mais)", qtyKg: 9600, unitPrice: 180 },
-    { date: "10/12/2025", parcel: "Parcelle Centre (Mais)", qtyKg: 18000, unitPrice: 180 },
-    { date: "20/06/2025", parcel: "Parcelle Nord (Riz)", qtyKg: 20000, unitPrice: 245 },
-    { date: "15/08/2025", parcel: "Parcelle Sud (Mais)", qtyKg: 8800, unitPrice: 175 },
-  ];
+  const serverHarvests = window.SeneBI_RENTABILITE?.harvests;
+  const harvests = Array.isArray(serverHarvests) && serverHarvests.length > 0
+    ? serverHarvests
+    : [
+        { date: "15/11/2025", parcel: "Parcelle Nord (Riz)", qtyKg: 22000, unitPrice: 250 },
+        { date: "20/02/2026", parcel: "Parcelle Sud (Mais)", qtyKg: 9600, unitPrice: 180 },
+        { date: "10/12/2025", parcel: "Parcelle Centre (Mais)", qtyKg: 18000, unitPrice: 180 },
+        { date: "20/06/2025", parcel: "Parcelle Nord (Riz)", qtyKg: 20000, unitPrice: 245 },
+        { date: "15/08/2025", parcel: "Parcelle Sud (Mais)", qtyKg: 8800, unitPrice: 175 },
+      ];
 
   function million(value) {
     return Number(value || 0) / 1000000;
@@ -146,7 +149,7 @@
 
     if (applyBtn && !applyBtn.dataset.bound) {
       applyBtn.dataset.bound = "1";
-      applyBtn.addEventListener("click", () => {
+      applyBtn.addEventListener("click", async () => {
         const values = recalc();
         if (!values.valid) {
           if (feedbackEl) {
@@ -156,10 +159,41 @@
           }
           return;
         }
+
         const business = SeneBI.getSeasonData(state).business;
         business.salesFcfa = Math.round(values.revenue);
         business.intrantsCostFcfa = Math.round(values.totalCosts);
         SeneBI.saveState(state);
+
+        try {
+          const apiBase = window.SeneBI_SERVER?.apiBase;
+          const csrf = window.SeneBI_SERVER?.csrf;
+          if (apiBase && csrf) {
+            const calcArea = document.getElementById('calcArea');
+            const calcPrice = document.getElementById('calcPrice');
+            const calcIntrants = document.getElementById('calcIntrants');
+            const calcOther = document.getElementById('calcOther');
+            const calcCulture = document.getElementById('calcCulture');
+            await fetch(`${apiBase}/rentabilites`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+              },
+              body: JSON.stringify({
+                parcelle_nom: 'Calculateur rentabilite',
+                culture: calcCulture?.value || 'Global',
+                quantite: Number(calcArea?.value || 0),
+                prix_unitaire: Number(calcPrice?.value || 0),
+                couts_totaux: Number(calcIntrants?.value || 0) + Number(calcOther?.value || 0),
+              }),
+            });
+          }
+        } catch (error) {
+          console.warn('Erreur lors de la sauvegarde de la rentabilite:', error);
+        }
+
         if (feedbackEl) {
           feedbackEl.textContent = "Bilan mis a jour avec les valeurs du calculateur.";
           feedbackEl.className = "form-feedback success";

@@ -436,94 +436,180 @@
           </article>
         </section>
 
-      </main>
+        <section style="margin-top: 24px;">
+          
+          <!-- Première ligne : Activités Récentes + Conseils SeneBI -->
+          <div class="dashboard-row-2" style="display: grid; grid-template-columns: 65fr 35fr; gap: 16px; margin-bottom: 16px; align-items: stretch;">
+            
+            <!-- Activités Récentes -->
+            <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #3b82f6; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';"
+                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
+              @php
+                $activities = \App\Models\Notification::latest()->limit(8)->get();
+              @endphp
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #eff6ff; border: 1px solid #dbeafe;">
+                    <i class="fas fa-list-check" style="font-size: 14px; color: #1e40af;"></i>
+                  </div>
+                  <div>
+                    <h3 style="margin:0; font-size:16px; font-weight: 700; color: #111827;">Activites Recentes</h3>
+                    <div class="small muted">Dernieres actions des agriculteurs</div>
+                  </div>
+                </div>
+                <span class="badge" style="background: #eff6ff; color: #1e40af; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;">{{ $activities->count() }}</span>
+              </div>
+              <div style="flex: 1; padding: 16px;">
+                @if($activities->count() > 0)
+                  <div class="timeline-list" style="max-height: 340px; overflow-y: auto; padding-left: 22px; position: relative;">
+                    <div style="position: absolute; left: 6px; top: 6px; bottom: 6px; width: 2px; background: #e5e7eb; border-radius: 1px;"></div>
+                    @foreach($activities as $activity)
+                      <div class="timeline-item" style="position: relative; padding-bottom: 14px; display: flex; gap: 12px; align-items: flex-start;">
+                        <div style="position: absolute; left: -22px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: {{ $activity->level === 'danger' ? '#ef4444' : ($activity->level === 'warning' ? '#f59e0b' : '#10b981') }}; border: 3px solid #fff; box-shadow: 0 0 0 1px {{ $activity->level === 'danger' ? '#ef4444' : ($activity->level === 'warning' ? '#f59e0b' : '#10b981') }}; flex-shrink: 0;"></div>
+                        <div style="flex: 1; min-width: 0;">
+                          <div style="font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 2px;">{{ $activity->title }}</div>
+                          <div style="font-size: 12px; color: #6b7280; line-height: 1.4;">{{ $activity->message }}</div>
+                          <div style="font-size: 11px; color: #9ca3af; margin-top: 2px;"><i class="fas fa-clock" style="margin-right: 4px;"></i>{{ $activity->created_at->format('d/m/Y H:i') }}</div>
+                        </div>
+                      </div>
+                    @endforeach
+                  </div>
+                @else
+                  <div style="text-align: center; color: #9ca3af; padding: 24px; font-size: 14px;">Aucune activite recente.</div>
+                @endif
+              </div>
+            </article>
 
-        <!-- Section Tableaux de Bord Supplémentaires -->
-        <section class="grid cards-2">
-          <article class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="margin:0; font-size:16px; display:flex; align-items:center; gap:8px;">
-                  <span style="display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <rect x="4" y="10" width="3" height="10" rx="1" fill="#10b981"/>
-                      <rect x="10.5" y="6" width="3" height="14" rx="1" fill="#0ea5e9"/>
-                      <rect x="17" y="3" width="3" height="17" rx="1" fill="#f97316"/>
-                    </svg>
-                  </span>
-                  Statistiques Nationales
-                </h3>
-                <div class="small muted">Vue d'ensemble nationale</div>
+            <!-- Conseils SeneBI -->
+            <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #f59e0b; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';"
+                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #fffbeb; border: 1px solid #fef3c7;">
+                    <i class="fas fa-robot" style="font-size: 14px; color: #92400e;"></i>
+                  </div>
+                  <div>
+                    <h3 style="margin:0; font-size:16px; font-weight: 700; color: #111827;">Conseils SeneBI</h3>
+                    <div class="small muted">Recommandations automatiques</div>
+                  </div>
+                </div>
+                <span class="badge" style="background: #fffbeb; color: #92400e; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;">{{ !empty($recommendations) ? count($recommendations) : 0 }}</span>
               </div>
-              <span class="tag muted">2026</span>
-            </div>
-            <div class="stats-grid">
-              <div class="stat-item">
-                <div class="stat-number">12,450</div>
-                <div class="stat-label">Agriculteurs actifs</div>
+              <div style="flex: 1; padding: 16px;">
+                @if(!empty($recommendations) && count($recommendations) > 0)
+                  <div style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto;">
+                    @foreach($recommendations as $rec)
+                      <div class="advice-chip" style="display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 10px; border: 1px solid {{ $rec['type'] === 'danger' ? '#fecaca' : ($rec['type'] === 'warning' ? '#fef3c7' : '#bbf7d0') }}; background: {{ $rec['type'] === 'danger' ? '#fef2f2' : ($rec['type'] === 'warning' ? '#fffbeb' : '#f0fdf4') }}; transition: all 0.2s ease; cursor: default;"
+                           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.06)';"
+                           onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        <i class="fas fa-robot" style="color: {{ $rec['type'] === 'danger' ? '#ef4444' : ($rec['type'] === 'warning' ? '#f59e0b' : '#10b981') }}; margin-top: 2px; font-size: 13px;"></i>
+                        <span style="font-size: 13px; color: #374151; line-height: 1.5;">{{ $rec['message'] }}</span>
+                      </div>
+                    @endforeach
+                  </div>
+                @else
+                  <div style="text-align: center; color: #9ca3af; padding: 24px; font-size: 14px;">
+                    <i class="fas fa-check-circle" style="font-size: 32px; color: #10b981; margin-bottom: 8px; display: block;"></i>
+                    Tous les indicateurs sont bons.
+                  </div>
+                @endif
               </div>
-              <div class="stat-item">
-                <div class="stat-number">85,320</div>
-                <div class="stat-label">Hectares cultivés</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">2.8M</div>
-                <div class="stat-label">Tonnes récoltées</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">94%</div>
-                <div class="stat-label">Taux de satisfaction</div>
-              </div>
-            </div>
-          </article>
+            </article>
+          </div>
 
-          <article class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="margin:0; font-size:16px; display:flex; align-items:center; gap:8px;">
-                  <span style="display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M12 2L3 7v5c0 5 3.5 9.4 9 10 5.5-.6 9-5 9-10V7l-9-5z" fill="#ef4444"/>
-                      <path d="M12 8v5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M12 16h.01" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                  </span>
-                  Alertes Critiques
-                </h3>
-                <div class="small muted">Surveillance en temps réel</div>
-              </div>
-            </div>
-            <div class="alerts-list">
-              <div class="alert-item critical">
-                <div class="alert-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2L3 7v5c0 5 3.5 9.4 9 10 5.5-.6 9-5 9-10V7l-9-5z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
-                <div class="alert-content">
-                  <div class="alert-title">Stock critique - NPK</div>
-                  <div class="alert-desc">Région de Sikasso - Seuil atteint</div>
-                  <div class="alert-time">Il y a 2 heures</div>
+          <!-- Deuxième ligne : Agriculteurs à Risque -->
+          <section class="grid cards-3">
+            <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #ef4444; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';"
+                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #fef2f2; border: 1px solid #fecaca;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 14px; color: #991b1b;"></i>
+                  </div>
+                  <div>
+                    <h3 style="margin:0; font-size:16px; font-weight: 700; color: #111827;">Agriculteurs a Risque</h3>
+                    <div class="small muted">Necessitent une attention particuliere</div>
+                  </div>
                 </div>
+                <span class="badge" style="background: #fef2f2; color: #991b1b; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;">{{ $atRiskFarmers->count() }}</span>
               </div>
-              <div class="alert-item warning">
-                <div class="alert-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
-                <div class="alert-content">
-                  <div class="alert-title">Rendement faible</div>
-                  <div class="alert-desc">Parcelle Nord - Maïs</div>
-                  <div class="alert-time">Il y a 5 heures</div>
-                </div>
+              <div style="flex: 1; padding: 16px;">
+                @if($atRiskFarmers->count() > 0)
+                  <div class="risk-farmers-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
+                    @foreach($atRiskFarmers as $farmer)
+                      <div class="risk-card" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; transition: all 0.3s ease; animation: fadeUpSoft 0.4s ease both;"
+                           onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 16px 32px rgba(0,0,0,0.08)'; this.style.borderColor='#d1d5db';"
+                           onmouseout="this.style.transform=''; this.style.boxShadow=''; this.style.borderColor='#e5e7eb';">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                          <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; flex-shrink: 0;">
+                            {{ substr($farmer['name'], 0, 2) }}
+                          </div>
+                          <div style="min-width: 0;">
+                            <div style="font-size: 14px; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $farmer['name'] }}</div>
+                            <div style="font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                              <i class="fas fa-map-marker-alt" style="font-size: 10px; color: #ef4444;"></i> {{ $farmer['location'] }}
+                            </div>
+                          </div>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                          @foreach($farmer['risks'] as $risk)
+                            @php
+                              $riskLabels = [
+                                'stock_critique' => 'Stock critique',
+                                'faible_rentabilite' => 'Faible rentabilite',
+                                'faible_activite' => 'Faible activite',
+                              ];
+                              $riskColors = [
+                                'stock_critique' => 'critical',
+                                'faible_rentabilite' => 'warning',
+                                'faible_activite' => 'muted',
+                              ];
+                            @endphp
+                            <span class="badge {{ $riskColors[$risk] ?? 'muted' }}">{{ $riskLabels[$risk] ?? $risk }}</span>
+                          @endforeach
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px;">
+                          <i class="fas fa-clock" style="font-size: 10px;"></i> Derniere visite : {{ $farmer['last_visit'] }}
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px solid #f3f4f6;">
+                          <a href="#" class="btn btn-sm" style="font-size: 12px; padding: 6px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-eye"></i> Details</a>
+                          <a href="{{ url('/manager/visites') }}" class="btn" style="font-size: 12px; padding: 6px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: #10b981; color: #fff; border: none;"><i class="fas fa-calendar-check"></i> Planifier visite</a>
+                        </div>
+                      </div>
+                    @endforeach
+                  </div>
+                @else
+                  <div style="text-align: center; color: #9ca3af; padding: 24px; font-size: 14px;">Aucun agriculteur a risque detecte.</div>
+                @endif
               </div>
-              <div class="alert-item info">
-                <div class="alert-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 7h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 11v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
-                <div class="alert-content">
-                  <div class="alert-title">Météo favorable</div>
-                  <div class="alert-desc">Conditions optimales prévues</div>
-                  <div class="alert-time">Il y a 1 jour</div>
-                </div>
-              </div>
-            </div>
-          </article>
+            </article>
+          </section>
         </section>
 
+        <style>
+          @media (max-width: 1024px) {
+            .dashboard-row-2 { grid-template-columns: 1fr !important; }
+            .risk-farmers-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          }
+          @media (max-width: 768px) {
+            .dashboard-row-2 { grid-template-columns: 1fr !important; }
+            .risk-farmers-grid { grid-template-columns: 1fr !important; }
+          }
+          @keyframes fadeUpSoft {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .timeline-list::-webkit-scrollbar { width: 6px; }
+          .timeline-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+          .btn-sm { font-size: 12px; padding: 6px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; }
+          .btn-sm:hover { background: #e2e8f0 !important; border-color: #cbd5e1 !important; }
+        </style>
+
       </main>
-      <div data-layout="footer"></div>
+      @include('partials.footer-manager')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>

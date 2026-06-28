@@ -53,9 +53,8 @@ Route::prefix('manager')->middleware('auth')->group(function () {
     // Supervision des Agriculteurs (supervision.html)
     Route::get('/supervision', [ManagementController::class, 'supervision'])->name('manager.supervision');
     
-    // Catalogue des Intrants (catalogue.html)
-    Route::get('/catalogue', [ManagementController::class, 'catalogue'])->name('manager.catalogue');
-    Route::post('/catalogue/update', [ManagementController::class, 'updateCatalogue'])->name('manager.catalogue.update');
+    // Analyses BI (analyses-bi.html)
+    Route::get('/analyses-bi', [ManagementController::class, 'analysesBi'])->name('manager.analyses');
     
     // Gestion des Stocks (stocks.html)
     Route::get('/stocks', [ManagementController::class, 'stocks'])->name('manager.stocks');
@@ -68,6 +67,9 @@ Route::prefix('manager')->middleware('auth')->group(function () {
     Route::get('/compte', [ManagementController::class, 'compte'])->name('manager.compte');
     Route::post('/compte/password', [ManagementController::class, 'updatePassword'])->name('manager.compte.password');
 
+    // Notifications manager
+    Route::get('/notifications', [ManagementController::class, 'notifications'])->name('manager.notifications');
+
     // Approbation des clients inscrits
     Route::post('/clients/approve/{user}', [ManagementController::class, 'approveClient'])->name('manager.clients.approve');
 
@@ -76,6 +78,13 @@ Route::prefix('manager')->middleware('auth')->group(function () {
 
     // Suppression définitive des utilisateurs
     Route::delete('/users/{user}', [ManagementController::class, 'destroyUser'])->name('manager.users.destroy')->middleware('auth');
+    Route::prefix('api')->group(function () {
+        Route::get('/notifications', [ManagementController::class, 'notificationsIndexApi']);
+        Route::post('/notifications/read-all', [ManagementController::class, 'notificationsReadAllApi']);
+        Route::delete('/notifications/{notification}', [ManagementController::class, 'notificationsDestroyApi']);
+        Route::get('/farmers/{user}', [ManagementController::class, 'farmerDetailApi']);
+        Route::get('/supervision-stats', [ManagementController::class, 'supervisionStatsApi']);
+    })->middleware('auth');
 });
 
 // --- ESPACE CLIENT (AGRICULTEURS - STRUCTURE CLIENT) ---
@@ -97,6 +106,9 @@ Route::prefix('client')->middleware('auth')->group(function () {
     Route::get('/mon-compte', [ClientController::class, 'compte'])->name('client.compte');
     Route::post('/mon-compte/password', [ClientController::class, 'updatePassword'])->name('client.compte.password');
 
+    // Notifications client
+    Route::get('/notifications', [ClientController::class, 'notifications'])->name('client.notifications');
+
     Route::prefix('api')->group(function () {
         Route::get('/parcelles', [ClientApiController::class, 'parcellesIndex']);
         Route::post('/parcelles', [ClientApiController::class, 'parcellesStore']);
@@ -107,6 +119,11 @@ Route::prefix('client')->middleware('auth')->group(function () {
         Route::put('/stocks/{stock}', [ClientApiController::class, 'stocksUpdate']);
         Route::post('/consommation', [ClientApiController::class, 'storeConsommation']);
         Route::post('/stocks/entree', [ClientApiController::class, 'addStockEntree']);
+        Route::get('/notifications', [ClientApiController::class, 'notificationsIndex']);
+        Route::post('/notifications/read-all', [ClientApiController::class, 'notificationsReadAll']);
+        Route::delete('/notifications/{notification}', [ClientApiController::class, 'notificationsDestroy']);
+        Route::post('/recoltes', [ClientApiController::class, 'storeHarvest']);
+        Route::post('/rentabilites', [ClientApiController::class, 'storeRentabilite']);
     })->middleware('auth');
 });
 

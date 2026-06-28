@@ -12,18 +12,23 @@
 
   window.getUiParcelsFromServer = function () {
     if (!Array.isArray(cfg.parcelles)) return null;
-    return cfg.parcelles.map((p) => ({
-      id: String(p.id),
-      name: p.nom,
-      culture: p.culture,
-      areaHa: Number(p.surface),
-      status: "En culture",
-      growth: 50,
-      cost: 0,
-      performance: null,
-      plantingDate: null,
-      region: p.region,
-    }));
+    const statsMap = new Map((Array.isArray(cfg.parcelleStats) ? cfg.parcelleStats : []).map(s => [String(s.id), s]));
+    return cfg.parcelles.map((p) => {
+      const stat = statsMap.get(String(p.id)) || {};
+      return {
+        id: String(p.id),
+        name: p.nom,
+        culture: p.culture,
+        areaHa: Number(p.surface),
+        status: "En culture",
+        growth: 50,
+        cost: 0,
+        performance: stat.badge || null,
+        performanceClass: stat.badgeClass || null,
+        plantingDate: null,
+        region: p.region,
+      };
+    });
   };
 
   async function refreshParcelles() {

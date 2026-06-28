@@ -64,10 +64,8 @@ class DashboardController extends Controller
                     return $recolte->parcelle ? $recolte->parcelle->surface : 0;
                 });
 
-                // Calculer le rendement (quantité / surface)
                 $rendement = $totalSurface > 0 ? ($totalQuantite / $totalSurface) : 0;
 
-                // Trouver la culture principale
                 $culturePrincipale = $recoltes->groupBy('culture')
                     ->map(fn($group) => $group->sum('quantite'))
                     ->sortDesc()
@@ -86,6 +84,68 @@ class DashboardController extends Controller
             ->take(3)
             ->values();
 
+        // Agriculteurs à risque
+        $atRiskFarmers = User::where('role', 'client')
+            ->where('is_active', true)
+            ->where('status', 'approved')
+            ->with(['stocks', 'recoltes', 'visites'])
+            ->get()
+            ->filter(function ($client) {
+                $criticalStocks = $client->stocks->where('quantite_actuelle', '<=', 'seuil_critique')->count();
+                $totalBenefice = $client->recoltes->sum('benefice_net');
+                $isLowProfitability = $totalBenefice < 0;
+                $lastVisit = $client->visites->sortByDesc('date_visite')->first();
+                $isInactive = $lastVisit ? $lastVisit->date_visite->lt(now()->subMonths(2)) : true;
+
+                return $criticalStocks > 0 || $isLowProfitability || $isInactive;
+            })
+            ->map(function ($client) {
+                $risks = [];
+                $criticalStocks = $client->stocks->where('quantite_actuelle', '<=', 'seuil_critique')->count();
+                if ($criticalStocks > 0) {
+                    $risks[] = 'stock_critique';
+                }
+                $totalBenefice = $client->recoltes->sum('benefice_net');
+                if ($totalBenefice < 0) {
+                    $risks[] = 'faible_rentabilite';
+                }
+                $lastVisit = $client->visites->sortByDesc('date_visite')->first();
+                if (!$lastVisit || $lastVisit->date_visite->lt(now()->subMonths(2))) {
+                    $risks[] = 'faible_activite';
+                }
+
+                return [
+                    'id' => $client->id,
+                    'name' => $client->name,
+                    'location' => $client->location ?? 'Non spécifié',
+                    'risks' => $risks,
+                    'critical_stocks' => $criticalStocks,
+                    'last_visit' => $lastVisit ? $lastVisit->date_visite->format('d/m/Y') : 'Jamais',
+                ];
+            })
+            ->values();
+
+        // Activités récentes
+        $recentActivities = \App\Models\Notification::where('user_id', 'like', '%')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        // Conseils intelligents
+        $recommendations = [];
+        if ($pendingClients > 0) {
+            $recommendations[] = ['type' => 'warning', 'message' => "{$pendingClients} agriculteur(s) en attente d'approbation"];
+        }
+        if ($criticalStocks > 0) {
+            $recommendations[] = ['type' => 'danger', 'message' => "{$criticalStocks} stock(s) critique(s) détecté(s) chez les agriculteurs"];
+        }
+        if ($atRiskFarmers->count() > 0) {
+            $recommendations[] = ['type' => 'danger', 'message' => "{$atRiskFarmers->count()} agriculteur(s) nécessitent une attention particulière"];
+        }
+        if ($totalRecoltes === 0) {
+            $recommendations[] = ['type' => 'info', 'message' => "Aucune récolte enregistrée cette saison"];
+        }
+
         return view('dashboard', compact(
             'totalUsers',
             'activeClients',
@@ -97,7 +157,10 @@ class DashboardController extends Controller
             'totalRecoltes',
             'recentVisits',
             'stockAlerts',
-            'topClients'
+            'topClients',
+            'atRiskFarmers',
+            'recentActivities',
+            'recommendations'
         ));
     }
 }

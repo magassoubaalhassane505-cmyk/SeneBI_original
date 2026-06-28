@@ -56,6 +56,14 @@ class RegisterController extends Controller
 
         User::create($data);
 
+        \App\Models\Notification::notifyManager(
+            'inscription',
+            'Nouvelle inscription agriculteur',
+            "Nouvelle demande d'inscription de {$data['name']} ({$data['company']}) - {$data['location']}.",
+            'info',
+            url('/manager/supervision')
+        );
+
         return redirect()->route('login')
             ->with('status', 'Votre demande d\'inscription a bien été enregistrée. Elle est en attente de validation par l\'équipe SeneBI.');
     }

@@ -147,6 +147,27 @@
         background: #fef3c7;
         color: #92400e;
       }
+
+      @media (max-width: 1024px) {
+        .visits-row-1 { grid-template-columns: 1fr !important; }
+        .visits-row-2 { grid-template-columns: 1fr !important; }
+      }
+
+      @media (max-width: 768px) {
+        .visit-form-horizontal .form-row { grid-template-columns: 1fr !important; }
+        .visits-row-1 { grid-template-columns: 1fr !important; }
+        .visits-row-2 { grid-template-columns: 1fr !important; }
+        .visit-card-modern { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+        .visit-calendar-badge { width: 100% !important; height: auto !important; flex-direction: row !important; gap: 10px !important; align-items: center !important; padding: 10px !important; }
+      }
+
+      @keyframes fadeUpSoft {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .visit-card-modern { animation: fadeUpSoft .45s ease both; }
+      .urgent-card { animation: fadeUpSoft .45s ease both; }
     </style>
   </head>
   <body data-page="visits">
@@ -161,100 +182,157 @@
           </div>
         </div>
 
-        <!-- Zone Supérieure : Consultation -->
-        <div class="consultation-zone">
-          <!-- Section Gauche : Calendrier/Liste des visites -->
-          <section class="visits-calendar">
-            <article class="card">
-              <div class="card-header">
-                <div>
-                  <h3 style="margin:0; font-size:16px;">Visites Prévues</h3>
-                  <div class="small muted">Planning de la semaine</div>
-                </div>
-                <span class="tag muted">Semaine</span>
+        <!-- Première ligne : Visites prévues + Visites urgentes -->
+        <div class="visits-row-1" style="display: grid; grid-template-columns: 65fr 35fr; gap: 16px; margin-bottom: 16px; align-items: stretch;">
+          
+          <!-- Visites prévues -->
+          <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #3b82f6; transition: all 0.3s ease;"
+                   onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';"
+                   onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div class="card-header">
+              <div>
+                <h3 style="margin:0; font-size:16px; font-weight:700; color:#111827;">Visites Prevues</h3>
+                <div class="small muted">Planning de la semaine</div>
               </div>
-              
-              <div class="visits-list" id="visitsList">
-                @foreach($visites as $visite)
-                  <div class="visit-item">
-                    <div class="visit-date">
-                      <span class="visit-day">{{ $visite->date_visite->format('d') }}</span>
-                      <span class="visit-month">{{ $visite->date_visite->format('M') }}</span>
-                      <span class="visit-time">{{ $visite->date_visite->format('H:i') }}</span>
+              <span class="badge" style="background:#eff6ff; color:#1e40af; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700;">{{ $visites->count() }}</span>
+            </div>
+            <div style="flex:1; padding:0;">
+              @foreach($visites as $visite)
+                <div class="visit-card-modern" style="display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid #f3f4f6; transition:background .2s ease; animation: fadeUpSoft .45s ease both;"
+                     onmouseover="this.style.background='#f8fafc';"
+                     onmouseout="this.style.background='transparent';">
+                  <div class="visit-calendar-badge" style="min-width:64px; height:68px; border-radius:12px; background:linear-gradient(135deg,#eff6ff,#dbeafe); border:1px solid #bfdbfe; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(59,130,246,0.08);">
+                    <span style="font-size:20px; font-weight:900; color:#1e40af; line-height:1;">{{ $visite->date_visite->format('d') }}</span>
+                    <span style="font-size:11px; font-weight:700; color:#3b82f6; text-transform:uppercase; margin-top:2px;">{{ $visite->date_visite->format('M') }}</span>
+                    <span style="font-size:10px; color:#64748b; margin-top:2px;"><i class="fas fa-clock" style="margin-right:3px;"></i>{{ $visite->date_visite->format('H:i') }}</span>
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:14px; font-weight:700; color:#111827; margin-bottom:2px;">{{ $visite->user->name ?? 'N/A' }}</div>
+                    <div style="font-size:12px; color:#6b7280; display:flex; align-items:center; gap:4px; margin-bottom:2px;"><i class="fas fa-map-marker-alt" style="font-size:10px; color:#ef4444;"></i> {{ $visite->user->location ?? 'Non spécifié' }}</div>
+                    <div style="font-size:12px; color:#475569;">Motif : {{ $visite->action_effectuee }}</div>
+                  </div>
+                  <div>
+                    @php
+                      $statusClass = match(true) {
+                        $visite->date_visite->lt(now()) => 'muted',
+                        default => 'planifie',
+                      };
+                      $statusLabel = match(true) {
+                        $visite->date_visite->lt(now()) => 'Terminée',
+                        default => 'Planifiée',
+                      };
+                    @endphp
+                    <span class="status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                  </div>
+                </div>
+              @endforeach
+
+              @if($visites->isEmpty())
+                <div style="text-align:center; padding:32px; color:#9ca3af; font-size:14px;">Aucune visite planifiée.</div>
+              @endif
+            </div>
+          </article>
+
+          <!-- Visites urgentes -->
+          <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #ef4444; transition: all 0.3s ease;"
+                   onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';"
+                   onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div class="card-header">
+              <div>
+                <h3 style="margin:0; font-size:16px; font-weight:700; color:#111827;"><i class="fas fa-triangle-exclamation" style="color:#ef4444; margin-right:6px; font-size:13px;"></i>Visites Urgentes</h3>
+                <div class="small muted">Agriculteurs en situation critique</div>
+              </div>
+              <span class="badge" style="background:#fef2f2; color:#991b1b; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700;">{{ $urgentClients->count() }}</span>
+            </div>
+            <div style="flex:1; padding:12px;">
+              @if ($urgentClients->count() > 0)
+                @foreach ($urgentClients as $urgentClient)
+                  <div class="urgent-card" style="display:flex; align-items:flex-start; gap:10px; padding:12px; border-radius:12px; border:1px solid #fecaca; background:#fff; margin-bottom:10px; transition:all .2s ease; cursor:default;"
+                       onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 20px rgba(239,68,68,0.08)';this.style.borderColor='#fca5a5';"
+                       onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='#fecaca';">
+                    <div style="width:32px; height:32px; border-radius:10px; background:#fef2f2; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                      <i class="fas fa-circle-exclamation" style="color:#ef4444; font-size:14px;"></i>
                     </div>
-                    <div class="visit-details">
-                      <div class="visit-person">{{ $visite->user->name ?? 'N/A' }}</div>
-                      <div class="visit-location">{{ $visite->user->location ?? 'Non spécifié' }}</div>
-                      <div class="visit-purpose">{{ $visite->action_effectuee }}</div>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:13px; font-weight:700; color:#111827; margin-bottom:2px;">{{ $urgentClient['name'] }}</div>
+                      <div style="font-size:12px; color:#6b7280; display:flex; align-items:center; gap:4px; margin-bottom:2px;"><i class="fas fa-map-marker-alt" style="font-size:10px; color:#ef4444;"></i> {{ $urgentClient['location'] }}</div>
+                      <div style="font-size:12px; color:#991b1b; font-weight:600;">Stock {{ $urgentClient['intrant'] }} <span style="background:#fef2f2; padding:2px 6px; border-radius:999px; font-size:11px; border:1px solid #fecaca;">{{ $urgentClient['percentage'] }}%</span></div>
                     </div>
-                    <div class="visit-status">
-                      <span class="status-badge planifie">Planifié</span>
-                    </div>
+                    <button class="btn" style="font-size:11px; padding:6px 10px; border-radius:8px; background:#ef4444; color:#fff; border:none; cursor:pointer; white-space:nowrap;" onclick="planUrgentVisit(this, '{{ $urgentClient['name'] }}', '{{ $urgentClient['location'] }}', 'Contrôle stock {{ $urgentClient['intrant'] }}')">Planifier</button>
                   </div>
                 @endforeach
-
-                @if($visites->isEmpty())
-                  <div style="text-align: center; padding: 40px; color: var(--muted);">
-                    <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
-                    <p>Aucune visite planifiée</p>
-                    <p style="font-size: 12px;">Utilisez le formulaire pour planifier votre première visite</p>
-                  </div>
-                @endif
-              </div>
-            </article>
-          </section>
-
-          <!-- Section Droite : Urgences -->
-          <section class="visits-urgent-section">
-            <article class="card urgent-visits">
-              <div class="card-header">
-                <div>
-                  <h3 style="margin:0; font-size:16px;">
-                    <span style="color: var(--danger); margin-right: 6px;">⚠️</span>
-                    Visites Urgentes
-                  </h3>
-                  <div class="small muted">Agriculteurs en situation critique</div>
+              @else
+                <div style="text-align:center; color:#9ca3af; padding:20px; font-size:14px;">
+                  <i class="fas fa-check-circle" style="font-size:32px; color:#10b981; margin-bottom:8px; display:block;"></i>
+                  Aucune urgence détectée.
                 </div>
-                <span class="tag danger">Urgence</span>
+              @endif
+            </div>
+            <div style="padding:12px 16px; border-top:1px solid #f3f4f6; background:#fafafa; border-radius:0 0 12px 12px; display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-size:12px; color:#64748b;">Total urgences</span>
+              <span style="font-size:14px; font-weight:800; color:#111827;">{{ $urgentClients->count() }}</span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Troisième ligne : Historique des visites -->
+        <div class="visits-row-2" style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; align-items: stretch;">
+          
+          <!-- Historique des visites -->
+          <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #3b82f6; transition: all 0.3s ease;"
+                   onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';"
+                   onmouseout="this.style.transform='';this.style.boxShadow='';">
+            <div class="card-header">
+              <div>
+                <h3 style="margin:0; font-size:16px; font-weight:700; color:#111827;">Historique des Visites</h3>
+                <div class="small muted">Toutes les visites enregistrées</div>
               </div>
-              
-              <div class="urgent-list" id="urgentList">
-                @if ($urgentClients->count() > 0)
-                  @foreach ($urgentClients as $urgentClient)
-                    <div style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--border);">
-                      <div style="width: 8px; height: 8px; background: var(--danger); border-radius: 50%; margin-right: 12px;"></div>
-                      <div style="flex: 1;">
-                        <div style="font-weight: 600; margin-bottom: 2px;">{{ $urgentClient['name'] }}</div>
-                        <div style="font-size: 14px; color: var(--muted); margin-bottom: 2px;">{{ $urgentClient['location'] }}</div>
-                        <div style="font-size: 13px; color: var(--danger);">Stock {{ $urgentClient['intrant'] }} ({{ $urgentClient['percentage'] }}%)</div>
-                      </div>
-                      <button class="btn" style="background: var(--danger); color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px;" onclick="planUrgentVisit(this, '{{ $urgentClient['name'] }}', '{{ $urgentClient['location'] }}', 'Contrôle stock {{ $urgentClient['intrant'] }}')">
-                        Planifier visite
-                      </button>
-                    </div>
+              <span class="badge" style="background:#eff6ff; color:#1e40af; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700;">{{ $allVisites->count() }}</span>
+            </div>
+            <div style="flex:1; padding:0; overflow:auto; max-height: 420px;">
+              <table class="table table-compact" style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead>
+                  <tr style="background:#f8fafc; position:sticky; top:0;">
+                    <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.3px; border-bottom:1px solid #e5e7eb;">Date</th>
+                    <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.3px; border-bottom:1px solid #e5e7eb;">Agriculteur</th>
+                    <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.3px; border-bottom:1px solid #e5e7eb;">Localisation</th>
+                    <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.3px; border-bottom:1px solid #e5e7eb;">Motif</th>
+                    <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.3px; border-bottom:1px solid #e5e7eb;">Statut</th>
+                    <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.3px; border-bottom:1px solid #e5e7eb;">Compte rendu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($allVisites as $visite)
+                    @php
+                      $statusClass = match(true) {
+                        $visite->date_visite->lt(now()) => 'muted',
+                        default => 'ok',
+                      };
+                      $statusLabel = match(true) {
+                        $visite->date_visite->lt(now()) => 'Effectuée',
+                        default => 'Planifiée',
+                      };
+                    @endphp
+                    <tr style="border-bottom:1px solid #f1f5f9; transition:background .2s ease; cursor:default;"
+                        onmouseover="this.style.background='#f8fafc';"
+                        onmouseout="this.style.background='transparent';">
+                      <td style="padding:12px 14px; color:#374151; font-weight:500; white-space:nowrap;">{{ $visite->date_visite->format('d/m/Y H:i') }}</td>
+                      <td style="padding:12px 14px; color:#111827; font-weight:600;">{{ $visite->user->name ?? 'N/A' }}</td>
+                      <td style="padding:12px 14px; color:#475569;">{{ $visite->user->location ?? 'Non spécifié' }}</td>
+                      <td style="padding:12px 14px; color:#374151;">{{ $visite->action_effectuee }}</td>
+                      <td style="padding:12px 14px;"><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                      <td style="padding:12px 14px; color:#64748b;">{{ Str::limit($visite->recommandation ?? 'Aucun', 40) }}</td>
+                    </tr>
                   @endforeach
-                @else
-                  <div style="text-align: center; padding: 24px; color: var(--muted);">
-                    <p style="margin: 0; font-size: 14px;">Aucun stock enregistré</p>
-                    <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--muted);">Les stocks des clients apparaîtront ici</p>
-                  </div>
-                @endif
-              </div>
-
-              <!-- Widget de Statut -->
-              <div class="status-widget">
-                <div class="status-summary">
-                  <div class="status-number">
-                    <span class="status-count" id="urgentCount">{{ $urgentClients->count() }}</span>
-                    <span class="status-label">Total Urgences</span>
-                  </div>
-                  <div class="status-tip">
-                    Priorité aux stocks d'Urée ce mois-ci
-                  </div>
-                </div>
-              </div>
-            </article>
-          </section>
+                  @if($allVisites->isEmpty())
+                    <tr>
+                      <td colspan="6" style="text-align:center; color:#9ca3af; padding:24px;">Aucune visite enregistrée.</td>
+                    </tr>
+                  @endif
+                </tbody>
+              </table>
+            </div>
+          </article>
         </div>
 
         <!-- Zone Inférieure : Action -->
@@ -315,8 +393,95 @@
             </form>
           </article>
         </section>
+
+        <section class="grid cards-2">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 style="margin:0; font-size:16px;">Historique des Visites</h3>
+                <div class="small muted">Toutes les visites enregistrees</div>
+              </div>
+              <span class="tag muted">Archives</span>
+            </div>
+            <div style="overflow:auto; max-height: 420px;">
+              <table class="table table-compact">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Agriculteur</th>
+                    <th>Localisation</th>
+                    <th>Motif</th>
+                    <th>Statut</th>
+                    <th>Compte rendu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($allVisites as $visite)
+                    @php
+                      $statusClass = match(true) {
+                        $visite->date_visite->lt(now()) => 'muted',
+                        default => 'ok',
+                      };
+                      $statusLabel = match(true) {
+                        $visite->date_visite->lt(now()) => 'Effectuée',
+                        default => 'Planifiée',
+                      };
+                    @endphp
+                    <tr>
+                      <td>{{ $visite->date_visite->format('d/m/Y H:i') }}</td>
+                      <td>{{ $visite->user->name ?? 'N/A' }}</td>
+                      <td>{{ $visite->user->location ?? 'Non spécifie' }}</td>
+                      <td>{{ $visite->action_effectuee }}</td>
+                      <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                      <td>{{ Str::limit($visite->recommandation ?? 'Aucun', 40) }}</td>
+                    </tr>
+                  @endforeach
+                  @if($allVisites->isEmpty())
+                    <tr>
+                      <td colspan="6" style="text-align:center; color:#9ca3af; padding: 20px;">Aucune visite enregistree.</td>
+                    </tr>
+                  @endif
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 style="margin:0; font-size:16px;">Rapports Urgents</h3>
+                <div class="small muted">Visites urgentes et alertes</div>
+              </div>
+              <span class="tag danger">Urgences</span>
+            </div>
+            <div style="padding: 16px;">
+              @if($urgentClients->count() > 0)
+                @foreach($urgentClients as $urgentClient)
+                  <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; padding: 12px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-top: 2px;"></i>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 2px;">{{ $urgentClient['name'] }}</div>
+                      <div style="font-size: 12px; color: #6b7280;">Stock {{ $urgentClient['intrant'] }} à {{ $urgentClient['percentage'] }}%</div>
+                      <div style="font-size: 11px; color: #9ca3af; margin-top: 2px;">Dernière visite : {{ $urgentClient['last_visit'] ?? 'Jamais' }}</div>
+                    </div>
+                    <a href="#visitForm" class="btn" style="font-size:12px; padding:6px 12px; background:#ef4444; color:white; border:none; border-radius:8px; text-decoration:none;">Planifier</a>
+                  </div>
+                @endforeach
+              @else
+                <div style="text-align: center; color: #9ca3af; padding: 20px; font-size: 14px;">
+                  <i class="fas fa-check-circle" style="font-size: 32px; color: #10b981; margin-bottom: 8px; display: block;"></i>
+                  Aucune urgence detectee.
+                </div>
+              @endif
+            </div>
+          </article>
+        </section>
+
       </main>
-      <script src="{{ asset('assets/js/layout.js') }}"></script>
+      @include('partials.footer-manager')
+    </div>
+
+    <script src="{{ asset('assets/js/layout.js') }}"></script>
       <script src="{{ asset('assets/js/core.js') }}"></script>
       <script src="{{ asset('assets/js/auth.js') }}"></script>
       <script src="{{ asset('assets/js/visits-control.js') }}"></script>

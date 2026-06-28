@@ -71,6 +71,7 @@
           </section>
         </div>
       </main>
+      @include('partials.footer-client')
     </div>
 
     <script src="{{ asset('assets/js/layout.js') }}"></script>

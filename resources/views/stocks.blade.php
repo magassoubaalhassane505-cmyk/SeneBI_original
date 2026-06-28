@@ -151,8 +151,78 @@
           </div>
         </section>
 
+        <section class="grid cards-2">
+          <article class="card">
+            <h3 class="section-title">Historique des Mouvements</h3>
+            <div style="overflow:auto; max-height: 360px;">
+              <table class="table table-compact">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Intrant</th>
+                    <th>Type</th>
+                    <th>Quantite</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($mouvements as $m)
+                    <tr>
+                      <td>{{ \Carbon\Carbon::parse($m->date_mouvement)->format('d/m/Y H:i') }}</td>
+                      <td>{{ $m->stock->nom ?? 'N/A' }}</td>
+                      <td>
+                        @php
+                          $typeClass = match($m->type) {
+                            'entree' => 'ok',
+                            'ajustement' => 'muted',
+                            'utilisation' => 'warning',
+                            default => 'muted',
+                          };
+                          $typeLabel = match($m->type) {
+                            'entree' => 'Entree',
+                            'ajustement' => 'Ajustement',
+                            'utilisation' => 'Consommation',
+                            default => ucfirst($m->type),
+                          };
+                        @endphp
+                        <span class="badge {{ $typeClass }}">{{ $typeLabel }}</span>
+                      </td>
+                      <td>{{ number_format($m->quantite, 0, ',', ' ') }} kg</td>
+                    </tr>
+                  @endforeach
+                  @if($mouvements->isEmpty())
+                    <tr>
+                      <td colspan="4" style="text-align:center; color:#9ca3af; padding: 20px;">Aucun mouvement enregistre.</td>
+                    </tr>
+                  @endif
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="section-title">Prevision d'Epuisement des Stocks</h3>
+            <p class="small muted" style="margin-bottom: 12px;">Estimation basee sur la consommation moyenne des 30 derniers jours.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              @foreach($stockForecasts as $forecast)
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f9fafb; border-radius: 8px; border-left: 4px solid {{ $forecast['est_critique'] ? '#ef4444' : '#10b981' }};">
+                  <div>
+                    <div style="font-weight: 600; font-size: 14px; color: #111827;">{{ $forecast['nom'] }}</div>
+                    <div class="small muted">Stock restant : {{ number_format($forecast['quantite'], 0, ',', ' ') }} kg</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 700; font-size: 16px; color: {{ $forecast['jours_restants'] <= 7 ? '#ef4444' : ($forecast['jours_restants'] <= 30 ? '#f59e0b' : '#10b981') }};">
+                      {{ $forecast['jours_restants'] <= 0 ? 'Epuise' : $forecast['jours_restants'] . ' j' }}
+                    </div>
+                    <div class="small muted">restants</div>
+                  </div>
+                </div>
+              @endforeach
+            </div>
+          </article>
+        </section>
+
       </main>
-      <div data-layout="footer"></div>
+      @include('partials.footer-client')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>

@@ -335,7 +335,7 @@
 
         <section class="parcels-list" id="parcelsList"></section>
       </main>
-      <div data-layout="footer"></div>
+      @include('partials.footer-client')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -345,6 +345,7 @@
         csrf: @json(csrf_token()),
         apiBase: @json(url('/client/api')),
         parcelles: @json($parcelles),
+        parcelleStats: @json($parcelleStats ?? collect()),
       };
     </script>
     <script src="{{ asset('assets/js/layout.js') }}"></script>
@@ -361,47 +362,63 @@
         // FONCTION DE SAUVEGARDE INTELLIGENTE MULTI-CLIENTS
         function saveHarvestToSharedStorage(harvestData) {
           try {
-            // Récupérer la liste des récoltes déjà existante (si elle existe)
             let existingHarvests = JSON.parse(localStorage.getItem('total_recolte_senebi') || '[]');
-            
-            // Créer la nouvelle récolte avec timestamp et infos complètes
             const newHarvest = {
               ...harvestData,
               timestamp: new Date().toISOString(),
-              saison: '2026', // Saison actuelle
-              id: Date.now() // ID unique pour cette récolte
+              saison: '2026',
+              id: Date.now()
             };
-            
-            // Ajouter la nouvelle récolte à la liste existante (au lieu d'écraser)
             existingHarvests.push(newHarvest);
-            
-            // Sauvegarder la liste mise à jour
             localStorage.setItem('total_recolte_senebi', JSON.stringify(existingHarvests));
-            
-            // Calculer et sauvegarder les totaux par client
             const totalsByClient = {};
             existingHarvests.forEach(harvest => {
               const client = harvest.client || 'Inconnu';
-              if (!totalsByClient[client]) {
-                totalsByClient[client] = 0;
-              }
-              totalsByClient[client] += parseFloat(harvest.quantite || 0);
+              totalsByClient[client] = (totalsByClient[client] || 0) + parseFloat(harvest.quantite || 0);
             });
-            
-            // Sauvegarder les totaux par client
             localStorage.setItem('totaux_par_client', JSON.stringify(totalsByClient));
-            
-            // Calculer et sauvegarder le total général
             const totalQuantity = existingHarvests.reduce((sum, harvest) => sum + parseFloat(harvest.quantite || 0), 0);
             localStorage.setItem('total_quantite_recoltee', totalQuantity.toString());
-            
-            console.log('✅ Récolte sauvegardée pour le client:', harvestData.client);
-            console.log('📊 Total cumulé des récoltes:', totalQuantity + ' kg');
-            console.log('👥 Totaux par client:', totalsByClient);
-            
+            console.log('Récolte sauvegardée pour le client:', harvestData.client);
             return true;
           } catch (error) {
-            console.error('❌ Erreur lors de la sauvegarde de la récolte:', error);
+            console.error('Erreur lors de la sauvegarde de la récolte:', error);
+            return false;
+          }
+        }
+
+        async function saveHarvestToDatabase(harvestData) {
+          try {
+            const selectEl = document.getElementById('parcelle-recoltee');
+            const parcelleId = selectEl ? selectEl.value : null;
+            if (!parcelleId) {
+              console.warn('ID de parcelle manquant, impossible de sauvegarder en base.');
+              return false;
+            }
+            const response = await fetch(`${window.SeneBI_SERVER.apiBase}/recoltes`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': window.SeneBI_SERVER.csrf || '',
+              },
+              body: JSON.stringify({
+                parcelle_id: parseInt(parcelleId),
+                date: harvestData.date,
+                quantite: harvestData.quantite,
+                culture: harvestData.culture,
+              }),
+            });
+            if (!response.ok) {
+              const text = await response.text();
+              console.error('Erreur API recolte:', response.status, text);
+              return false;
+            }
+            const result = await response.json();
+            console.log('Récolte sauvegardée en base:', result);
+            return true;
+          } catch (error) {
+            console.error('Erreur lors de la sauvegarde en base:', error);
             return false;
           }
         }
@@ -435,10 +452,13 @@
               rendementEstime: calculateRendementEstime(parcelle, parseFloat(quantite)) // Fonction helper
             };
             
-            // Sauvegarder dans le localStorage partagé
-            const success = saveHarvestToSharedStorage(harvestData);
+            // Sauvegarder dans le localStorage partagé (pour compatibilité)
+            const successLocal = saveHarvestToSharedStorage(harvestData);
             
-            if (success) {
+            // Sauvegarder dans la base de données via API
+            const apiSuccess = await saveHarvestToDatabase(harvestData);
+            
+            if (apiSuccess || successLocal) {
               // Afficher un message de succès
               showSuccessMessage('Récolte enregistrée avec succès ! Données transmises au manager SeneBI.');
               

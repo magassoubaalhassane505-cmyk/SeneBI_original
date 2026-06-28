@@ -245,71 +245,166 @@
           </article>
         </section>
       </main>
-      <div data-layout="footer"></div>
+      @include('partials.footer-manager')
     </div>
 
-    <!-- Modal pour les détails de l'agriculteur -->
+    <!-- Modal premium pour les détails de l'agriculteur -->
     <div id="farmerModal" class="modal-overlay" hidden>
-      <div class="modal-content">
-        <!-- En-tête de la modal -->
-        <div class="modal-header">
-          <div class="modal-title">
-            <h2 id="modalFarmerName">Mamadou Diallo</h2>
-            <span id="modalFarmerLocation" class="modal-location">Bamako</span>
+      <div class="modal-content premium-modal" style="max-width: 1100px; width: 96%; max-height: 92vh; overflow-y: auto; border-radius: 20px; padding: 0; animation: modalSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <!-- En-tête moderne avec avatar -->
+        <div class="modal-header-modern" style="padding: 24px 28px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #fff; z-index: 10; border-radius: 20px 20px 0 0;">
+          <div class="modal-profile" style="display: flex; align-items: center; gap: 16px;">
+            <div class="modal-avatar" id="modalAvatar" style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; font-weight: 800; box-shadow: 0 8px 20px rgba(16,185,129,0.25);">MD</div>
+            <div class="modal-profile-info">
+              <h2 id="modalFarmerName" style="margin: 0; font-size: 20px; font-weight: 800; color: #111827; line-height: 1.2;">Mamadou Diallo</h2>
+              <span id="modalFarmerLocation" style="font-size: 13px; color: #6b7280; display: inline-flex; align-items: center; gap: 6px; margin-top: 2px;"><i class="fas fa-map-marker-alt" style="color: #ef4444;"></i> Bamako</span>
+              <span id="modalStatusBadge" class="status-badge success" style="display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #dcfce7; color: #166534;"><i class="fas fa-check-circle"></i> Actif</span>
+            </div>
           </div>
-          <button class="modal-close" onclick="closeFarmerModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+          <button class="modal-close" onclick="closeFarmerModal()" style="background: #f8fafc; border: 1px solid #e5e7eb; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
 
-        <!-- Corps de la modal avec deux colonnes -->
-        <div class="modal-body">
-          <!-- Colonne gauche : Jauge de Stock -->
-          <div class="modal-left">
-            <div class="modal-section">
-              <h3>Jauge de Stock</h3>
-              <div class="stock-chart-container">
-                <canvas id="stockChart" width="200" height="200"></canvas>
+        <!-- Corps de la modale premium -->
+        <div class="modal-body-modern" style="padding: 24px 28px;">
+          
+          <!-- Section KPI alignés -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+            <div class="kpi-card-modern" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; border-radius: 14px; padding: 16px; text-align: center; transition: transform 0.2s ease;">
+              <div style="font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;"><i class="fas fa-chart-line" style="margin-right: 4px;"></i>Rendement</div>
+              <div id="modalRendement" style="font-size: 22px; font-weight: 800; color: #14532d;">2.4 t/ha</div>
+            </div>
+            <div class="kpi-card-modern" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #bfdbfe; border-radius: 14px; padding: 16px; text-align: center; transition: transform 0.2s ease;">
+              <div style="font-size: 11px; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;"><i class="fas fa-weight-hanging" style="margin-right: 4px;"></i>Production</div>
+              <div id="modalProduction" style="font-size: 22px; font-weight: 800; color: #1e3a8a;">12,450 kg</div>
+            </div>
+            <div class="kpi-card-modern" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fef08a; border-radius: 14px; padding: 16px; text-align: center; transition: transform 0.2s ease;">
+              <div style="font-size: 11px; font-weight: 700; color: #854d0e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;"><i class="fas fa-coins" style="margin-right: 4px;"></i>Chiffre d'affaires</div>
+              <div id="modalCA" style="font-size: 22px; font-weight: 800; color: #713f12;">1.8M FCFA</div>
+            </div>
+            <div class="kpi-card-modern" style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1px solid #fecaca; border-radius: 14px; padding: 16px; text-align: center; transition: transform 0.2s ease;">
+              <div style="font-size: 11px; font-weight: 700; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;"><i class="fas fa-piggy-bank" style="margin-right: 4px;"></i>Bénéfice net</div>
+              <div id="modalBenefice" style="font-size: 22px; font-weight: 800; color: #7f1d1d;">+450K FCFA</div>
+            </div>
+          </div>
+
+          <!-- Section Analyse SeneBI -->
+          <div id="modalAnalysisSection" style="margin-bottom: 20px; padding: 14px 18px; background: linear-gradient(90deg, #f8fafc, #f1f5f9); border: 1px solid #e2e8f0; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px;">
+            <div style="width: 32px; height: 32px; border-radius: 10px; background: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(16,185,129,0.25);">
+              <i class="fas fa-robot" style="color: #fff; font-size: 14px;"></i>
+            </div>
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Analyse SeneBI</div>
+              <div id="modalAnalysisText" style="font-size: 13px; color: #475569; line-height: 1.5;">Analyse en cours...</div>
+            </div>
+          </div>
+
+          <!-- Onglets modernes -->
+          <div style="margin-bottom: 20px;">
+            <div class="tabs-nav-modern" style="display: flex; gap: 8px; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px;">
+              <button class="tab-btn-modern active" data-tab="stocks" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: none; background: transparent; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s ease;">
+                <i class="fas fa-boxes" style="font-size: 12px;"></i> Stocks
+              </button>
+              <button class="tab-btn-modern" data-tab="cultures" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: none; background: transparent; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s ease;">
+                <i class="fas fa-seedling" style="font-size: 12px;"></i> Cultures
+              </button>
+              <button class="tab-btn-modern" data-tab="visites" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: none; background: transparent; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s ease;">
+                <i class="fas fa-calendar-check" style="font-size: 12px;"></i> Visites
+              </button>
+            </div>
+
+            <div class="tab-panels-modern">
+              <!-- Panel Stocks -->
+              <div class="tab-panel-modern active" id="panelStocks" style="animation: fadeInSoft 0.3s ease;">
+                <div id="modalStocksList" style="display: flex; flex-direction: column; gap: 8px;"></div>
               </div>
-              <div class="stock-details">
-                <h4>État des stocks détaillés</h4>
-                <div class="stock-list" id="stockList">
-                  <!-- Sera rempli dynamiquement -->
-                </div>
+              <!-- Panel Cultures -->
+              <div class="tab-panel-modern" id="panelCultures" style="display: none; animation: fadeInSoft 0.3s ease;">
+                <div id="modalCulturesList" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
               </div>
-              <div class="chart-description">
-                <p class="chart-text">Analyse basée sur les dernières données saisies par l'agriculteur le <span id="stockDate">15 avril 2026</span></p>
+              <!-- Panel Visites -->
+              <div class="tab-panel-modern" id="panelVisites" style="display: none; animation: fadeInSoft 0.3s ease;">
+                <div id="modalVisitesList" style="display: flex; flex-direction: column; gap: 8px;"></div>
               </div>
             </div>
           </div>
 
-          <!-- Colonne droite : Performance de Récolte -->
-          <div class="modal-right">
-            <div class="modal-section">
-              <h3>Performance de Récolte</h3>
-              <div class="performance-chart-container">
-                <canvas id="performanceChart" width="300" height="200"></canvas>
-              </div>
-              <div class="chart-description">
-                <p class="chart-text">Comparaison : Récolte Réelle vs Prévisions pour la saison 2026</p>
-              </div>
+          <!-- Alertes actives -->
+          <div id="modalAlertesSection" style="margin-bottom: 20px; display: none;">
+            <h3 style="margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #111827;"><i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 6px;"></i>Alertes actives</h3>
+            <div id="modalAlertesList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+          </div>
+
+          <!-- Mini graphiques -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;"><i class="fas fa-chart-bar" style="margin-right: 4px;"></i>Niveaux de stocks</div>
+              <div style="height: 160px;"><canvas id="stockMiniChart"></canvas></div>
             </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;"><i class="fas fa-chart-pie" style="margin-right: 4px;"></i>Répartition cultures</div>
+              <div style="height: 160px;"><canvas id="cultureMiniChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Actions rapides -->
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+            <a href="/manager/visites" class="btn" style="font-size: 13px; padding: 10px 18px; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;"><i class="fas fa-calendar-plus"></i> Planifier une visite</a>
+            <a href="/manager/supervision" class="btn secondary" style="font-size: 13px; padding: 10px 18px; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; transition: all 0.2s ease;"><i class="fas fa-map-marked-alt"></i> Consulter les parcelles</a>
+            <button onclick="closeFarmerModal()" class="btn secondary" style="font-size: 13px; padding: 10px 18px; border-radius: 10px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s ease;"><i class="fas fa-history"></i> Historique activités</button>
           </div>
         </div>
       </div>
     </div>
 
+    <style>
+      @keyframes modalSlideIn {
+        from { opacity: 0; transform: translateY(30px) scale(0.96); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      @keyframes fadeInSoft {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .premium-modal .kpi-card-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      }
+      .tabs-nav-modern .tab-btn-modern.active {
+        color: #059669;
+        border-bottom-color: #10b981;
+        background: linear-gradient(180deg, transparent, rgba(16,185,129,0.05));
+      }
+      .tabs-nav-modern .tab-btn-modern:hover {
+        background: #f8fafc;
+        border-radius: 8px 8px 0 0;
+      }
+      .status-badge.success { background: #dcfce7; color: #166534; }
+      .status-badge.warning { background: #fef3c7; color: #92400e; }
+      .status-badge.danger { background: #fef2f2; color: #991b1b; }
+      .status-badge.info { background: #eff6ff; color: #1e40af; }
+      .premium-modal .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+      .premium-modal .btn.secondary:hover {
+        background: #e2e8f0 !important;
+        border-color: #cbd5e1 !important;
+      }
+      .modal-close:hover {
+        background: #fef2f2 !important;
+        color: #dc2626 !important;
+        border-color: #fecaca !important;
+      }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="{{ asset('assets/js/layout.js') }}"></script>
     <script src="{{ asset('assets/js/core.js') }}"></script>
     <script src="{{ asset('assets/js/auth.js') }}"></script>
-    <script src="{{ asset('assets/js/supervision.js') }}"></script>
-
     <script>
-      // Passer les clients actifs au JavaScript
       window.SeneBI = window.SeneBI || {};
       window.SeneBI.activeClients = {{ \Illuminate\Support\Js::from(
         $activeClients->map(fn($client) => [
@@ -317,61 +412,15 @@
           'name' => $client->name,
           'location' => $client->location ?? 'Non spécifié',
           'email' => $client->email,
+          'stockStatus' => 'ok',
+          'stockLevel' => 'Actif',
+          'riskLevel' => 'Faible',
+          'riskClass' => 'risk-low',
+          'lastActivity' => 'Actif',
         ])->values()
       ) }};
     </script>
-    
-    <!-- Modal de rejet -->
-    <div id="rejectModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-      <div style="background: white; border-radius: 8px; padding: 32px; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
-        <h2 style="margin: 0 0 16px 0; font-size: 18px;">Rejeter le compte</h2>
-        <p id="rejectClientName" style="color: #64748b; margin: 0 0 24px 0;"></p>
-        
-        <form id="rejectForm" method="POST" style="margin-bottom: 16px;">
-          @csrf
-          <label for="rejectReason" style="display: block; margin-bottom: 8px; font-weight: 500;">Raison du rejet (optionnel)</label>
-          <textarea id="rejectReason" name="reason" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px; font-family: inherit; font-size: 14px; resize: vertical; min-height: 80px;" placeholder="Exemple: Données incomplètes, doublon, etc."></textarea>
-          
-          <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px;">
-            <button type="button" onclick="closeRejectModal()" class="btn secondary" style="padding: 8px 16px;">Annuler</button>
-            <button type="submit" class="btn warn" style="padding: 8px 16px;">Confirmer le rejet</button>
-          </div>
-        </form>
-      </div>
-    </div>
-    
-    <!-- JavaScript pour la navigation active et modale rejet -->
-    <script>
-      function openRejectModal(clientId, clientName) {
-        document.getElementById('rejectClientName').textContent = 'Êtes-vous sûr de rejeter ' + clientName + ' ?';
-        document.getElementById('rejectForm').action = '/manager/clients/reject/' + clientId;
-        document.getElementById('rejectModal').style.display = 'flex';
-      }
+    <script src="{{ asset('assets/js/supervision.js') }}"></script>
 
-      function closeRejectModal() {
-        document.getElementById('rejectModal').style.display = 'none';
-        document.getElementById('rejectReason').value = '';
-      }
-
-      // Fermer la modale si on clique en dehors
-      document.getElementById('rejectModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeRejectModal();
-        }
-      });
-
-      document.addEventListener('DOMContentLoaded', function() {
-        // Détecter la page active dans la navigation
-        const navLinks = document.querySelectorAll('.manager-nav a');
-        const currentPath = window.location.pathname;
-
-        navLinks.forEach(link => {
-          const linkPath = new URL(link.href, window.location.origin).pathname;
-          if (currentPath === linkPath) {
-            link.classList.add('active');
-          }
-        });
-      });
-    </script>
   </body>
 </html>

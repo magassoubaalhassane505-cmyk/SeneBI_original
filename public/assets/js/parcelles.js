@@ -276,6 +276,7 @@
           <article class="parcel-card ${p.status === "En jachère" ? 'fallow-card' : ''}">
             <div class="parcel-head">
               <div class="parcel-name">${p.name}</div>
+              ${p.performance && p.performanceClass ? `<span class="${p.performanceClass}">${p.performance}</span>` : ''}
               <span class="badge ${badgeClass(p.status)}">${p.status}</span>
             </div>
             

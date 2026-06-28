@@ -46,7 +46,7 @@
           ) }};
         </script>
       </main>
-      <div data-layout="footer"></div>
+      @include('partials.footer-manager')
     </div>
     <script src="{{ asset('assets/js/layout.js') }}"></script>
     <script src="{{ asset('assets/js/core.js') }}"></script>

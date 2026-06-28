@@ -273,9 +273,13 @@
                 <label for="calcParcel">Parcelle</label>
                 <select id="calcParcel">
                   <option value="">Sélectionner une parcelle</option>
-                  <option value="Parcelle Nord">Parcelle Nord</option>
-                  <option value="Parcelle Centre">Parcelle Centre</option>
-                  <option value="Parcelle Sud">Parcelle Sud</option>
+                  @foreach($parcelles as $parcelle)
+                    <option value="{{ $parcelle->id }}"
+                            data-culture="{{ $parcelle->culture }}"
+                            data-surface="{{ $parcelle->surface }}">
+                      {{ $parcelle->nom }}
+                    </option>
+                  @endforeach
                 </select>
               </div>
               <div class="input-field">
@@ -880,39 +884,74 @@
 
             // Intelligence du calculateur - Remplissage automatique avec verrouillage et calcul flash
             function autoFillParcelleData() {
-              const parcelleData = {
-                'Parcelle Nord': { surface: 5.5, intrants: 2500000, other: 400000 },
-                'Parcelle Centre': { surface: 6.0, intrants: 1750000, other: 280000 },
-                'Parcelle Sud': { surface: 3.2, intrants: 2100000, other: 350000 }
-              };
+              const selectedOption = calcParcel.options[calcParcel.selectedIndex];
+              const parcelleId = calcParcel.value;
 
-              const selectedParcelle = calcParcel.value;
-              if (parcelleData[selectedParcelle]) {
-                const data = parcelleData[selectedParcelle];
-                
-                // Remplissage automatique de la surface
-                calcArea.value = data.surface;
-                
-                // VERROUILLAGE du champ Surface avec style gris
-                calcArea.setAttribute('readonly', true);
-                calcArea.style.backgroundColor = '#f8fafc'; // Fond gris clair
-                calcArea.style.cursor = 'not-allowed'; // Curseur interdit
-                
-                // Remplissage des autres champs
-                calcIntrants.value = data.intrants;
-                calcOther.value = data.other;
-                
-                // CALCUL FLASH - Lancement immédiat
-                setTimeout(() => {
-                  performCalculations();
-                }, 100);
-                
-              } else {
-                // Si aucune parcelle sélectionnée, déverrouiller le champ
+              if (!parcelleId) {
                 calcArea.removeAttribute('readonly');
-                calcArea.style.backgroundColor = ''; // Remettre la couleur par défaut
-                calcArea.style.cursor = ''; // Curseur par défaut
+                calcArea.style.backgroundColor = '';
+                calcArea.style.cursor = '';
                 calcArea.value = '';
+                calcCulture.value = '';
+                return;
+              }
+
+              const culture = selectedOption.getAttribute('data-culture') || '';
+              const surface = selectedOption.getAttribute('data-surface') || '';
+
+              calcCulture.value = culture;
+              calcArea.value = surface;
+
+              calcArea.setAttribute('readonly', true);
+              calcArea.style.backgroundColor = '#f8fafc';
+              calcArea.style.cursor = 'not-allowed';
+
+              setTimeout(() => {
+                performCalculations();
+              }, 100);
+            }
+
+            async function saveCalculationToDatabase() {
+              const parcelleId = calcParcel.value;
+              const culture = calcCulture.value;
+              const surface = parseFloat(calcArea.value) || 0;
+              const qty = parseFloat(calcQty.value) || 0;
+              const price = parseFloat(calcPrice.value) || 0;
+              const intrants = parseFloat(calcIntrants.value) || 0;
+              const other = parseFloat(calcOther.value) || 0;
+
+              if (!parcelleId || !culture || !qty || !price) {
+                alert('Veuillez remplir la parcelle, la culture, la quantité et le prix.');
+                return;
+              }
+
+              try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const response = await fetch('/client/api/recoltes', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    parcelle_id: parcelleId,
+                    date: new Date().toISOString().slice(0, 10),
+                    quantite: qty,
+                    prix_unitaire: price,
+                    culture: culture,
+                    couts_totaux: intrants + other,
+                  })
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                  throw new Error(result.message || 'Erreur lors de l\'enregistrement');
+                }
+
+                showToast('Rentabilité enregistrée avec succès');
+              } catch (error) {
+                alert('Erreur: ' + error.message);
               }
             }
 
@@ -936,6 +975,7 @@
 
             // AMÉLIORATION : Liaison Calculateur ➔ Bilan avec cumul, graphiques et notification
             function applyCalculatorToBilan() {
+              saveCalculationToDatabase();
               // Attendre un peu que la transformation initiale se fasse
               setTimeout(() => {
                 // Récupérer les éléments KPI du bilan
@@ -1114,16 +1154,21 @@
               const calcQty = document.getElementById('calcQty');
               const calcPrice = document.getElementById('calcPrice');
               const calcIntrants = document.getElementById('calcIntrants');
-              const calcAutres = document.getElementById('calcAutres');
+              const calcOther = document.getElementById('calcOther');
               
               // Réinitialiser tous les champs
               if (calcParcel) calcParcel.value = '';
               if (calcCulture) calcCulture.value = '';
-              if (calcArea) calcArea.value = '';
+              if (calcArea) {
+                calcArea.value = '';
+                calcArea.removeAttribute('readonly');
+                calcArea.style.backgroundColor = '';
+                calcArea.style.cursor = '';
+              }
               if (calcQty) calcQty.value = '';
               if (calcPrice) calcPrice.value = '';
               if (calcIntrants) calcIntrants.value = '';
-              if (calcAutres) calcAutres.value = '';
+              if (calcOther) calcOther.value = '';
               
               // Réinitialiser les résultats du calculateur
               const resultElements = ['valeur-revenu', 'valeur-benefice', 'valeur-marge', 'valeur-verdict'];
@@ -1656,14 +1701,25 @@
           <button class="btn export-main" type="button" id="exportPdfBottomBtn">Generer le rapport PDF</button>
         </section>
       </main>
-
-      <div data-layout="footer"></div>
+      @include('partials.footer-client')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script>
+      window.SeneBI_SERVER = {
+        useDb: true,
+        csrf: @json(csrf_token()),
+        apiBase: @json(url('/client/api')),
+      };
+    </script>
     <script src="{{ asset('assets/js/layout.js') }}"></script>
     <script src="{{ asset('assets/js/core.js') }}"></script>
+    <script>
+      window.SeneBI_RENTABILITE = {
+        harvests: @json($rentabiliteHarvests),
+      };
+    </script>
     <script src="{{ asset('assets/js/rentabilite.js') }}"></script>
     <script src="{{ asset('assets/js/region-filter.js') }}"></script>
     <script src="{{ asset('assets/js/region-rentabilite.js') }}"></script>

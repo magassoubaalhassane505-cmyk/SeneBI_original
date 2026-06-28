@@ -25,21 +25,18 @@
   }
 
   function updateKPIs() {
-    // Simulate active users
-    const activeUsers = Math.floor(Math.random() * 20) + 5;
-    document.getElementById('activeUsers').textContent = activeUsers;
-
-    // Simulate daily activities
-    const dailyActivities = Math.floor(Math.random() * 150) + 50;
-    document.getElementById('dailyActivities').textContent = dailyActivities;
-
-    // Simulate system alerts
-    const systemAlerts = Math.floor(Math.random() * 3);
-    document.getElementById('systemAlerts').textContent = systemAlerts;
-
-    // Simulate performance score
-    const performanceScore = Math.floor(Math.random() * 10) + 90;
-    document.getElementById('performanceScore').textContent = performanceScore;
+    fetch('/manager/api/supervision-stats', {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data) return;
+        document.getElementById('activeUsers').textContent = data.activeUsers ?? 0;
+        document.getElementById('dailyActivities').textContent = data.dailyActivities ?? 0;
+        document.getElementById('systemAlerts').textContent = data.systemAlerts ?? 0;
+        document.getElementById('performanceScore').textContent = data.performanceScore ?? 0;
+      })
+      .catch(() => {});
   }
 
   function updateFarmersDirectory() {
@@ -47,6 +44,7 @@
     const realClients = window.SeneBI?.activeClients || [];
 
     const farmers = realClients.map(client => ({
+      id: client.id,
       name: client.name,
       location: client.location,
       stockStatus: "ok",
@@ -86,7 +84,7 @@
               <div class="last-activity">${farmer.lastActivity}</div>
             </td>
             <td>
-              <button class="details-btn" onclick="showFarmerDetails('${farmer.name}')">
+              <button class="details-btn" onclick="showFarmerDetails('${farmer.id}', '${farmer.name}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
@@ -101,296 +99,213 @@
   }
 
   // Function to handle farmer details click
-  window.showFarmerDetails = function(farmerName) {
-    const farmerData = getFarmerData(farmerName);
-    if (farmerData) {
-      openFarmerModal(farmerData);
-    }
-  }
-
-  // Function to get farmer data
-  function getFarmerData(farmerName) {
-    // Utiliser les clients réels depuis la base de données
-    const realClients = window.SeneBI?.activeClients || [];
-    const client = realClients.find(c => c.name === farmerName);
-
-    if (!client) {
-      return null;
-    }
-
-    // Générer des données simulées pour le client réel
-    return {
-      name: client.name,
-      location: client.location,
-      stockStatus: "ok",
-      stockLevel: "Actif",
-      stockPercentage: 75,
-      lastActivity: "Actif",
-      cultures: {
-        riz: { real: 4500, forecast: 4700 },
-        mais: { real: 4100, forecast: 4300 },
-        coton: { real: 2500, forecast: 2700 }
-      },
-      stocks: {
-        uree: 48,
-        npk: 72,
-        semenceRiz: 80,
-        semenceMais: 78,
-        semenceCoton: 82
-      }
-    };
-  }
-
-  // Function to open farmer modal
-  function openFarmerModal(farmerData) {
+  window.showFarmerDetails = async function(farmerId) {
     const modal = document.getElementById('farmerModal');
-    const nameEl = document.getElementById('modalFarmerName');
-    const locationEl = document.getElementById('modalFarmerLocation');
-    const stockDateEl = document.getElementById('stockDate');
-    const stockListEl = document.getElementById('stockList');
+    modal.hidden = false;
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    document.body.style.overflow = 'hidden';
 
-    // Update modal content
-    nameEl.textContent = farmerData.name;
-    locationEl.textContent = farmerData.location;
-    
-    // Generate a recent date for the analysis
-    const today = new Date();
-    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const dateStr = lastWeek.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-    stockDateEl.textContent = dateStr;
+    try {
+      const res = await fetch(`/manager/api/farmers/${farmerId}`);
+      if (!res.ok) return;
+      const data = await res.json();
 
-    // Update stock details list
-    updateStockDetailsList(farmerData.stocks);
+      document.getElementById('modalFarmerName').textContent = data.name;
+      document.getElementById('modalFarmerLocation').innerHTML = `<i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i>${data.location}`;
+      
+      const initials = data.name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase();
+      const avatarEl = document.getElementById('modalAvatar');
+      if (avatarEl) avatarEl.textContent = initials || '?';
 
-    // Show modal
-    modal.removeAttribute('hidden');
+      const statusBadge = document.getElementById('modalStatusBadge');
+      if (statusBadge) {
+        const hasCritical = data.alertes && data.alertes.some(a => a.includes('Stock critique') || a.includes('Perte'));
+        if (hasCritical) {
+          statusBadge.className = 'status-badge danger';
+          statusBadge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Attention';
+        } else {
+          statusBadge.className = 'status-badge success';
+          statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Actif';
+        }
+      }
 
-    // Create charts after modal is visible
-    setTimeout(() => {
-      createStockChart(farmerData.stockPercentage);
-      createPerformanceChart(farmerData.cultures);
-    }, 100);
+      document.getElementById('modalRendement').textContent = (data.rendement_moyen || 0).toLocaleString('fr-FR') + ' t/ha';
+      document.getElementById('modalProduction').textContent = Number(data.production_totale || 0).toLocaleString('fr-FR') + ' kg';
+      document.getElementById('modalCA').textContent = Number(data.chiffre_affaires || 0).toLocaleString('fr-FR') + ' FCFA';
+      const beneficeEl = document.getElementById('modalBenefice');
+      beneficeEl.textContent = (data.benefice_net >= 0 ? '+' : '') + Number(data.benefice_net || 0).toLocaleString('fr-FR') + ' FCFA';
+      beneficeEl.style.color = data.benefice_net >= 0 ? '#14532d' : '#991b1b';
+
+      const analysisEl = document.getElementById('modalAnalysisText');
+      if (analysisEl) analysisEl.textContent = generateAnalysis(data);
+
+      const alertesSection = document.getElementById('modalAlertesSection');
+      const alertesList = document.getElementById('modalAlertesList');
+      if (data.alertes && data.alertes.length > 0) {
+        alertesSection.style.display = 'block';
+        alertesList.innerHTML = data.alertes.map(a => `
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #991b1b; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-exclamation-circle"></i> ${a}
+          </div>
+        `).join('');
+      } else {
+        alertesSection.style.display = 'none';
+      }
+
+      const stocksList = document.getElementById('modalStocksList');
+      if (data.stocks && data.stocks.length > 0) {
+        stocksList.innerHTML = data.stocks.map(s => `
+          <div style="display: flex; align-items: center; justify-content: space-between; background: ${s.est_critique ? '#fef2f2' : '#f9fafb'}; padding: 10px 12px; border-radius: 8px; border: 1px solid ${s.est_critique ? '#fecaca' : '#e5e7eb'};">
+            <div>
+              <div style="font-size: 13px; font-weight: 600; color: #111827;">${s.nom}</div>
+              <div style="font-size: 11px; color: #6b7280;">Seuil: ${Number(s.seuil).toLocaleString('fr-FR')} kg</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 14px; font-weight: 700; color: ${s.est_critique ? '#991b1b' : '#14532d'};">${Number(s.quantite).toLocaleString('fr-FR')} kg</div>
+              <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; background: ${s.est_critique ? '#fef2f2' : '#dcfce7'}; color: ${s.est_critique ? '#991b1b' : '#166534'};">${s.est_critique ? 'Critique' : 'OK'}</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        stocksList.innerHTML = '<span style="color: #9ca3af; font-size: 13px;">Aucun stock enregistré</span>';
+      }
+
+      const culturesList = document.getElementById('modalCulturesList');
+      if (data.cultures && data.cultures.length > 0) {
+        culturesList.innerHTML = data.cultures.map(c => `
+          <span style="background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;">${c.culture} — ${Number(c.quantite).toLocaleString('fr-FR')} kg</span>
+        `).join('');
+      } else {
+        culturesList.innerHTML = '<span style="color: #9ca3af; font-size: 13px;">Aucune culture enregistrée</span>';
+      }
+
+      const visitesList = document.getElementById('modalVisitesList');
+      if (data.visites && data.visites.length > 0) {
+        visitesList.innerHTML = data.visites.map(v => `
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #f9fafb; padding: 10px 12px; border-radius: 8px; border: 1px solid #f3f4f6;">
+            <div>
+              <div style="font-size: 13px; font-weight: 600; color: #111827;">${v.action}</div>
+              <div style="font-size: 11px; color: #6b7280;">${v.recommandation ?? 'Aucun compte rendu'}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 12px; font-weight: 600; color: #374151;">${v.date}</div>
+              <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; background: #eff6ff; color: #1e40af;">${v.statut}</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        visitesList.innerHTML = '<span style="color: #9ca3af; font-size: 13px;">Aucune visite enregistrée</span>';
+      }
+
+      renderMiniCharts(data);
+      switchTab('stocks');
+    } catch (err) {
+      console.error('Erreur lors du chargement des détails:', err);
+    }
   }
 
-  // Function to update stock details list
-  function updateStockDetailsList(stocks) {
-    const stockListEl = document.getElementById('stockList');
-    if (!stockListEl) return;
-
-    const stockItems = [
-      { name: 'Urée', value: stocks.uree },
-      { name: 'NPK', value: stocks.npk },
-      { name: 'Semence Riz', value: stocks.semenceRiz },
-      { name: 'Semence Maïs', value: stocks.semenceMais },
-      { name: 'Semence Coton', value: stocks.semenceCoton }
-    ];
-
-    stockListEl.innerHTML = stockItems.map(item => {
-      let statusClass = 'ok';
-      if (item.value < 30) statusClass = 'critical';
-      else if (item.value < 60) statusClass = 'warning';
-
-      return `
-        <div class="stock-item">
-          <span class="stock-dot ${statusClass}"></span>
-          <span class="stock-name">${item.name}</span>
-          <span class="stock-percentage">${item.value}%</span>
-        </div>
-      `;
-    }).join('');
+  function generateAnalysis(data) {
+    const parts = [];
+    if (data.benefice_net < 0) {
+      parts.push('Rentabilité négative détectée. Une révision des coûts et des prix de vente est recommandée.');
+    } else if (data.benefice_net > 0) {
+      parts.push('Exploitation rentable. Les performances sont positives, continuez sur cette lancée.');
+    }
+    const criticalStocks = (data.stocks || []).filter(s => s.est_critique);
+    if (criticalStocks.length > 0) {
+      parts.push(`${criticalStocks.length} stock(s) critique(s) nécessitent un réapprovisionnement urgent.`);
+    }
+    if (data.rendement_moyen >= 1.0) {
+      parts.push('Rendement excellent (≥ 1 t/ha).');
+    } else if (data.rendement_moyen >= 0.5) {
+      parts.push('Rendement correct mais peut être amélioré.');
+    }
+    if ((data.cultures || []).length > 2) {
+      parts.push('Diversification des cultures bénéfique.');
+    }
+    if (!parts.length) {
+      parts.push('Données insuffisantes pour une analyse complète.');
+    }
+    return parts.join(' ');
   }
 
-  // Function to close farmer modal
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab-btn-modern').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+    document.querySelectorAll('.tab-panel-modern').forEach(panel => {
+      panel.style.display = 'none';
+    });
+    const target = document.getElementById('panel' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+    if (target) {
+      target.style.display = 'block';
+      target.style.animation = 'none';
+      target.offsetHeight;
+      target.style.animation = 'fadeInSoft 0.3s ease';
+    }
+  }
+
+  function renderMiniCharts(data) {
+    destroyMiniCharts();
+
+    const stockCtx = document.getElementById('stockMiniChart');
+    if (stockCtx && data.stocks && data.stocks.length > 0) {
+      const labels = data.stocks.map(s => s.nom);
+      const current = data.stocks.map(s => s.quantite);
+      const threshold = data.stocks.map(s => s.seuil);
+      if (window.Chart) {
+        window._stockMiniChart = new Chart(stockCtx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Actuel', data: current, backgroundColor: '#10b981', borderRadius: 6, barPercentage: 0.6 },
+              { label: 'Seuil', data: threshold, backgroundColor: '#f59e0b', borderRadius: 6, barPercentage: 0.6 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+            scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { font: { size: 10 } } } }
+          }
+        });
+      }
+    }
+
+    const cultureCtx = document.getElementById('cultureMiniChart');
+    if (cultureCtx && data.cultures && data.cultures.length > 0) {
+      const labels = data.cultures.map(c => c.culture);
+      const values = data.cultures.map(c => c.quantite);
+      const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+      if (window.Chart) {
+        window._cultureMiniChart = new Chart(cultureCtx, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{ data: values, backgroundColor: colors.slice(0, values.length), borderWidth: 0, hoverOffset: 6 }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, padding: 12 } } }
+          }
+        });
+      }
+    }
+  }
+
+  function destroyMiniCharts() {
+    if (window._stockMiniChart) { window._stockMiniChart.destroy(); window._stockMiniChart = null; }
+    if (window._cultureMiniChart) { window._cultureMiniChart.destroy(); window._cultureMiniChart = null; }
+  }
+
   window.closeFarmerModal = function() {
+    destroyMiniCharts();
     const modal = document.getElementById('farmerModal');
-    modal.setAttribute('hidden', '');
-  }
-
-  // Function to create stock gauge chart (doughnut half-circle)
-  function createStockChart(stockPercentage) {
-    const canvas = document.getElementById('stockChart');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    
-    // Destroy existing chart if it exists
-    if (window.stockChartInstance) {
-      window.stockChartInstance.destroy();
-    }
-
-    // Determine colors based on stock percentage
-    const mainColor = stockPercentage > 30 ? '#16a34a' : '#dc2626'; // Vert Émeraude or Rouge Corail
-    const bgColor = stockPercentage > 30 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(220, 38, 38, 0.1)';
-
-    // Create doughnut chart (half-circle)
-    window.stockChartInstance = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        datasets: [{
-          data: [stockPercentage, 100 - stockPercentage],
-          backgroundColor: [mainColor, '#e2e8f0'],
-          borderWidth: 0,
-          cutout: '70%'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        rotation: -90,
-        circumference: 180,
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            enabled: true,
-            callbacks: {
-              label: function(context) {
-                return `Stock: ${context.parsed}%`;
-              }
-            }
-          }
-        }
-      },
-      plugins: [{
-        beforeDraw: function(chart) {
-          const width = chart.width;
-          const height = chart.height;
-          const ctx = chart.ctx;
-          
-          ctx.restore();
-          ctx.font = 'bold 24px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-          ctx.textBaseline = 'middle';
-          ctx.textAlign = 'center';
-          ctx.fillStyle = mainColor;
-          ctx.fillText(`${stockPercentage}%`, width / 2, height * 0.7);
-          ctx.save();
-        }
-      }]
-    });
-  }
-
-  // Function to create performance bar chart for cultures
-  function createPerformanceChart(cultures) {
-    const canvas = document.getElementById('performanceChart');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    
-    // Destroy existing chart if it exists
-    if (window.performanceChartInstance) {
-      window.performanceChartInstance.destroy();
-    }
-
-    // Prepare data for Riz, Maïs, Coton
-    const labels = ['Riz', 'Maïs', 'Coton'];
-    const realData = [cultures.riz.real, cultures.mais.real, cultures.coton.real];
-    const forecastData = [cultures.riz.forecast, cultures.mais.forecast, cultures.coton.forecast];
-
-    // Create bar chart
-    window.performanceChartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Récolte Réelle',
-            data: realData,
-            backgroundColor: '#059669',
-            borderColor: '#059669',
-            borderWidth: 1,
-            borderRadius: 4
-          },
-          {
-            label: 'Prévisions',
-            data: forecastData,
-            backgroundColor: 'rgba(5, 150, 105, 0.3)',
-            borderColor: 'rgba(5, 150, 105, 0.5)',
-            borderWidth: 1,
-            borderRadius: 4
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              font: {
-                family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
-                size: 11
-              },
-              usePointStyle: true,
-              padding: 15
-            }
-          },
-          tooltip: {
-            enabled: true,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            titleFont: {
-              family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif'
-            },
-            bodyFont: {
-              family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif'
-            },
-            callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
-                if (label) {
-                  label += ': ';
-                }
-                label += new Intl.NumberFormat('fr-FR').format(context.parsed.y) + ' kg';
-                return label;
-              }
-            }
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Rendement (kg)',
-              font: {
-                family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
-                size: 10
-              },
-              color: '#64748b'
-            },
-            grid: {
-              color: 'rgba(226, 232, 240, 0.5)',
-              drawBorder: false
-            },
-            ticks: {
-              font: {
-                family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
-                size: 10
-              },
-              color: '#64748b',
-              callback: function(value) {
-                return new Intl.NumberFormat('fr-FR').format(value);
-              }
-            }
-          },
-          x: {
-            grid: {
-              display: false,
-              drawBorder: false
-            },
-            ticks: {
-              font: {
-                family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
-                size: 11,
-                weight: 600
-              },
-              color: '#0f172a'
-            }
-          }
-        }
-      }
-    });
+    modal.hidden = true;
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
   }
 
   // Close modal when clicking on overlay
@@ -406,6 +321,14 @@
     if (e.key === 'Escape') {
       closeFarmerModal();
     }
+  });
+
+  // Tab switching for farmer detail modal
+  document.addEventListener('click', function(e) {
+    const tabBtn = e.target.closest('.tab-btn-modern');
+    if (!tabBtn) return;
+    const tab = tabBtn.dataset.tab;
+    if (tab) switchTab(tab);
   });
 
   function updateSystemStatus() {

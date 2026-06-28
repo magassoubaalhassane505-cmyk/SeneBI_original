@@ -20,6 +20,7 @@
 .grid{ display:grid; gap: 14px; }
 .kpis{ grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 14px; }
 .cards-2{ grid-template-columns: 1.25fr 1fr; margin-top: 14px; }
+.cards-3{ grid-template-columns: repeat(3, 1fr); margin-top: 14px; }
 
 .card{
   background: var(--card);
@@ -146,6 +147,326 @@
 }
 
 @media (max-width: 1100px){
+  .kpis{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cards-2{ grid-template-columns: 1fr; }
+}
+
+/* Modern card enhancements */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1), 0 3px 10px rgba(0,0,0,0.06);
+}
+
+/* KPI card indicators */
+.kpi-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  margin-left: 8px;
+}
+.kpi-indicator.up {
+  background: #dcfce7;
+  color: #14532d;
+}
+.kpi-indicator.down {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.kpi-indicator i {
+  font-size: 10px;
+}
+
+/* Timeline for activites recentes */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(180deg, #10b981 0%, #e5e7eb 100%);
+  border-radius: 1px;
+}
+.timeline-item {
+  position: relative;
+  padding-bottom: 16px;
+}
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+.timeline-icon {
+  position: absolute;
+  left: -24px;
+  top: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  background: #fff;
+  border: 2px solid #10b981;
+}
+.timeline-icon.critical {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #ef4444;
+}
+.timeline-icon.warning {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #f59e0b;
+}
+.timeline-icon.info {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #3b82f6;
+}
+.timeline-content {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #f3f4f6;
+}
+.timeline-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2px;
+}
+.timeline-meta {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Quick summary card */
+.quick-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.quick-summary-item:last-child {
+  margin-bottom: 0;
+}
+.quick-summary-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.quick-summary-icon.green {
+  background: #dcfce7;
+  color: #14532d;
+}
+.quick-summary-icon.orange {
+  background: #fffbeb;
+  color: #92400e;
+}
+.quick-summary-icon.blue {
+  background: #eff6ff;
+  color: #1e40af;
+}
+.quick-summary-text {
+  flex: 1;
+}
+.quick-summary-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+.quick-summary-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Conseil du jour */
+.conseil-card {
+  background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 20px;
+}
+.conseil-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.conseil-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #10b981;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.conseil-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+.conseil-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+}
+.conseil-content {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* Stock forecast pills */
+.forecast-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.forecast-pill.danger {
+  background: #fef2f2;
+  color: #991b1b;
+}
+.forecast-pill.warning {
+  background: #fffbeb;
+  color: #92400e;
+}
+.forecast-pill.ok {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+/* Performance badges */
+.perf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.perf-badge.excellent {
+  background: #dcfce7;
+  color: #14532d;
+}
+.perf-badge.moyen {
+  background: #fffbeb;
+  color: #92400e;
+}
+.perf-badge.risque {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Mini calendar */
+.mini-calendar {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+}
+.mini-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+}
+.mini-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  font-size: 11px;
+}
+.mini-cal-day {
+  padding: 6px 4px;
+  border-radius: 8px;
+  color: #374151;
+  font-weight: 600;
+}
+.mini-cal-day.header {
+  color: #9ca3af;
+  font-weight: 700;
+  font-size: 10px;
+}
+.mini-cal-day.today {
+  background: #10b981;
+  color: #fff;
+  font-weight: 800;
+}
+.mini-cal-day.has-activity {
+  background: #dcfce7;
+  color: #14532d;
+  font-weight: 700;
+  position: relative;
+}
+.mini-cal-day.empty {
+  color: #d1d5db;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Chart improvements */
+.chart-wrap {
+  position: relative;
+  height: 280px;
+}
+.chart-wrap canvas {
+  border-radius: 12px;
+}
+
+@media (max-width: 1100px) {
   .kpis{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cards-2{ grid-template-columns: 1fr; }
 }

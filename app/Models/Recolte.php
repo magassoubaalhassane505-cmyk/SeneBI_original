@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['parcelle_id', 'date_recolte', 'quantite', 'prix_unitaire', 'user_id'])]
+#[Fillable(['parcelle_id', 'date_recolte', 'quantite', 'prix_unitaire', 'user_id', 'culture', 'saison', 'couts_totaux', 'benefice_net', 'revenu_total'])]
 class Recolte extends Model
 {
     use HasFactory;
@@ -15,6 +15,9 @@ class Recolte extends Model
         'date_recolte' => 'date',
         'quantite' => 'decimal:2',
         'prix_unitaire' => 'decimal:2',
+        'couts_totaux' => 'decimal:2',
+        'benefice_net' => 'decimal:2',
+        'revenu_total' => 'decimal:2',
     ];
 
     // Relations
