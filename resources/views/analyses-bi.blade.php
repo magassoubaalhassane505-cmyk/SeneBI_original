@@ -13,8 +13,10 @@
     <style>
         .chart-box{position:relative;height:300px}
         .chart-box.tall{height:360px}
-        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
-        .top-table{width:100%;border-collapse:collapse}
+.grid-kpis-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.grid-kpis-1{display:grid;grid-template-columns:1fr;gap:16px;margin-top:18px}
+.bi-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.top-table{width:100%;border-collapse:collapse}
         .top-table th{text-align:left;padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;border-bottom:2px solid var(--border)}
         .top-table td{padding:12px 8px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
         .top-table tbody tr:hover{background:rgba(248,250,252,.6)}
@@ -100,64 +102,122 @@
         <section class="grid-kpis-2">
             <article class="card">
                 <div class="card-header">
-                    <div><h3>Évolution de la production agricole</h3><div class="small muted">Récoltes cumulées dans le temps</div></div>
+                    <div><h3>Évolution de la production agricole</h3><div class="small muted">Récoltes mois par mois</div></div>
                     <span class="tag muted">Tonnes</span>
                 </div>
-                <div class="chart-box tall"><canvas id="productionChart"></canvas></div>
+                <div class="chart-box tall">
+                    @if($productionByMonth->isEmpty())
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:14px;text-align:center;padding:20px">
+                            <div>
+                                <i class="fas fa-chart-line" style="font-size:24px;margin-bottom:10px;display:block;color:#cbd5e1"></i>
+                                Aucune donnée de production disponible.<br>
+                                <span style="font-size:12px;color:#94a3b8">Veuillez enregistrer au moins une récolte avec une date et une quantité.</span>
+                            </div>
+                        </div>
+                    @else
+                        <canvas id="productionChart"></canvas>
+                    @endif
+                </div>
             </article>
+            <article class="card">
+                <div class="card-header">
+                    <div><h3>Récoltes cumulées dans le temps</h3><div class="small muted">Accumulation depuis le début de saison</div></div>
+                    <span class="tag good">Total cumulé</span>
+                </div>
+                <div class="chart-box tall">
+                    @if($cumulativeHarvests->isEmpty())
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:14px;text-align:center;padding:20px">
+                            <div>
+                                <i class="fas fa-layer-group" style="font-size:24px;margin-bottom:10px;display:block;color:#cbd5e1"></i>
+                                Aucune donnée de cumul disponible.<br>
+                                <span style="font-size:12px;color:#94a3b8">Enregistrez des récoltes avec date pour voir l'accumulation dans le temps.</span>
+                            </div>
+                        </div>
+                    @else
+                        <canvas id="cumulativeChart"></canvas>
+                    @endif
+                </div>
+            </article>
+        </section>
+
+        <section class="grid-kpis-2">
             <article class="card">
                 <div class="card-header">
                     <div><h3>Revenus vs Coûts globaux</h3><div class="small muted">Comparaison sur toutes les exploitations</div></div>
                     <span class="tag good">FCFA</span>
                 </div>
-                <div class="chart-box tall"><canvas id="revenueCostChart"></canvas></div>
+                <div class="chart-box tall">
+                    @if($stats['revenus_totaux'] <= 0 && $coutTotal <= 0)
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:14px;text-align:center;padding:20px">
+                            <div>
+                                <i class="fas fa-coins" style="font-size:24px;margin-bottom:10px;display:block;color:#cbd5e1"></i>
+                                Aucune donnée financière disponible.<br>
+                                <span style="font-size:12px;color:#94a3b8">Veuillez enregistrer des récoltes avec prix de vente et coûts de production.</span>
+                            </div>
+                        </div>
+                    @else
+                        <canvas id="revenueCostChart"></canvas>
+                    @endif
+                </div>
+            </article>
+            <article class="card">
+                <div class="card-header">
+                    <div><h3>Performance par culture</h3><div class="small muted">Comparaison des rendements moyens</div></div>
+                </div>
+                <div class="chart-box">
+                    @if($performanceByCulture->isEmpty())
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:14px;text-align:center;padding:20px">
+                            <div>
+                                <i class="fas fa-seedling" style="font-size:24px;margin-bottom:10px;display:block;color:#cbd5e1"></i>
+                                Aucune donnée de performance disponible.<br>
+                                <span style="font-size:12px;color:#94a3b8">Créez des parcelles avec culture et surface, puis enregistrez des récoltes.</span>
+                            </div>
+                        </div>
+                    @else
+                        <canvas id="performanceChart"></canvas>
+                    @endif
+                </div>
             </article>
         </section>
 
-        <section class="grid-kpis-2">
+        <section class="grid-kpis-1">
             <article class="card">
                 <div class="card-header">
-                    <div><h3>Performance par culture</h3><div class="small muted">Maïs / Riz / Coton</div></div>
+                    <div><h3>Répartition des agriculteurs par région</h3><div class="small muted">Distribution géographique des agriculteurs actifs</div></div>
                 </div>
-                <div class="chart-box"><canvas id="performanceChart"></canvas></div>
-            </article>
-            <article class="card">
-                <div class="card-header">
-                    <div><h3>Répartition des agriculteurs par région</h3><div class="small muted">Distribution géographique</div></div>
+                <div class="chart-box tall">
+                    @if($farmersByRegion->isEmpty())
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:14px;text-align:center;padding:20px">
+                            <div>
+                                <i class="fas fa-map-marker-alt" style="font-size:24px;margin-bottom:10px;display:block;color:#cbd5e1"></i>
+                                Aucune donnée régionale disponible.<br>
+                                <span style="font-size:12px;color:#94a3b8">Veuillez renseigner la localisation des agriculteurs lors de leur inscription.</span>
+                            </div>
+                        </div>
+                    @else
+                        <canvas id="regionChart"></canvas>
+                    @endif
                 </div>
-                <div class="chart-box"><canvas id="regionChart"></canvas></div>
             </article>
         </section>
 
-        <section class="grid-kpis-2">
+        <section class="grid-kpis-1">
             <article class="card">
                 <div class="card-header">
                     <div><h3>Tendances des rendements</h3><div class="small muted">Évolution du rendement moyen national</div></div>
                     <span class="tag muted">kg/ha</span>
                 </div>
-                <div class="chart-box"><canvas id="yieldChart"></canvas></div>
-            </article>
-            <article class="card">
-                <div class="card-header">
-                    <div><h3>Conseils intelligents SeneBI</h3><div class="small muted">Recommandations générées automatiquement</div></div>
-                    <span class="tag good"><i class="fas fa-lightbulb"></i>BI</span>
-                </div>
-                <div class="rec-list">
-                    @foreach($recommendations as $rec)
-                        <div class="rec-item">
-                            <div class="rec-icon {{ $rec['type'] ?? '' }}"><i class="fas fa-lightbulb"></i></div>
+                <div class="chart-box tall">
+                    @if($rendementByMonth->isEmpty())
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:14px;text-align:center;padding:20px">
                             <div>
-                                <div class="rec-title">{{ $rec['message'] }}</div>
+                                <i class="fas fa-chart-area" style="font-size:24px;margin-bottom:10px;display:block;color:#cbd5e1"></i>
+                                Aucune donnée de rendement disponible.<br>
+                                <span style="font-size:12px;color:#94a3b8">Créez des parcelles avec surface et enregistrez des récoltes liées aux parcelles.</span>
                             </div>
                         </div>
-                    @endforeach
-                    @if(empty($recommendations))
-                        <div class="rec-item">
-                            <div class="rec-icon success"><i class="fas fa-check"></i></div>
-                            <div>
-                                <div class="rec-title">Tous les indicateurs sont bons.</div>
-                            </div>
-                        </div>
+                    @else
+                        <canvas id="yieldChart"></canvas>
                     @endif
                 </div>
             </article>
@@ -262,46 +322,64 @@
 (function(){
     const font="'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif";
     const C={primary:'#059669',grid:'rgba(226,232,240,.6)',muted:'#64748b',accent:'#0f172a'};
+    const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    function normalizeKey(s){s=String(s||'').toLowerCase();try{s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,'')}catch(e){}return s}
     function fmt(v,u){v=Number(v||0);if(u==='FCFA')return v.toLocaleString('fr-FR')+' FCFA';if(u==='t')return v.toLocaleString('fr-FR')+' t';if(u==='kg')return v.toLocaleString('fr-FR')+' kg';if(u==='ha')return v.toLocaleString('fr-FR')+' ha';return v.toLocaleString('fr-FR')}
     function destroy(n){if(window[n]){window[n].destroy();window[n]=null}}
+    function safeChart(id,builder){try{const c=document.getElementById(id);if(!c){console.warn('Chart #'+id+' not found in DOM');return}const ctx=c.getContext('2d');destroy('_'+id);builder(c,ctx);console.log('Chart rendered:',id)}catch(e){console.error('Chart error ['+id+']:',e);const box=c?.closest('.chart-box')||c?.parentElement;if(box&&!box.querySelector('.chart-error')){box.insertAdjacentHTML('beforeend','<div class="chart-error" style="color:#dc2626;font-size:12px;padding:10px">Erreur de chargement du graphique</div>')}}}
 
     document.addEventListener('DOMContentLoaded',function(){
-        initProductionChart();initRevenueCostChart();initPerformanceChart();initRegionChart();initYieldChart();initPdfExport();initExcelExport();
+        if(typeof Chart==='undefined'){console.error('Chart.js not loaded');return}
+        initProductionChart();initCumulativeChart();initRevenueCostChart();initPerformanceChart();initRegionChart();initYieldChart();initPdfExport();initExcelExport();
     });
 
     function initProductionChart(){
         const c=document.getElementById('productionChart');if(!c)return;const ctx=c.getContext('2d');destroy('_p');
-        const labels = @json($productionByMonth->pluck('mois'));
-        const data = @json($productionByMonth->pluck('total')->map(fn($v)=>$v/1000));
-        window._p=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'Production (tonnes)',data:data,borderColor:C.primary,backgroundColor:'rgba(16,185,129,.12)',fill:true,tension:.35,pointRadius:4,pointBackgroundColor:'#fff',pointBorderColor:C.primary,pointBorderWidth:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.92)',titleFont:{family:font},bodyFont:{family:font},callbacks:{label:function(c){return fmt(c.parsed.y,'t')}}}},scales:{y:{beginAtZero:true,grid:{color:C.grid,drawBorder:false},ticks:{font:{family:font},color:C.muted}},x:{grid:{display:false,drawBorder:false},ticks:{font:{family:font,weight:'600'},color:C.accent}}}}}});
+        const rawMonths=@json($productionByMonth->pluck('mois'));
+        const labels=rawMonths.map(function(m){return MONTHS[m-1] || 'Mois '+m});
+        const rawData=@json($productionByMonth->pluck('total'));
+        const data=rawData.map(function(v){return v/1000});
+        window._p=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'Production (tonnes)',data:data,borderColor:'#059669',backgroundColor:'rgba(16,185,129,.12)',fill:true,tension:.4,pointRadius:4,borderWidth:2}]}});
     }
 
     function initRevenueCostChart(){
         const c=document.getElementById('revenueCostChart');if(!c)return;const ctx=c.getContext('2d');destroy('_rc');
-        window._rc=new Chart(ctx,{type:'bar',data:{labels:['Revenus','Coûts'],datasets:[{data:[{!! json_encode(($stats['revenus_totaux'] ?? 0)/1000000) !!}, {!! json_encode(($stats['revenus_totaux'] - $stats['production_totale']) ?? 0/1000000) !!}],backgroundColor:['#10b981','#ef4444'],borderColor:['#059669','#dc2626'],borderWidth:1,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.92)',titleFont:{family:font},bodyFont:{family:font},callbacks:{label:function(c){return c.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' M FCFA'}}}},scales:{y:{beginAtZero:true,grid:{color:C.grid,drawBorder:false},ticks:{font:{family:font},color:C.muted,callback:function(v){return v+' M'}}},x:{grid:{display:false,drawBorder:false},ticks:{font:{family:font,weight:'600'},color:C.accent}}}}}});
+        const vals=[@json($revenuTotal/1000000),@json($coutTotal/1000000),@json($beneficeNet/1000000),@json($margeGlobale/1000000)];
+        window._rc=new Chart(ctx,{type:'bar',data:{labels:['Revenus totaux','Coûts totaux','Bénéfice net','Marge globale'],datasets:[{data:vals,backgroundColor:['#10b981','#ef4444','#059669','#0ea5e9'],borderColor:['#10b981','#ef4444','#059669','#0ea5e9'],borderWidth:1,borderRadius:6}]}});
     }
 
     function initPerformanceChart(){
         const c=document.getElementById('performanceChart');if(!c)return;const ctx=c.getContext('2d');destroy('_perf');
-        const labels = @json($performanceByCulture->pluck('culture'));
-        const data = @json($performanceByCulture->pluck('total_qte')->map(fn($v)=>$v/1000));
-        const pal=['#10b981','#0ea5e9','#f97316','#8b5cf6','#ef4444'];
-        window._perf=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Production (tonnes)',data:data,backgroundColor:pal.slice(0,labels.length),borderColor:pal.slice(0,labels.length),borderWidth:1,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.92)',titleFont:{family:font},bodyFont:{family:font},callbacks:{label:function(c){return fmt(c.parsed.x,'t')}}}},scales:{x:{beginAtZero:true,grid:{color:C.grid,drawBorder:false},ticks:{font:{family:font},color:C.muted,callback:function(v){return v+' t'}}},y:{grid:{display:false,drawBorder:false},ticks:{font:{family:font,weight:'600'},color:C.accent}}}}}});
+        const labels=@json($performanceByCulture->pluck('culture'));
+        const rawQte=@json($performanceByCulture->pluck('total_qte'));
+        const surfacesJson=@json($surfacesParCulture);
+        const rendements=rawQte.map(function(q,i){const s=surfacesJson[normalizeKey(labels[i])]||0;return s>0?parseFloat((q/s).toFixed(2)):0});
+        window._perf=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Rendement (kg/ha)',data:rendements}]}});
     }
 
     function initRegionChart(){
         const c=document.getElementById('regionChart');if(!c)return;const ctx=c.getContext('2d');destroy('_reg');
-        const labels = @json($farmersByRegion->pluck('location'));
-        const data = @json($farmersByRegion->pluck('total'));
-        const pal=['#059669','#10b981','#0ea5e9','#f97316','#8b5cf6','#ef4444','#f59e0b'];
-        window._reg=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:data,backgroundColor:pal.slice(0,labels.length),borderColor:'#fff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{family:font},usePointStyle:true,padding:16}},tooltip:{backgroundColor:'rgba(15,23,42,.92)',titleFont:{family:font},bodyFont:{family:font},callbacks:{label:function(c){return c.label+' : '+c.parsed+' agriculteurs'}}}}}});
+        const labels=@json($farmersByRegion->pluck('location'));
+        const data=@json($farmersByRegion->pluck('total'));
+        window._reg=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:data,backgroundColor:['#059669','#10b981','#0ea5e9','#f97316'],borderColor:'#fff',borderWidth:2}]}});
     }
 
     function initYieldChart(){
         const c=document.getElementById('yieldChart');if(!c)return;const ctx=c.getContext('2d');destroy('_y');
-        const labels = @json($rendementByMonth->pluck('mois'));
-        const data = @json($rendementByMonth->pluck('avg_rendement'));
-        window._y=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'Rendement (kg/ha)',data:data,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.12)',fill:true,tension:.35,pointRadius:4,pointBackgroundColor:'#fff',pointBorderColor:'#f59e0b',pointBorderWidth:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.92)',titleFont:{family:font},bodyFont:{family:font},callbacks:{label:function(c){return fmt(c.parsed.y,'kg')}}}},scales:{y:{beginAtZero:true,grid:{color:C.grid,drawBorder:false},ticks:{font:{family:font},color:C.muted,callback:function(v){return v+' kg/ha'}}},x:{grid:{display:false,drawBorder:false},ticks:{font:{family:font,weight:'600'},color:C.accent}}}}}});
+        const rawMonths=@json($rendementByMonth->pluck('mois'));
+        const labels=rawMonths.map(function(m){return MONTHS[m-1] || 'Mois '+m});
+        const data=@json($rendementByMonth->pluck('avg_rendement'));
+        window._y=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'Rendement (kg/ha)',data:data,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.12)',fill:true,tension:.4,pointRadius:4,borderWidth:2}, {label:'Moyenne nationale',data:Array(data.length).fill(@json($yieldMetrics['national_average'])),borderColor:'#0f172a',borderDash:[8,4],tension:0,pointRadius:0,borderWidth:1.5}]}});
+    }
+
+    function initCumulativeChart(){
+        const c=document.getElementById('cumulativeChart');if(!c)return;const ctx=c.getContext('2d');destroy('_cum');
+        const rawMonths=@json($cumulativeHarvests->pluck('mois'));
+        const labels=rawMonths.map(function(m){return MONTHS[m-1] || 'Mois '+m});
+        const rawQte=@json($cumulativeHarvests->pluck('total'));
+        const rawData=rawQte.map(function(v){return v/1000});
+        let cumulative=[];let sum=0;rawData.forEach(function(v){sum+=v;cumulative.push(sum)});
+        window._cum=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'Cumul (tonnes)',data:cumulative,fill:true,tension:.4,pointRadius:4,borderWidth:2}]}});
     }
 
     function initPdfExport(){
@@ -375,6 +453,48 @@
             XLSX.writeFile(wb,'SeneBI_Analyses_BI.xlsx');
         });
     }
+
+    window._biDebug = {
+        chartJsLoaded: typeof Chart !== 'undefined',
+        pdfLoaded: typeof window.jspdf !== 'undefined',
+        excelLoaded: typeof XLSX !== 'undefined',
+        errors: [],
+        rendered: [],
+        expected: ['productionChart','cumulativeChart','revenueCostChart','performanceChart','regionChart','yieldChart']
+    };
+
+    const origSafeChart = window.safeChart || function(){};
+    window.safeChart = function(id, builder) {
+        try {
+            const c = document.getElementById(id);
+            if (!c) { window._biDebug.errors.push(id + ': element not found'); return; }
+            const ctx = c.getContext('2d');
+            destroy('_' + id);
+            builder(c, ctx);
+            window._biDebug.rendered.push(id);
+            console.log('[BI DEBUG] Chart rendered:', id);
+        } catch (e) {
+            window._biDebug.errors.push(id + ': ' + e.message);
+            console.error('[BI DEBUG] Chart error [' + id + ']:', e);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Chart === 'undefined') {
+            console.error('[BI DEBUG] Chart.js NOT loaded');
+            const dbg = document.getElementById('bi-debug');
+            if (dbg) {
+                dbg.style.borderColor = '#dc2626';
+                dbg.innerHTML += '<span style="color:#dc2626;margin-left:12px"><i class="fas fa-exclamation-triangle"></i> Chart.js CDN non chargé — vérifiez votre connexion internet.</span>';
+            }
+        } else {
+            console.log('[BI DEBUG] Chart.js loaded version', Chart.version);
+        }
+
+        setTimeout(function() {
+            console.warn('[BI] Charts expected: productionChart, cumulativeChart, revenueCostChart, performanceChart, regionChart, yieldChart');
+        }, 2000);
+    });
 })();
 </script>
 </body>

@@ -137,7 +137,11 @@ class ManagementController extends Controller
             'alertes_critiques' => \App\Models\Stock::whereColumn('quantite_actuelle', '<=', 'seuil_critique')->count(),
         ];
 
-        $stats['rendement_moyen'] = $stats['parcelles_actives'] > 0 ? ($stats['production_totale'] / $stats['parcelles_actives']) : 0;
+        $surfaceTotale = \App\Models\Parcelle::sum('surface') ?? 0;
+        $stats['rendement_moyen'] = $surfaceTotale > 0 ? ($stats['production_totale'] / $surfaceTotale) : 0;
+
+        // Debug
+        \Log::info('BI Stats', $stats);
 
         $topFarmers = \App\Models\User::where('role', 'client')
             ->where('is_active', true)
@@ -215,41 +219,167 @@ class ManagementController extends Controller
             $recommendations[] = ['type' => 'warning', 'message' => "Les rendements du maïs sont en baisse comparés au riz"];
         }
 
-        $productionByMonth = \App\Models\Recolte::selectRaw('MONTH(date_recolte) as mois, SUM(quantite) as total')
+        $productionByMonthQuery = \App\Models\Recolte::selectRaw('MONTH(date_recolte) as mois, SUM(quantite) as total')
             ->groupBy('mois')
             ->orderBy('mois')
             ->get();
+
+        \Log::info('BI productionByMonth', ['count' => $productionByMonthQuery->count()]);
+
+        $cumulativeTotal = 0;
+        $cumulativeHarvests = $productionByMonthQuery->map(function ($row) use (&$cumulativeTotal) {
+            $cumulativeTotal += (float) $row->total;
+            return (object)[
+                'mois' => $row->mois,
+                'total' => (float) $row->total,
+                'cumul' => $cumulativeTotal,
+            ];
+        });
+
+        $productionByMonth = $cumulativeHarvests->map(fn($row) => (object)[
+            'mois' => $row->mois,
+            'total' => $row->total,
+        ]);
 
         $revenusByMonth = \App\Models\Recolte::selectRaw('MONTH(date_recolte) as mois, SUM(revenu_total) as total')
             ->groupBy('mois')
             ->orderBy('mois')
-            ->get();
+            ->get()
+            ->map(fn($row) => (object)[
+                'mois' => $row->mois,
+                'total' => (float) $row->total,
+            ]);
 
         $performanceByCulture = \App\Models\Recolte::selectRaw('culture, SUM(quantite) as total_qte, AVG(benefice_net) as avg_benefice')
             ->groupBy('culture')
-            ->get();
+            ->get()
+            ->map(fn($row) => (object)[
+                'culture' => $row->culture,
+                'total_qte' => (float) $row->total_qte,
+                'avg_benefice' => (float) $row->avg_benefice,
+            ]);
+
+        \Log::info('BI performanceByCulture', ['count' => $performanceByCulture->count()]);
+
+        $surfacesParCulture = \App\Models\Parcelle::selectRaw('culture, SUM(surface) as surface_totale')
+            ->groupBy('culture')
+            ->get()
+            ->mapWithKeys(function ($row) {
+                $key = strtolower(trim((string) $row->culture));
+                $key = preg_replace('/\s+/', '', $key);
+                if (class_exists('Normalizer')) {
+                    $key = \Normalizer::normalize($key, \Normalizer::FORM_KD);
+                    $key = preg_replace('/\p{Mn}/u', '', $key);
+                }
+                return [$key => (float) $row->surface_totale];
+            });
+
+        $performanceMetrics = [
+            'best_culture' => null,
+            'best_rendement' => 0,
+            'worst_culture' => null,
+            'worst_rendement' => null,
+        ];
+        if ($performanceByCulture->isNotEmpty()) {
+            $culturesAvecRendement = $performanceByCulture->map(function ($row) use ($surfacesParCulture) {
+                $key = strtolower(trim((string) $row->culture));
+                $key = preg_replace('/\s+/', '', $key);
+                if (class_exists('Normalizer')) {
+                    $key = \Normalizer::normalize($key, \Normalizer::FORM_KD);
+                    $key = preg_replace('/\p{Mn}/u', '', $key);
+                }
+                $surface = $surfacesParCulture->get($key) ?? 0;
+                $rendement = $surface > 0 ? ($row->total_qte / $surface) : 0;
+                return ['culture' => $row->culture, 'rendement' => $rendement];
+            });
+            $sorted = $culturesAvecRendement->sortByDesc('rendement')->values();
+            $performanceMetrics['best_culture'] = $sorted->first()['culture'];
+            $performanceMetrics['best_rendement'] = round($sorted->first()['rendement'], 2);
+            $sortedAsc = $culturesAvecRendement->sortBy('rendement')->values();
+            $performanceMetrics['worst_culture'] = $sortedAsc->first()['culture'];
+            $performanceMetrics['worst_rendement'] = round($sortedAsc->first()['rendement'], 2);
+        }
 
         $farmersByRegion = \App\Models\User::where('role', 'client')
             ->where('is_active', true)
+            ->whereNotNull('location')
+            ->where('location', '!=', '')
             ->selectRaw('location, COUNT(*) as total')
             ->groupBy('location')
-            ->get();
+            ->get()
+            ->map(fn($row) => (object)[
+                'location' => $row->location,
+                'total' => (int) $row->total,
+            ]);
 
-        $rendementByMonth = \App\Models\Recolte::selectRaw('MONTH(date_recolte) as mois, AVG(benefice_net) as avg_rendement')
+        \Log::info('BI farmersByRegion', ['count' => $farmersByRegion->count()]);
+
+        $regionMetrics = [
+            'total_farmers' => $farmersByRegion->sum('total'),
+            'region_count' => $farmersByRegion->count(),
+            'dominant_region' => $farmersByRegion->sortByDesc('total')->first()?->location ?? 'N/A',
+        ];
+
+        $rendementByMonth = \App\Models\Recolte::selectRaw('MONTH(recoltes.date_recolte) as mois, CAST(SUM(recoltes.quantite) / NULLIF(SUM(parcelles.surface), 0) AS DECIMAL(10,2)) as avg_rendement')
+            ->join('parcelles', 'recoltes.parcelle_id', '=', 'parcelles.id')
+            ->where('parcelles.surface', '>', 0)
             ->groupBy('mois')
             ->orderBy('mois')
-            ->get();
+            ->get()
+            ->map(fn($row) => (object)[
+                'mois' => $row->mois,
+                'avg_rendement' => $row->avg_rendement !== null ? (float) $row->avg_rendement : 0,
+            ]);
+
+        \Log::info('BI rendementByMonth', ['count' => $rendementByMonth->count()]);
+
+        $yieldMetrics = [
+            'national_average' => $rendementByMonth->avg('avg_rendement'),
+            'best_month' => $rendementByMonth->sortByDesc('avg_rendement')->first()?->mois ?? null,
+            'worst_month' => $rendementByMonth->sortBy('avg_rendement')->first()?->mois ?? null,
+            'trend' => 'stable',
+        ];
+        if ($rendementByMonth->count() >= 2) {
+            $values = $rendementByMonth->pluck('avg_rendement')->values();
+            $first = $values->first();
+            $last = $values->last();
+            if ($first > 0) {
+                $pctChange = (($last - $first) / $first) * 100;
+                $yieldMetrics['trend'] = $pctChange > 5 ? 'hausse' : ($pctChange < -5 ? 'baisse' : 'stable');
+            }
+        }
+
+        $coutTotal = \App\Models\Recolte::sum('couts_totaux') ?? 0;
+        $margeGlobale = $stats['revenus_totaux'] - $coutTotal;
+        $revenuTotal = $stats['revenus_totaux'] ?? 0;
+        $beneficeNet = $revenuTotal - $coutTotal;
+
+        \Log::info('BI Final data', [
+            'productionByMonth_count' => $productionByMonth->count(),
+            'performanceByCulture_count' => $performanceByCulture->count(),
+            'farmersByRegion_count' => $farmersByRegion->count(),
+            'rendementByMonth_count' => $rendementByMonth->count(),
+        ]);
 
         return view('analyses-bi', compact(
             'stats',
             'topFarmers',
             'atRiskFarmers',
             'recommendations',
+            'cumulativeHarvests',
             'productionByMonth',
             'revenusByMonth',
             'performanceByCulture',
+            'performanceMetrics',
+            'surfacesParCulture',
             'farmersByRegion',
-            'rendementByMonth'
+            'regionMetrics',
+            'rendementByMonth',
+            'yieldMetrics',
+            'coutTotal',
+            'margeGlobale',
+            'revenuTotal',
+            'beneficeNet'
         ));
     }
 

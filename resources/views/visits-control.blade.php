@@ -89,24 +89,24 @@
         <div class="visits-row-1" style="display: grid; grid-template-columns: 65fr 35fr; gap: 16px; margin-bottom: 16px; align-items: stretch;">
 
           <!-- Visites prévues -->
-          <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #3b82f6; transition: all 0.3s ease;">
+          <article class="card" style="display: flex; flex-direction: column; border-top: 3px solid #059669; transition: all 0.3s ease;">
             <div class="card-header">
               <div>
                 <h3 style="margin:0; font-size:16px; font-weight:700; color:#111827;">Visites Prevues</h3>
                 <div class="small muted">Planning de la semaine</div>
               </div>
-              <span class="badge" style="background:#eff6ff; color:#1e40af; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700;">{{ $visites->count() }}</span>
+              <span class="badge" style="background:#f0fdf4; color:#166534; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700;">{{ $visites->count() }}</span>
             </div>
             <div style="flex:1; padding:0;">
               @foreach($visites as $visite)
                 <div class="visit-card-modern" style="display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid #f3f4f6; transition:background .2s ease;"
                      onmouseover="this.style.background='#f8fafc';"
                      onmouseout="this.style.background='transparent';">
-                  <div class="visit-calendar-badge" style="min-width:64px; height:68px; border-radius:12px; background:linear-gradient(135deg,#eff6ff,#dbeafe); border:1px solid #bfdbfe; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(59,130,246,0.08);">
-                    <span style="font-size:20px; font-weight:900; color:#1e40af; line-height:1;">{{ $visite->date_visite->format('d') }}</span>
-                    <span style="font-size:11px; font-weight:700; color:#3b82f6; text-transform:uppercase; margin-top:2px;">{{ $visite->date_visite->format('M') }}</span>
+                  <div class="visit-calendar-badge" style="min-width:64px; height:68px; border-radius:12px; background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:1px solid #bbf7d0; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(5,150,105,0.08);">
+                    <span style="font-size:20px; font-weight:900; color:#166534; line-height:1;">{{ $visite->date_visite->format('d') }}</span>
+                    <span style="font-size:11px; font-weight:700; color:#059669; text-transform:uppercase; margin-top:2px;">{{ $visite->date_visite->format('M') }}</span>
                      <span style="font-size:10px; color:#64748b; margin-top:2px;"><div class="icon-box-sm icon-box" style="display:inline-flex; margin-right:3px;"><i class="fas fa-clock"></i></div>{{ $visite->date_visite->format('H:i') }}</span>
-                   </div>
+                  </div>
                    <div style="flex:1; min-width:0;">
                      <div style="font-size:14px; font-weight:700; color:#111827; margin-bottom:2px;">{{ $visite->user->name ?? 'N/A' }}</div>
                      <div style="font-size:12px; color:#6b7280; display:flex; align-items:center; gap:4px; margin-bottom:2px;"><div class="icon-box-sm icon-box red" style="display:inline-flex;"><i class="fas fa-map-marker-alt"></i></div> {{ $visite->user->location ?? 'Non spécifié' }}</div>
