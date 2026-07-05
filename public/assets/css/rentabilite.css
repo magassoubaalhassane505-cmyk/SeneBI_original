@@ -41,12 +41,121 @@
   border: 0;
 }
 
+.btn-calculator-premium {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border: 0;
+  padding: 12px 18px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-calculator-premium i {
+  font-size: 15px;
+}
+
+.btn-calculator-premium span {
+  white-space: nowrap;
+}
+
+.btn-calculator-premium:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.32);
+  filter: brightness(1.05);
+}
+
+.btn-calculator-premium:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.22);
+}
+
 .card {
   background: #fff;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 16px;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(15, 23, 42, 0.55);
+  font-weight: 700;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.card-icon.green {
+  background: #e4ffe9;
+  color: #16a34a;
+}
+
+.card-icon.red {
+  background: #ffe7e7;
+  color: #dc2626;
+}
+
+.card-icon i {
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  font-size: 20px;
+  opacity: 1;
+}
+
+.kpi-value {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin: 6px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kpi-value .muted {
+  color: rgba(15, 23, 42, 0.55);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.kpi-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--good);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.kpi-sub .muted {
+  color: rgba(15, 23, 42, 0.55);
+  font-weight: 600;
 }
 
 .chart-hint {
@@ -494,6 +603,155 @@
   margin-top: 16px;
 }
 
+/* Forecasts KPI — alignés sur le style dashboard agriculteur */
+.forecasts-grid--premium .card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.forecasts-grid--premium .card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.forecasts-grid--premium .card-title {
+  margin: 0;
+  font-size: var(--fs-subtitle);
+  color: rgba(15,23,42,0.55);
+  font-weight: 700;
+}
+
+.forecasts-grid--premium .card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.forecasts-grid--premium .card-icon i {
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  font-size: 20px;
+  opacity: 1;
+}
+
+.forecasts-grid--premium .kpi-value {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin: 6px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.forecasts-grid--premium .kpi-value .muted {
+  color: rgba(15,23,42,0.55);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.forecasts-grid--premium .kpi-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--good);
+  font-weight: 700;
+  font-size: var(--fs-small);
+}
+
+.forecasts-grid--premium .kpi-sub .muted {
+  color: rgba(15,23,42,0.55);
+  font-weight: 600;
+}
+
+.projections-summary-cards--premium .kpi-value {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin: 6px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.projections-summary-cards--premium .kpi-value .muted {
+  color: rgba(15,23,42,0.55);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.projections-summary-cards--premium .kpi-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--good);
+  font-weight: 700;
+  font-size: var(--fs-small);
+}
+
+.projections-summary-cards--premium .kpi-sub .muted {
+  color: rgba(15,23,42,0.55);
+  font-weight: 600;
+}
+
+.projections-summary-cards--premium .card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.projections-summary-cards--premium .card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.projections-summary-cards--premium .card-title {
+  margin: 0;
+  font-size: var(--fs-subtitle);
+  color: rgba(15,23,42,0.55);
+  font-weight: 700;
+}
+
+.projections-summary-cards--premium .card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.projections-summary-cards--premium .card-icon i {
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  font-size: 20px;
+  opacity: 1;
+}
+
 /* Forecast cards — style KPI */
 .forecast-card {
   background: var(--card);
@@ -625,9 +883,9 @@
 }
 
 .perf-badge.moyenne {
-  background: #eff6ff;
-  border: 2px solid #3b82f6;
-  color: #1d4ed8;
+  background: #fffbeb;
+  border: 2px solid #f59e0b;
+  color: #b45309;
 }
 
 .perf-badge.faible {
@@ -673,8 +931,8 @@
 }
 
 .rank-1 { background: var(--accent-soft); color: var(--accent); }
-.rank-2 { background: #eef2ff; color: #6366f1; }
-.rank-3 { background: #fef2f2; color: #ef4444; }
+.rank-2 { background: #f1f5f9; color: #475569; }
+.rank-3 { background: #fff7ed; color: #c2410c; }
 
 .culture-info {
   display: flex;

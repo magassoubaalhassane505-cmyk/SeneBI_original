@@ -198,31 +198,8 @@
 
     const stockTableBody = SeneBI.qs("#stockTableBody");
     if (stockTableBody) {
-      const intrants = window.SeneBI_SERVER?.intrants || {};
-      stockTableBody.innerHTML = stockRows
-        .map((row) => {
-          const level = pct(row.value, row.threshold);
-          const ok = row.value > row.threshold;
-          
-          // Récupérer le prix dynamique depuis la table intrants
-          let cost = row.cost;
-          const intrantKey = Object.keys(intrants).find(key => row.name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(row.name.toLowerCase()));
-          if (intrantKey && intrants[intrantKey]) {
-            cost = intrants[intrantKey].prix;
-          }
-          
-          return `
-            <tr>
-              <td><strong>${row.name}</strong></td>
-              <td><span class="stock-type">${row.type}</span></td>
-              <td>${row.value} ${row.type === "Engrais" ? "sac" : "kg"}</td>
-              <td>${row.threshold} ${row.type === "Engrais" ? "sac" : "kg"}</td>
-              <td>${cost.toLocaleString("fr-FR")} FCFA</td>
-              <td class="${ok ? "status-ok" : "status-bad"}">${ok ? `OK (${level}%)` : `Critique (${level}%)`}</td>
-            </tr>
-          `;
-        })
-        .join("");
+      // Laisser Laravel gérer l'affichage du tableau serveur.
+      // Le script conserve la lecture des lignes pour les calculs et événements.
     }
 
     const historyList = SeneBI.qs("#consumptionList");

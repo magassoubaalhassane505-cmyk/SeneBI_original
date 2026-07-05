@@ -10,11 +10,12 @@
     function renderStockGauge() {
         const canvas = document.getElementById('stockGaugeChart');
         const pctEl = document.getElementById('stockGaugePct');
-        if (!canvas || !window.Chart || !cfg.stocks) return;
+        if (!canvas || !window.Chart) return;
         
-        const totalStock = cfg.stocks.reduce((sum, s) => sum + Number(s.quantite_actuelle || 0), 0);
-        const totalCapacity = cfg.stocks.length * 10000;
-        const pct = totalCapacity > 0 ? Math.min(100, Math.round((totalStock / totalCapacity) * 100)) : 0;
+        const stocks = cfg.stocks || [];
+        const totalStock = stocks.reduce((sum, s) => sum + Number(s.quantite_actuelle || 0), 0);
+        const totalCapacity = 10000;
+        const pct = totalStock > 0 ? Math.min(100, Math.round((totalStock / totalCapacity) * 100)) : 0;
         const rest = Math.max(0, 100 - pct);
         
         if (pctEl) pctEl.textContent = `${pct}%`;
@@ -45,14 +46,18 @@
     
     function renderStocksChart() {
         const canvas = document.getElementById('stocksChart');
-        if (!canvas || !window.Chart || !cfg.stocks) return;
+        if (!canvas || !window.Chart) return;
+
+        const stocks = cfg.stocks || [];
+        
+        if (stocks.length === 0) return;
         
         const existing = Chart.getChart(canvas);
         if (existing) existing.destroy();
         
-        const labels = cfg.stocks.map(s => s.nom);
-        const stockData = cfg.stocks.map(s => Number(s.quantite_actuelle || 0));
-        const thresholdData = cfg.stocks.map(s => Number(s.seuil_critique || 0));
+        const labels = stocks.map(s => s.nom);
+        const stockData = stocks.map(s => Number(s.quantite_actuelle || 0));
+        const thresholdData = stocks.map(s => Number(s.seuil_critique || 0));
         
         new Chart(canvas, {
             type: 'bar',

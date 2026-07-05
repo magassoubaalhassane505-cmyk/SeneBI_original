@@ -42,24 +42,36 @@
           @endphp
           <article class="card kpi-card {{ $criticalCount > 0 ? 'critical-alert' : '' }}">
             <div class="card-header">
-              <p class="kpi-title">Total Intrants</p>
+              <p class="card-title">Total Intrants</p>
               <div class="card-icon" aria-hidden="true"><i class="fas fa-boxes"></i></div>
             </div>
             <div class="kpi-value">{{ $totalIntrants }}</div>
+            <div class="kpi-sub">
+              <span>Nombre d'articles en stock</span>
+              <span class="muted">Tous intrants confondus</span>
+            </div>
           </article>
           <article class="card kpi-card">
             <div class="card-header">
-              <p class="kpi-title">Valeur Totale du Stock</p>
+              <p class="card-title">Valeur Totale du Stock</p>
               <div class="card-icon" aria-hidden="true"><i class="fas fa-coins"></i></div>
             </div>
-            <div class="kpi-value valeur-stock">{{ number_format($totalValue, 0, ',', ' ') }} FCFA</div>
+            <div class="kpi-value">{{ number_format($totalValue, 0, ',', ' ') }} <span class="muted" style="font-size:14px;font-weight:700;">FCFA</span></div>
+            <div class="kpi-sub">
+              <span>Estimation financière</span>
+              <span class="muted">Quantité × coût unitaire</span>
+            </div>
           </article>
           <article class="card kpi-card {{ $criticalCount > 0 ? 'critical-alert' : '' }}">
             <div class="card-header">
-              <p class="kpi-title">Alertes Critiques</p>
+              <p class="card-title">Alertes Critiques</p>
               <div class="card-icon icon-box red" aria-hidden="true"><i class="fas fa-bell"></i></div>
             </div>
             <div class="kpi-value">{{ $criticalCount }}</div>
+            <div class="kpi-sub">
+              <span>Articles sous seuil</span>
+              <span class="muted">Nécessitent un réapprovisionnement</span>
+            </div>
           </article>
         </section>
 
@@ -102,15 +114,18 @@
                 </div>
               </div>
               <div class="form-row form-row--2">
-                <div class="field">
-                  <label class="field-label" for="consumeItem">Intrant</label>
-                  <select id="consumeItem" required>
-                    <option value="">Sélectionner un intrant</option>
-                    @foreach($stocks as $stock)
-                    <option value="{{ $stock->nom }}">{{ $stock->nom }}</option>
-                    @endforeach
-                  </select>
-                </div>
+<div class="field">
+                   <label class="field-label" for="consumeItem">Intrant</label>
+                   <select id="consumeItem" required>
+                     <option value="">Sélectionner un intrant</option>
+                     <option value="NPK">NPK</option>
+                     <option value="Semence Riz">Semences de riz</option>
+                     <option value="Semence Maïs">Semences de maïs</option>
+                     <option value="Semence Coton">Semences de coton</option>
+                     <option value="Pesticide">Pesticides</option>
+                     <option value="Herbicide">Herbicides</option>
+                   </select>
+                 </div>
                 <div class="field">
                   <label class="field-label" for="consumeQty">Quantité (kg)</label>
                   <input id="consumeQty" type="number" min="1" step="1" placeholder="ex: 50" required />
@@ -136,49 +151,58 @@
               <span class="tag good">Approvisionnement</span>
             </div>
 
-            <form class="form" id="reapproForm">
-              <div class="form-row form-row--3">
-                <div class="field">
-                  <label class="field-label" for="reapproItem">Intrant</label>
-                  <select id="reapproItem" required>
-                    <option value="">Sélectionner un intrant</option>
-                    @foreach($stocks as $stock)
-                    <option value="{{ $stock->id }}">{{ $stock->nom }} (stock: {{ number_format($stock->quantite_actuelle, 0, ',', ' ') }} kg)</option>
-                    @endforeach
-                  </select>
+<form class="form" id="reapproForm">
+                <div class="form-row form-row--2">
+                 <div class="field">
+                   <label class="field-label" for="reapproItem">Intrant</label>
+                   <select id="reapproItem" required>
+                     <option value="">Sélectionner un intrant</option>
+                     <option value="NPK">NPK</option>
+                     <option value="Semence Riz">Semences de riz</option>
+                     <option value="Semence Maïs">Semences de maïs</option>
+                     <option value="Semence Coton">Semences de coton</option>
+                     <option value="Pesticide">Pesticides</option>
+                     <option value="Herbicide">Herbicides</option>
+                   </select>
+                 </div>
                 </div>
-                <div class="field">
-                  <label class="field-label" for="reapproQty">Quantité ajoutée (kg)</label>
-                  <input id="reapproQty" type="number" min="0.01" step="1" placeholder="ex: 200" required />
-                </div>
-                <div class="field">
-                  <label class="field-label" for="reapproUnitCost">Coût unitaire (FCFA / kg)</label>
-                  <input id="reapproUnitCost" type="number" min="0" step="1" placeholder="ex: 15000" />
-                </div>
-              </div>
-              <div class="form-row form-row--2">
-                <div class="field">
-                  <label class="field-label" for="reapproTotalCost">Coût total (FCFA)</label>
-                  <input id="reapproTotalCost" type="number" min="0" step="1" placeholder="ex: 3000000" />
-                  <span style="font-size:11px;color:#64748b;margin-top:2px;">Se calcule automatiquement si le coût unitaire est renseigné.</span>
-                </div>
-                <div class="field">
-                  <label class="field-label" for="reapproDate">Date</label>
-                  <input id="reapproDate" type="date" value="{{ date('Y-m-d') }}" required />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="field">
-                  <label class="field-label" for="reapproObs">Observation / Référence</label>
-                  <input id="reapproObs" type="text" placeholder="ex: Facture N°2026-001, Fournisseur X" />
-                </div>
-              </div>
-              <div class="form-actions">
-                <button class="btn" type="submit">Enregistrer le réapprovisionnement</button>
-              </div>
-              <div class="footer-note">La quantité ajoutée est immédiatement intégrée au stock et l'opération est enregistrée dans l'historique.</div>
-              <div class="form-feedback" id="reapproFeedback" aria-live="polite"></div>
-            </form>
+                <div class="form-row form-row--3">
+                 <div class="field">
+                   <label class="field-label" for="reapproQty">Quantité ajoutée (kg)</label>
+                   <input id="reapproQty" type="number" min="0.01" step="1" placeholder="ex: 200" required />
+                 </div>
+                 <div class="field">
+                   <label class="field-label" for="reapproSeuil">Seuil critique (kg)</label>
+                   <input id="reapproSeuil" type="number" min="0" step="1" placeholder="ex: 500" value="100" />
+                 </div>
+                 <div class="field">
+                   <label class="field-label" for="reapproUnitCost">Coût unitaire (FCFA / kg)</label>
+                   <input id="reapproUnitCost" type="number" min="0" step="1" placeholder="ex: 15000" />
+                 </div>
+               </div>
+               <div class="form-row form-row--2">
+                 <div class="field">
+                   <label class="field-label" for="reapproTotalCost">Coût total (FCFA)</label>
+                   <input id="reapproTotalCost" type="number" min="0" step="1" placeholder="ex: 3000000" />
+                   <span style="font-size:11px;color:#64748b;margin-top:2px;">Se calcule automatiquement si le coût unitaire est renseigné.</span>
+                 </div>
+                 <div class="field">
+                   <label class="field-label" for="reapproDate">Date</label>
+                   <input id="reapproDate" type="date" value="{{ date('Y-m-d') }}" required />
+                 </div>
+               </div>
+               <div class="form-row">
+                 <div class="field">
+                   <label class="field-label" for="reapproObs">Observation / Référence</label>
+                   <input id="reapproObs" type="text" placeholder="ex: Facture N°2026-001, Fournisseur X" />
+                 </div>
+               </div>
+               <div class="form-actions">
+                 <button class="btn" type="submit">Enregistrer le réapprovisionnement</button>
+               </div>
+               <div class="footer-note">La quantité ajoutée est immédiatement intégrée au stock et l'opération est enregistrée dans l'historique.</div>
+               <div class="form-feedback" id="reapproFeedback" aria-live="polite"></div>
+             </form>
           </article>
         </section>
 
@@ -246,32 +270,37 @@
                 @foreach($stocks as $stock)
 @php
                       $isCritical = $stock->quantite_actuelle <= $stock->seuil_critique;
+                      $isLow = $stock->quantite_actuelle > $stock->seuil_critique && $stock->quantite_actuelle <= ($stock->seuil_critique * 2);
                       $ratio = $stock->seuil_critique > 0 ? ($stock->quantite_actuelle / ($stock->seuil_critique * 4)) * 100 : 100;
                       $progressPercent = min(100, $ratio);
-                    @endphp
-                  <tr>
-                    <td><strong>{{ $stock->nom }}</strong></td>
-                    <td><span class="stock-type">{{ $stock->type }}</span></td>
-                    <td>
-                      <div>{{ number_format($stock->quantite_actuelle, 0, ',', ' ') }} kg</div>
-                      <div class="stock-progress-bar">
-                        <div class="stock-progress-fill {{ $isCritical ? 'critical' : 'ok' }}" style="width: {{ $progressPercent }}%;"></div>
-                      </div>
-                    </td>
-                    <td>{{ number_format($stock->seuil_critique, 0, ',', ' ') }} kg</td>
-                    <td>{{ number_format($stock->cout_unitaire, 0, ',', ' ') }} FCFA</td>
-                    <td class="{{ $isCritical ? 'status-bad' : 'status-ok' }}">
-                      {{ $isCritical 
+                      $statusClass = $isCritical ? 'critical' : ($isLow ? 'warning' : 'ok');
+                      $statusText = $isCritical 
                         ? 'Critique (' . round(($stock->quantite_actuelle / $stock->seuil_critique) * 100) . '%)' 
-                        : 'OK (' . round(($stock->quantite_actuelle / ($stock->seuil_critique * 4)) * 100) . '%)' }}
-                    </td>
-                  </tr>
+                        : ($isLow 
+                            ? 'Faible (' . round(($stock->quantite_actuelle / ($stock->seuil_critique * 4)) * 100) . '%)' 
+                            : 'Normal (' . round(($stock->quantite_actuelle / ($stock->seuil_critique * 4)) * 100) . '%)');
+                    @endphp
+                    <tr>
+                      <td><strong>{{ $stock->nom }}</strong></td>
+                      <td><span class="stock-type">{{ $stock->type }}</span></td>
+                      <td>
+                        <div>{{ number_format($stock->quantite_actuelle, 0, ',', ' ') }} kg</div>
+                        <div class="stock-progress-bar">
+                          <div class="stock-progress-fill {{ $statusClass }}" style="width: {{ $progressPercent }}%;"></div>
+                        </div>
+                      </td>
+                      <td>{{ number_format($stock->seuil_critique, 0, ',', ' ') }} kg</td>
+                      <td>{{ number_format($stock->cout_unitaire, 0, ',', ' ') }} FCFA</td>
+                      <td class="{{ $isCritical ? 'status-bad' : ($isLow ? 'status-warning' : 'status-ok') }}">
+                        {{ $statusText }}
+                      </td>
+                    </tr>
                 @endforeach
-                @if($stocks->isEmpty())
-                  <tr>
-                    <td colspan="6" style="text-align:center; color:#9ca3af; padding: 20px;">Aucun stock enregistré.</td>
-                  </tr>
-                @endif
+@if($stocks->isEmpty())
+                   <tr>
+                     <td colspan="6" style="text-align:center; color:#9ca3af; padding: 20px;">Aucun stock disponible.</td>
+                   </tr>
+                 @endif
               </tbody>
             </table>
           </div>
@@ -315,11 +344,11 @@
                       <td>{{ number_format($m->quantite, 0, ',', ' ') }} kg</td>
                     </tr>
                   @endforeach
-                  @if($mouvements->isEmpty())
-                    <tr>
-                      <td colspan="4" style="text-align:center; color:#9ca3af; padding: 20px;">Aucun mouvement enregistre.</td>
-                    </tr>
-                  @endif
+@if($mouvements->isEmpty())
+                     <tr>
+                       <td colspan="4" style="text-align:center; color:#9ca3af; padding: 20px;">Aucun mouvement disponible.</td>
+                     </tr>
+                   @endif
                 </tbody>
               </table>
             </div>

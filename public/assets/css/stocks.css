@@ -44,10 +44,9 @@
   }
 }
 
-/* Style des alertes maintenu - fond rouge léger si > 0 */
+/* Style des alertes maintenu - bordures et tons sobres */
 .kpi-row .kpi-card.critical-alert {
-  background: #fff5f5 !important; /* Rouge très léger */
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  border-left: 3px solid #dc2626;
 }
 
 /* ÉTAPE 2 : HARMONISER FORMULAIRE ET TABLEAU */
@@ -264,6 +263,61 @@
   padding: 16px;
 }
 .card-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom: 10px; }
+.card-title{
+  margin:0;
+  font-size: 14px;
+  color: rgba(15,23,42,0.55);
+  font-weight: 700;
+}
+.card-icon{
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.card-icon i{
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  font-size: 20px;
+  opacity: 1;
+}
+
+.kpi-value{
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin: 6px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kpi-value .muted{
+  color: rgba(15, 23, 42, 0.55);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.kpi-sub{
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--good);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.kpi-sub .muted{
+  color: rgba(15,23,42,0.55);
+  font-weight: 600;
+}
 .tag{
   display:inline-flex; align-items:center; gap:8px;
   padding: 8px 10px; border-radius: 999px;
@@ -453,7 +507,13 @@
   background:#f1f5f9; border-radius:999px; padding:5px 10px; font-size:12px;
 }
 .status-ok{ color:#08a046; font-weight:900; }
+.status-warning{ color:#d97706; font-weight:900; }
 .status-bad{ color:#e11d48; font-weight:900; }
+
+.table td .badge.warning {
+  background: #ffedd5 !important;
+  color: #9a3412 !important;
+}
 
 .history-list{ display:grid; gap:12px; margin-top: 8px; }
 .history-item{

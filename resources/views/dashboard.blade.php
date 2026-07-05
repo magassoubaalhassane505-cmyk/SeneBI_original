@@ -507,7 +507,7 @@ Tous les indicateurs sont bons.
               <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
                 <div class="card-header--premium">
                   <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="icon-box red" aria-hidden="true" style="width: 48px; height: 48px; font-size: 20px;">
+                    <div class="icon-box amber" aria-hidden="true" style="width: 48px; height: 48px; font-size: 20px;">
                       <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div>

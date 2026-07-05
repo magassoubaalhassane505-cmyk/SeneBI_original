@@ -131,7 +131,7 @@ class ClientController extends Controller
         $rendementRegional = Parcelle::where('region', $region)
             ->join('recoltes', 'parcelles.id', '=', 'recoltes.parcelle_id')
             ->avg('quantite') ?? 0;
-        $rendementRegional = $rendementRegional > 0 ? ($rendementRegional / $hectaresActifs) : 0;
+        $rendementRegional = $rendementRegional > 0 && $hectaresActifs > 0 ? ($rendementRegional / $hectaresActifs) : 0;
         $ecartRegional = $rendementMoyen > 0 && $rendementRegional > 0 
             ? (($rendementMoyen - $rendementRegional) / $rendementRegional) * 100 
             : 0;
@@ -264,8 +264,8 @@ class ClientController extends Controller
         $recoltes = $user->recoltes()->with('parcelle')->latest()->get();
         
         // Calculer les statistiques de rentabilité
-        $totalCA = $recoltes->sum('revenu_total');
-        $totalCouts = $recoltes->sum('couts_totaux');
+        $totalCA = $recoltes->sum('revenu_total') ?? 0;
+        $totalCouts = $recoltes->sum('couts_totaux') ?? 0;
         $totalBenefice = $totalCA - $totalCouts;
         
         // Calculer la marge moyenne
@@ -355,23 +355,23 @@ class ClientController extends Controller
         $coutsEngrais = IntrantConsomme::where('intrant_consommes.user_id', $user->id)
             ->join('stocks', 'intrant_consommes.stock_id', '=', 'stocks.id')
             ->where('stocks.type', 'Engrais')
-            ->sum(\DB::raw('quantite_consommee * cout_unitaire'));
+            ->sum(\DB::raw('quantite_consommee * cout_unitaire')) ?? 0;
         $coutsSemences = IntrantConsomme::where('intrant_consommes.user_id', $user->id)
             ->join('stocks', 'intrant_consommes.stock_id', '=', 'stocks.id')
             ->where('stocks.type', 'Semence')
-            ->sum(\DB::raw('quantite_consommee * cout_unitaire'));
+            ->sum(\DB::raw('quantite_consommee * cout_unitaire')) ?? 0;
         $coutsMainOeuvre = IntrantConsomme::where('intrant_consommes.user_id', $user->id)
             ->join('stocks', 'intrant_consommes.stock_id', '=', 'stocks.id')
             ->where('stocks.type', 'like', '%main%')
-            ->sum(\DB::raw('quantite_consommee * cout_unitaire'));
+            ->sum(\DB::raw('quantite_consommee * cout_unitaire')) ?? 0;
         $coutsTransport = IntrantConsomme::where('intrant_consommes.user_id', $user->id)
             ->join('stocks', 'intrant_consommes.stock_id', '=', 'stocks.id')
             ->where('stocks.type', 'like', '%transport%')
-            ->sum(\DB::raw('quantite_consommee * cout_unitaire'));
+            ->sum(\DB::raw('quantite_consommee * cout_unitaire')) ?? 0;
         $coutsHerbicides = IntrantConsomme::where('intrant_consommes.user_id', $user->id)
             ->join('stocks', 'intrant_consommes.stock_id', '=', 'stocks.id')
             ->where('stocks.type', 'like', '%herbicide%')
-            ->sum(\DB::raw('quantite_consommee * cout_unitaire'));
+            ->sum(\DB::raw('quantite_consommee * cout_unitaire')) ?? 0;
         $coutsAutres = max(0, $totalCouts - ($coutsEngrais + $coutsSemences + $coutsMainOeuvre + $coutsTransport + $coutsHerbicides));
         
         // Top 3 cultures les plus rentables
@@ -556,9 +556,10 @@ class ClientController extends Controller
 
     // Affiche la gestion des stocks du client
     public function stocks() {
-        app(\App\Http\Controllers\ClientApiController::class)->stocksIndex();
         $user = Auth::user();
-        $stocks = Stock::where('user_id', $user->id)->orderBy('nom')->get();
+        $stocks = Stock::where('user_id', $user->id)
+            ->orderBy('nom')
+            ->get();
         $mouvements = \App\Models\StockMouvement::whereHas('stock', fn($q) => $q->where('user_id', $user->id))
             ->with('stock')
             ->orderByDesc('date_mouvement')
@@ -567,27 +568,7 @@ class ClientController extends Controller
         
         $parcelles = $user->parcelles()->orderBy('nom')->get();
 
-        // Récupérer les prix depuis la table intrants
         $intrants = Intrant::all()->keyBy('nom');
-
-        // Créer des stocks par défaut si l'utilisateur n'en a pas ou ajouter les manquants
-        $defaults = [
-            ['nom' => 'Urée', 'type' => 'Engrais', 'quantite_actuelle' => 520, 'seuil_critique' => 500, 'cout_unitaire' => $intrants['Urée']->prix ?? 15000],
-            ['nom' => 'NPK', 'type' => 'Engrais', 'quantite_actuelle' => 900, 'seuil_critique' => 450, 'cout_unitaire' => $intrants['NPK 15-15-15']->prix ?? 18000],
-            ['nom' => 'Semence Maïs', 'type' => 'Semence', 'quantite_actuelle' => 240, 'seuil_critique' => 100, 'cout_unitaire' => $intrants['Semences Maïs']->prix ?? 800],
-            ['nom' => 'Semence Coton', 'type' => 'Semence', 'quantite_actuelle' => 1250, 'seuil_critique' => 500, 'cout_unitaire' => 1200],
-            ['nom' => 'Semence Riz', 'type' => 'Semence', 'quantite_actuelle' => 600, 'seuil_critique' => 300, 'cout_unitaire' => $intrants['Semences Riz']->prix ?? 1000],
-        ];
-        
-        foreach ($defaults as $default) {
-            $existingStock = $stocks->firstWhere('nom', $default['nom']);
-            if (!$existingStock) {
-                Stock::create([...$default, 'user_id' => Auth::id()]);
-            }
-        }
-        
-        // Recharger les stocks après création
-        $stocks = Stock::where('user_id', Auth::id())->orderBy('nom')->get();
 
         // Calculer les prévisions d'épuisement basées sur les 30 derniers jours
         $consumptionByStock = \App\Models\IntrantConsomme::where('user_id', $user->id)

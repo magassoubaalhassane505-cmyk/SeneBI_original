@@ -6,7 +6,7 @@
 }
 
 .risk-section--premium .card {
-  border-top: 3px solid var(--danger) !important;
+  border-top: 3px solid var(--warn) !important;
 }
 
 .risk-section--premium .card-header--premium {
@@ -36,8 +36,8 @@
   border-radius: 999px;
   font-size: 14px;
   font-weight: 700;
-  background: var(--danger-soft);
-  color: var(--danger);
+  background: var(--warn-soft);
+  color: var(--warn);
 }
 
 /* Risk Filter Tabs */
@@ -62,13 +62,13 @@
 }
 
 .risk-filter-tab:hover {
-  background: var(--danger-soft);
+  background: var(--warn-soft);
 }
 
 .risk-filter-tab.active {
-  background: var(--danger-soft);
-  color: var(--danger);
-  border-color: var(--danger);
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-color: var(--warn);
 }
 
 .risk-filter-tab.count {
@@ -94,31 +94,33 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: all var(--anim-fast) ease;
+  transition: transform var(--anim-fast) ease, box-shadow var(--anim-fast) ease, border-color var(--anim-fast) ease;
   position: relative;
   overflow: hidden;
 }
 
 .risk-card--premium:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
   border-color: #cbd5e1;
 }
 
 .risk-card--premium.critical {
-  border-left: 4px solid var(--danger);
+  border-left: 3px solid #dc2626;
+  background: linear-gradient(180deg, #fff5f5 0%, var(--card) 100%);
 }
 
 .risk-card--premium.high {
-  border-left: 4px solid var(--warn);
+  border-left: 3px solid #dc2626;
+  background: linear-gradient(180deg, #fff5f5 0%, var(--card) 100%);
 }
 
 .risk-card--premium.medium {
-  border-left: 4px solid var(--muted);
+  border-left: 3px solid #f59e0b;
 }
 
 .risk-card--premium.low {
-  border-left: 4px solid var(--good);
+  border-left: 3px solid #15803d;
 }
 
 /* Risk Card Header */
@@ -142,19 +144,19 @@
 }
 
 .risk-avatar--premium.critical {
-  background: var(--danger);
+  background: #dc2626;
 }
 
 .risk-avatar--premium.high {
-  background: var(--warn);
+  background: #dc2626;
 }
 
 .risk-avatar--premium.medium {
-  background: var(--muted);
+  background: #f59e0b;
 }
 
 .risk-avatar--premium.low {
-  background: var(--good);
+  background: #15803d;
 }
 
 .risk-farmer-info {
@@ -183,7 +185,7 @@
 
 .risk-farmer-location i {
   font-size: 11px;
-  color: var(--danger);
+  color: var(--accent);
 }
 
 /* Risk Progress Bar */
@@ -216,19 +218,19 @@
 }
 
 .risk-progress-fill.critical {
-  background: var(--danger);
+  background: #dc2626;
 }
 
 .risk-progress-fill.high {
-  background: var(--warn);
+  background: #dc2626;
 }
 
 .risk-progress-fill.medium {
-  background: var(--muted);
+  background: #f59e0b;
 }
 
 .risk-progress-fill.low {
-  background: var(--good);
+  background: #16a34a;
 }
 
 /* Risk Badge */
@@ -244,27 +246,27 @@
 }
 
 .risk-badge--premium.critical {
-  background: var(--danger-soft);
-  color: var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 .risk-badge--premium.high {
-  background: var(--warn-soft);
-  color: var(--warn);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 .risk-badge--premium.medium {
-  background: var(--border);
-  color: var(--muted);
-  border: 1px solid var(--border);
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
 }
 
 .risk-badge--premium.low {
-  background: var(--good-soft);
-  color: var(--good);
-  border: 1px solid rgba(22, 163, 74, 0.2);
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
 }
 
 /* Risk Causes */
@@ -295,7 +297,7 @@
 
 .risk-cause-item i {
   font-size: 11px;
-  color: var(--danger);
+  color: var(--muted);
 }
 
 /* Last Activity */
@@ -344,15 +346,17 @@
   font-size: 13px;
   padding: 8px 14px;
   border-radius: 10px;
-  background: var(--good);
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   border: none;
-  transition: all var(--anim-fast) ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.18);
+  transition: transform var(--anim-fast) ease, box-shadow var(--anim-fast) ease, filter var(--anim-fast) ease;
 }
 
 .risk-card-actions .btn-visit:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.05);
   transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
 }
 
 /* Empty State */

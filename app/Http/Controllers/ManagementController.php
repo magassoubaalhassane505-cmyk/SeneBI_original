@@ -113,10 +113,12 @@ class ManagementController extends Controller
 
     // Affiche la gestion des stocks d'intrants (Fichier: stocks.blade.php)
     public function stocks() {
-        $stocks = Stock::with('user')->orderBy('nom')->get();
+        $stocks = Stock::with('user')
+            ->orderByRaw("FIELD(nom, 'NPK', 'Urée', 'Semence Riz', 'Semence Maïs', 'Semence Coton', 'Herbicide', 'Pesticide')")
+            ->get();
         $criticalStocks = Stock::with('user')
             ->whereColumn('quantite_actuelle', '<=', 'seuil_critique')
-            ->orderBy('nom')
+            ->orderByRaw("FIELD(nom, 'NPK', 'Urée', 'Semence Riz', 'Semence Maïs', 'Semence Coton', 'Herbicide', 'Pesticide')")
             ->get();
         
         // Calculer la valeur totale du stock
