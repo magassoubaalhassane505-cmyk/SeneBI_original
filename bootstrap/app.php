@@ -29,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
             SubstituteBindings::class,
         ]);
         
+        // Fait confiance aux proxys (nécessaire sur Render, Heroku, etc.)
+        $middleware->trustProxies(at: '*');
+
         // Alias des middlewares personnalisés
         $middleware->alias([
             'public.portal' => \App\Http\Middleware\PublicPortalAccess::class,
