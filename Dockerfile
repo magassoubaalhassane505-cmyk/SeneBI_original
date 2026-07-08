@@ -12,7 +12,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 COPY . .
-RUN composer dump-autoload --no-dev --optimize
+RUN composer dump-autoload --no-dev --optimize --no-scripts
 
 # --- Stage 3: Production Image ---
 FROM php:8.3-fpm-alpine
@@ -57,6 +57,10 @@ COPY --from=node-builder --chown=www-data:www-data /app/public /var/www/html/pub
 # Ensure write permissions for storage & cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Run Laravel package discovery (safeguarded against build-time environment missing variables)
+RUN php artisan package:discover --ansi || echo "Package discovery deferred to runtime"
+
 
 # Expose default port (Render overrides this with $PORT)
 EXPOSE 8080
